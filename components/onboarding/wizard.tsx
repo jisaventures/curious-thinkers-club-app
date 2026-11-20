@@ -196,7 +196,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               <p
                 className={`flex min-h-16 w-full items-center justify-center rounded-2xl px-2 py-3 text-center text-sm leading-tight font-extrabold text-white md:text-base ${done || current ? "bg-[#1e4d3a]" : "bg-[#8eaa9b]"}`}
               >
-                Step {index + 1}: {label}
+                Step {index + 1}:<br />{label}
               </p>
             </li>
           );
@@ -343,7 +343,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             <Button
               type="button"
               variant="bottle"
-              className="footer-action h-14 min-w-80 px-12 text-lg"
+              className="footer-action h-16 min-w-80 px-12 text-2xl uppercase tracking-wide"
               onClick={() => {
                 setMessage(null);
                 if (screen === "family") setScreen("welcome");
@@ -355,14 +355,14 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             </Button>
           )}
           {screen === "welcome" && (
-            <Button type="button" className="footer-action h-14 min-w-80 bg-mustard px-12 text-lg hover:bg-[#d39320]" size="lg" disabled={!terms} onClick={() => setScreen("family")}>
+            <Button type="button" className="footer-action h-16 min-w-80 bg-mustard px-12 text-2xl uppercase tracking-wide hover:bg-[#d39320]" size="lg" disabled={!terms} onClick={() => setScreen("family")}>
               Get started
             </Button>
           )}
           {screen === "family" && (
             <Button
               type="button"
-              className="footer-action h-14 min-w-80 bg-mustard px-12 text-lg hover:bg-[#d39320]"
+              className="footer-action h-16 min-w-80 bg-mustard px-12 text-2xl uppercase tracking-wide hover:bg-[#d39320]"
               size="lg"
               onClick={() => {
                 setEditing(0);
@@ -374,7 +374,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             </Button>
           )}
           {screen === "details" && (
-            <Button type="button" className="footer-action h-14 min-w-80 bg-mustard px-12 text-lg hover:bg-[#d39320]" size="lg" disabled={pending} onClick={() => void continueProfile()}>
+            <Button type="button" className="footer-action h-16 min-w-80 bg-mustard px-12 text-2xl uppercase tracking-wide hover:bg-[#d39320]" size="lg" disabled={pending} onClick={() => void continueProfile()}>
               {editing < count - 1 ? "Next child" : pending ? "Starting…" : "Get started"}
             </Button>
           )}
