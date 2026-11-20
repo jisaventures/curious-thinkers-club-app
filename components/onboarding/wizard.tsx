@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { checkNickname, completeOnboarding } from "@/app/onboarding/actions";
 import { FamilyAvatar } from "@/components/brand/family-avatar";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import {
   type AvatarBuild,
 } from "@/lib/avataaars-options";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
-import { Check, Mars, Venus, X } from "lucide-react";
+import { Check, ChevronRight, Mars, Venus, X } from "lucide-react";
 
 type Gender = "boy" | "girl" | "unspecified";
 
@@ -57,6 +57,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   const [pending, setPending] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [avatarDraft, setAvatarDraft] = useState<AvatarBuild | null>(null);
+  const tabsRef = useRef<HTMLOListElement>(null);
+  const [tabsOverflow, setTabsOverflow] = useState(false);
 
   const child = children[editing];
   const progressLabels = ["Welcome", "Create Family", ...Array.from({ length: count }, (_, index) => `Child ${index + 1} Profile`)];
@@ -147,6 +149,19 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   }
 
   useEffect(() => {
+    const el = tabsRef.current;
+    if (!el) return;
+    const sync = () => setTabsOverflow(el.scrollWidth - el.clientWidth - el.scrollLeft > 8);
+    sync();
+    el.addEventListener("scroll", sync, { passive: true });
+    window.addEventListener("resize", sync);
+    return () => {
+      el.removeEventListener("scroll", sync);
+      window.removeEventListener("resize", sync);
+    };
+  }, [progressLabels.length, screen]);
+
+  useEffect(() => {
     if (screen !== "details" || children[editing]?.nickname) return;
     let cancelled = false;
     void assignNickname([], () => cancelled);
@@ -181,12 +196,13 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
   return (
     <div className="w-full">
-      <ol className="mb-5 flex gap-2 overflow-x-auto px-1 pt-2" aria-label="Onboarding progress">
+      <div className="relative mb-5">
+      <ol ref={tabsRef} className="tab-scroll flex gap-2 overflow-x-auto px-1 pt-2" aria-label="Onboarding progress">
         {progressLabels.map((label, index) => {
           const done = index < progress;
           const current = index === progress;
           return (
-            <li key={label} className="relative flex min-w-32 flex-1" aria-current={current ? "step" : undefined}>
+            <li key={label} className="relative flex min-w-36 shrink-0 flex-1" aria-current={current ? "step" : undefined}>
               {done && (
                 <p className="absolute top-0 left-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 rounded-full bg-[#d7efc8] px-2 py-0.5 text-xs font-extrabold whitespace-nowrap text-[#1e4d3a]">
                   <Check className="size-3 shrink-0" strokeWidth={3} aria-hidden="true" />
@@ -202,6 +218,22 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           );
         })}
       </ol>
+      {tabsOverflow && (
+        <>
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#fffdf8] to-transparent" />
+          <Button
+            type="button"
+            variant="green"
+            size="sm"
+            className="absolute right-1 bottom-2 z-10"
+            aria-label="Show more steps"
+            onClick={() => tabsRef.current?.scrollBy({ left: 200, behavior: "smooth" })}
+          >
+            <ChevronRight className="size-5" />
+          </Button>
+        </>
+      )}
+      </div>
       <div>
 
       {screen === "welcome" && (
