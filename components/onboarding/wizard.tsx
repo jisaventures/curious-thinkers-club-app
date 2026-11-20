@@ -228,9 +228,6 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               .
             </span>
           </label>
-          <Button type="button" className="mt-4 w-full" size="lg" disabled={!terms} onClick={() => setScreen("family")}>
-            Get started
-          </Button>
         </section>
       )}
 
@@ -253,22 +250,6 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 {value}
               </button>
             ))}
-          </div>
-          <div className="mt-5 flex gap-2">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => setScreen("welcome")}>
-              Back
-            </Button>
-            <Button
-              type="button"
-              className="flex-1"
-              onClick={() => {
-                setEditing(0);
-                setMessage(null);
-                setScreen("details");
-              }}
-            >
-              {count === 1 ? "Add your child" : `Add ${count} children`}
-            </Button>
           </div>
         </section>
       )}
@@ -353,25 +334,52 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           </fieldset>
 
           {message && <p className="mt-4 text-sm font-bold text-[#8a4b3a]">{message}</p>}
-          <div className="mt-4 flex gap-2">
+        </section>
+      )}
+
+      <footer className="fixed inset-x-0 bottom-0 z-40 border-t border-dashed border-club/25 bg-header">
+        <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-3 py-3 sm:px-4">
+          {screen !== "welcome" && (
             <Button
               type="button"
               variant="outline"
-              className="flex-1"
+              className="min-w-28"
               onClick={() => {
                 setMessage(null);
-                if (editing === 0) setScreen("family");
+                if (screen === "family") setScreen("welcome");
+                else if (editing === 0) setScreen("family");
                 else setEditing(editing - 1);
               }}
             >
               Back
             </Button>
-            <Button type="button" className="flex-1" disabled={pending} onClick={() => void continueProfile()}>
+          )}
+          {screen === "welcome" && (
+            <Button type="button" className="ml-auto min-w-40" size="lg" disabled={!terms} onClick={() => setScreen("family")}>
+              Get started
+            </Button>
+          )}
+          {screen === "family" && (
+            <Button
+              type="button"
+              className="ml-auto min-w-40"
+              size="lg"
+              onClick={() => {
+                setEditing(0);
+                setMessage(null);
+                setScreen("details");
+              }}
+            >
+              {count === 1 ? "Add your child" : `Add ${count} children`}
+            </Button>
+          )}
+          {screen === "details" && (
+            <Button type="button" className="ml-auto min-w-40" size="lg" disabled={pending} onClick={() => void continueProfile()}>
               {editing < count - 1 ? "Next child" : pending ? "Starting…" : "Get started"}
             </Button>
-          </div>
-        </section>
-      )}
+          )}
+        </div>
+      </footer>
 
       {avatarOpen && avatarDraft && (
         <div

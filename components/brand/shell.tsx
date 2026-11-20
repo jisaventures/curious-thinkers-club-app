@@ -21,7 +21,7 @@ export function AppShell({
   void _hideShop;
   const shop = shopUrl();
   const frame = centered
-    ? "mx-auto flex w-full max-w-6xl flex-1 flex-col px-3 py-4 [justify-content:safe_center] sm:px-4 sm:py-6"
+    ? `mx-auto flex w-full max-w-6xl flex-1 flex-col px-3 [justify-content:safe_center] sm:px-4 ${onboarding ? "pt-4 pb-28 sm:pt-6" : "py-4 sm:py-6"}`
     : "mx-auto w-full max-w-none px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5";
   return (
     <div className="flex min-h-svh flex-col">
