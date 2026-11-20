@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { AVATAR_COLOURS, AVATAR_FACES, AVATAR_HATS, HAIR_COLOURS, HAIR_STYLES } from "@/lib/avatar-style";
+import { AVATAR_COLOURS, AVATAR_FACES, AVATAR_HATS, EYE_COLOURS, HAIR_COLOURS, HAIR_STYLES, SHIRT_COLOURS, SKIN_COLOURS } from "@/lib/avatar-style";
 import { authCookieOptions } from "@/lib/env";
 import { isDemoMode } from "@/lib/demo/mode";
 import { createDemoFamily, demoDb, nicknameTaken } from "@/lib/demo/store";
@@ -29,6 +29,9 @@ const familySchema = z.object({
         hairColour: z.enum(HAIR_COLOURS.map((colour) => colour.id) as [string, ...string[]]),
         glasses: z.boolean(),
         hat: z.enum(AVATAR_HATS),
+        skin: z.enum(SKIN_COLOURS.map((colour) => colour.id) as [string, ...string[]]),
+        eyeColour: z.enum(EYE_COLOURS.map((colour) => colour.id) as [string, ...string[]]),
+        shirt: z.enum(SHIRT_COLOURS.map((colour) => colour.id) as [string, ...string[]]),
       }),
     )
     .min(1)
@@ -139,6 +142,9 @@ export async function completeOnboarding(input: z.infer<typeof familySchema>) {
       avatar_hair_colour: child.hairColour,
       avatar_glasses: child.glasses,
       avatar_hat: child.hat,
+      avatar_skin: child.skin,
+      avatar_eyes: child.eyeColour,
+      avatar_shirt: child.shirt,
     })),
   );
   if (error) return { ok: false as const, message: friendlyError(error.message) };

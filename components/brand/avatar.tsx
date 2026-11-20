@@ -22,6 +22,10 @@ export function Avatar({
   hairColour,
   glasses,
   hat,
+  gender,
+  skin,
+  eyeColour,
+  shirt,
   className = "size-11",
   title,
 }: {
@@ -32,6 +36,10 @@ export function Avatar({
   hairColour?: string | null;
   glasses?: boolean | null;
   hat?: string | null;
+  gender?: "boy" | "girl" | null;
+  skin?: string | null;
+  eyeColour?: string | null;
+  shirt?: string | null;
   className?: string;
   title?: string;
 }) {
@@ -44,6 +52,10 @@ export function Avatar({
         hairColour={hairColour ?? "brown"}
         glasses={Boolean(glasses)}
         hat={hat ?? "none"}
+        gender={gender === "girl" ? "girl" : "boy"}
+        skin={skin ?? "light"}
+        eyeColour={eyeColour ?? "brown"}
+        shirt={shirt ?? "cream"}
         className={className}
         title={title}
       />

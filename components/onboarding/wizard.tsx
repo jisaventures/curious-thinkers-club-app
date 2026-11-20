@@ -6,7 +6,7 @@ import { FamilyAvatar } from "@/components/brand/family-avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AVATAR_COLOURS, AVATAR_FACES, AVATAR_HATS, HAIR_COLOURS, HAIR_STYLES, type AvatarFaceId, type AvatarHatId, type HairColourId, type HairStyleId } from "@/lib/avatar-style";
+import { AVATAR_COLOURS, AVATAR_FACES, AVATAR_HATS, EYE_COLOURS, HAIR_COLOURS, HAIR_STYLES, SHIRT_COLOURS, SKIN_COLOURS, type AvatarFaceId, type AvatarHatId, type HairColourId, type HairStyleId } from "@/lib/avatar-style";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
 
 type Gender = "boy" | "girl" | "unspecified";
@@ -23,6 +23,9 @@ type ChildDraft = {
   hairColour: HairColourId;
   glasses: boolean;
   hat: AvatarHatId;
+  skin: string;
+  eyeColour: string;
+  shirt: string;
   nicknameMessage: string;
 };
 
@@ -38,6 +41,9 @@ const emptyChild = (): ChildDraft => ({
   hairColour: "brown",
   glasses: false,
   hat: "none",
+  skin: "light",
+  eyeColour: "brown",
+  shirt: "cream",
   nicknameMessage: "",
 });
 
@@ -126,6 +132,9 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
         hairColour: item.hairColour,
         glasses: item.glasses,
         hat: item.hat,
+        skin: item.skin,
+        eyeColour: item.eyeColour,
+        shirt: item.shirt,
       })),
     }).catch((error: { digest?: string; message?: string }) => {
       if (typeof error?.digest === "string" && error.digest.startsWith("NEXT_REDIRECT")) throw error;
@@ -276,6 +285,57 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           </fieldset>
 
           <fieldset className="mt-5">
+            <legend className="text-sm font-extrabold text-[#1e4d3a]">Skin</legend>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {SKIN_COLOURS.map((colour) => (
+                <button
+                  key={colour.id}
+                  type="button"
+                  aria-label={colour.label}
+                  aria-pressed={child.skin === colour.id}
+                  onClick={() => patchChild({ skin: colour.id })}
+                  className={`size-11 rounded-full border-2 ${child.skin === colour.id ? "border-[#173528]" : "border-white"}`}
+                  style={{ background: colour.hex }}
+                />
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset className="mt-5">
+            <legend className="text-sm font-extrabold text-[#1e4d3a]">Eyes</legend>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {EYE_COLOURS.map((colour) => (
+                <button
+                  key={colour.id}
+                  type="button"
+                  aria-label={colour.label}
+                  aria-pressed={child.eyeColour === colour.id}
+                  onClick={() => patchChild({ eyeColour: colour.id })}
+                  className={`size-11 rounded-full border-2 ${child.eyeColour === colour.id ? "border-[#173528]" : "border-white"}`}
+                  style={{ background: colour.hex }}
+                />
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset className="mt-5">
+            <legend className="text-sm font-extrabold text-[#1e4d3a]">Shirt</legend>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {SHIRT_COLOURS.map((colour) => (
+                <button
+                  key={colour.id}
+                  type="button"
+                  aria-label={colour.label}
+                  aria-pressed={child.shirt === colour.id}
+                  onClick={() => patchChild({ shirt: colour.id })}
+                  className={`size-11 rounded-full border-2 ${child.shirt === colour.id ? "border-[#173528]" : "border-white"}`}
+                  style={{ background: colour.hex }}
+                />
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset className="mt-5">
             <legend className="text-sm font-extrabold text-[#1e4d3a]">Background colour</legend>
             <div className="mt-2 flex flex-wrap gap-2">
               {AVATAR_COLOURS.map((colour) => (
@@ -316,6 +376,9 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                     glasses={child.glasses}
                     hat={child.hat}
                     gender={child.gender === "girl" ? "girl" : "boy"}
+                    skin={child.skin}
+                    eyeColour={child.eyeColour}
+                    shirt={child.shirt}
                     className="mx-auto h-24 w-full"
                   />
                 </button>

@@ -113,6 +113,10 @@ export function PathMap({
                 hairColour={child.avatar_hair_colour}
                 glasses={child.avatar_glasses}
                 hat={child.avatar_hat}
+                gender={child.gender === "girl" ? "girl" : "boy"}
+                skin={child.avatar_skin}
+                eyeColour={child.avatar_eyes}
+                shirt={child.avatar_shirt}
                 title={child.nickname}
                 className="h-10 w-7 ring-2 ring-white"
               />

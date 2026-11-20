@@ -6,7 +6,10 @@ alter table public.children
   add column avatar_hair_style text,
   add column avatar_hair_colour text,
   add column avatar_glasses boolean,
-  add column avatar_hat text;
+  add column avatar_hat text,
+  add column avatar_skin text,
+  add column avatar_eyes text,
+  add column avatar_shirt text;
 
 alter table public.children
   add constraint children_gender_chk check (gender is null or gender in ('boy', 'girl', 'unspecified')),

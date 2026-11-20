@@ -32,6 +32,9 @@ export type DemoChild = {
   avatar_hair_colour?: string;
   avatar_glasses?: boolean;
   avatar_hat?: string;
+  avatar_skin?: string;
+  avatar_eyes?: string;
+  avatar_shirt?: string;
 };
 
 export type DemoPack = {
@@ -490,6 +493,9 @@ export function createDemoFamily(input: {
     hairColour: string;
     glasses: boolean;
     hat: string;
+    skin: string;
+    eyeColour: string;
+    shirt: string;
   }>;
 }) {
   const db = demoDb();
@@ -519,6 +525,9 @@ export function createDemoFamily(input: {
       avatar_hair_colour: child.hairColour,
       avatar_glasses: child.glasses,
       avatar_hat: child.hat,
+      avatar_skin: child.skin,
+      avatar_eyes: child.eyeColour,
+      avatar_shirt: child.shirt,
     });
     return id;
   });

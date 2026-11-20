@@ -222,6 +222,9 @@ function StepPanel({
       avatar_glasses: child.avatar_glasses,
       avatar_hat: child.avatar_hat,
       gender: child.gender === "girl" || child.gender === "boy" || child.gender === "unspecified" ? child.gender : null,
+      avatar_skin: child.avatar_skin,
+      avatar_eyes: child.avatar_eyes,
+      avatar_shirt: child.avatar_shirt,
       tickable: onStep,
       detail,
     };

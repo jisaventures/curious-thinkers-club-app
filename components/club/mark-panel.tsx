@@ -20,6 +20,9 @@ export type MarkChild = {
   avatar_glasses?: boolean | null;
   avatar_hat?: string | null;
   gender?: "boy" | "girl" | "unspecified" | null;
+  avatar_skin?: string | null;
+  avatar_eyes?: string | null;
+  avatar_shirt?: string | null;
   tickable: boolean;
   detail: string;
 };
@@ -102,6 +105,9 @@ export function MarkPanel({
               glasses={child.avatar_glasses}
               hat={child.avatar_hat}
               gender={child.gender === "girl" ? "girl" : "boy"}
+              skin={child.avatar_skin}
+              eyeColour={child.avatar_eyes}
+              shirt={child.avatar_shirt}
               className="h-12 w-9"
             />
             <div className="min-w-0">
