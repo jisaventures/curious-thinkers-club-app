@@ -21,7 +21,7 @@ import {
 import { BirthdayPicker } from "@/components/onboarding/birthday-picker";
 import { ageFromBirthday, isBirthdayAllowed } from "@/lib/birthday";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
-import { Check, ChevronLeft, ChevronRight, Mars, Trophy, Venus, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Mars, Rocket, Trophy, Venus, X } from "lucide-react";
 
 type Gender = "boy" | "girl" | "unspecified";
 
@@ -444,7 +444,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           {screen === "welcome" && (
             <Button type="button" variant="mustard" size="lg" className="footer-cta gap-2" disabled={!terms} onClick={() => setScreen("family")}>
               Get started
-              <EmojiRocket className="size-7 shrink-0" />
+              <Rocket className="size-7 shrink-0" strokeWidth={2.4} aria-hidden="true" />
             </Button>
           )}
           {screen === "family" && (
@@ -637,20 +637,6 @@ function HintedButton({
         {hint}
       </span>
     </span>
-  );
-}
-
-function EmojiRocket({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-      <path fill="#F5A623" d="M10.2 16.2 12 22l1.8-5.8z" />
-      <path fill="#FFE14D" d="M11.1 16.2 12 20.2l.9-4z" />
-      <path fill="#DD2E44" d="M8.6 11.2 4.2 17.4l4.6-.6zM15.4 11.2 19.8 17.4l-4.6-.6z" />
-      <path fill="#F4F7FB" d="M8.4 8.2h7.2c.2 2.4.2 6.2 0 8.6a8 8 0 0 1-7.2 0c-.2-2.4-.2-6.2 0-8.6z" />
-      <path fill="#DD2E44" d="M12 2.2 16.1 8.2H7.9z" />
-      <circle cx="12" cy="11.2" r="2.05" fill="#3B88C3" />
-      <circle cx="11.35" cy="10.55" r="0.65" fill="#fff" />
-    </svg>
   );
 }
 
