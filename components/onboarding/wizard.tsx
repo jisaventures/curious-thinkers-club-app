@@ -168,20 +168,23 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
   return (
     <div className="flex w-full flex-1 flex-col">
-      <ol className="mb-5 flex gap-2 overflow-x-auto pb-1" aria-label="Onboarding progress">
+      <ol className="mb-5 flex gap-2 overflow-x-auto px-1 pt-3" aria-label="Onboarding progress">
         {progressLabels.map((label, index) => {
           const done = index < progress;
           const current = index === progress;
           return (
-            <li key={label} className="flex min-w-32 flex-1 flex-col gap-1" aria-current={current ? "step" : undefined}>
-              <p className={`flex h-5 items-center gap-1 text-[11px] font-extrabold ${done ? "text-[#1e4d3a]" : "invisible"}`}>
-                <Check className="size-3.5 shrink-0" strokeWidth={3} aria-hidden="true" />
-                Complete
-              </p>
-              <p className={`text-xs font-extrabold leading-tight ${done || current ? "text-[#1e4d3a]" : "text-[#8aa094]"}`}>
+            <li key={label} className="relative flex min-w-32 flex-1" aria-current={current ? "step" : undefined}>
+              {done && (
+                <p className="absolute top-0 left-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 rounded-full bg-[#d7efc8] px-2 py-0.5 text-[11px] font-extrabold whitespace-nowrap text-[#1e4d3a]">
+                  <Check className="size-3 shrink-0" strokeWidth={3} aria-hidden="true" />
+                  Complete
+                </p>
+              )}
+              <p
+                className={`flex min-h-14 w-full items-center justify-center rounded-2xl px-2 py-3 text-center text-[11px] leading-tight font-extrabold text-white sm:text-xs ${done || current ? "bg-[#1e4d3a]" : "bg-[#8eaa9b]"}`}
+              >
                 Step {index + 1}: {label}
               </p>
-              <span className={`mt-1 h-1.5 rounded-full ${done || current ? "bg-[#1e4d3a]" : "bg-[#eadfce]"}`} />
             </li>
           );
         })}
