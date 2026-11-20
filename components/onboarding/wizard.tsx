@@ -290,7 +290,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 <Label htmlFor="nickname">Nickname</Label>
                 <div className="flex gap-2">
                   <Input id="nickname" value={child.nickname} readOnly aria-readonly="true" />
-                  <Button type="button" variant="outline" className="shrink-0" onClick={regenerateNickname}>
+                  <Button type="button" variant="green" size="sm" className="shrink-0" onClick={regenerateNickname}>
                     Re-generate
                   </Button>
                 </div>
@@ -342,8 +342,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           {screen !== "welcome" && (
             <Button
               type="button"
-              variant="bottle"
-              className="footer-action h-16 min-w-80 px-12 text-2xl uppercase tracking-wide"
+              variant="green"
+              size="lg"
               onClick={() => {
                 setMessage(null);
                 if (screen === "family") setScreen("welcome");
@@ -355,14 +355,14 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             </Button>
           )}
           {screen === "welcome" && (
-            <Button type="button" className="footer-action h-16 min-w-80 bg-mustard px-12 text-2xl uppercase tracking-wide hover:bg-[#d39320]" size="lg" disabled={!terms} onClick={() => setScreen("family")}>
+            <Button type="button" variant="mustard" size="lg" disabled={!terms} onClick={() => setScreen("family")}>
               Get started
             </Button>
           )}
           {screen === "family" && (
             <Button
               type="button"
-              className="footer-action h-16 min-w-80 bg-mustard px-12 text-2xl uppercase tracking-wide hover:bg-[#d39320]"
+              variant="mustard"
               size="lg"
               onClick={() => {
                 setEditing(0);
@@ -374,7 +374,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             </Button>
           )}
           {screen === "details" && (
-            <Button type="button" className="footer-action h-16 min-w-80 bg-mustard px-12 text-2xl uppercase tracking-wide hover:bg-[#d39320]" size="lg" disabled={pending} onClick={() => void continueProfile()}>
+            <Button type="button" variant="mustard" size="lg" disabled={pending} onClick={() => void continueProfile()}>
               {editing < count - 1 ? "Next child" : pending ? "Starting…" : "Get started"}
             </Button>
           )}
@@ -429,7 +429,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               <ColourRow legend="Clothes colour" value={avatarDraft.clothesColor} colours={CLOTHES_COLOURS} onChange={(clothesColor) => setAvatarDraft({ ...avatarDraft, clothesColor })} />
               <ColourRow legend="Background" value={avatarDraft.background} colours={AVATAR_COLOURS} onChange={(background) => setAvatarDraft({ ...avatarDraft, background })} />
             </div>
-            <Button type="button" className="mt-6 w-full" size="lg" onClick={saveAvatar}>
+            <Button type="button" variant="mustard" size="lg" className="mt-6 w-full" onClick={saveAvatar}>
               Save
             </Button>
           </div>
