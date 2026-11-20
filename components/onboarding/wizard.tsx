@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { AVATAR_COLOURS, AVATAR_FACES, AVATAR_HATS, HAIR_COLOURS, HAIR_STYLES, type AvatarFaceId, type AvatarHatId, type HairColourId, type HairStyleId } from "@/lib/avatar-style";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
 
-type Gender = "boy" | "girl" | "other";
+type Gender = "boy" | "girl" | "unspecified";
 
 type ChildDraft = {
   firstName: string;
@@ -254,16 +254,22 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
           <fieldset className="mt-5">
             <legend className="text-sm font-extrabold text-[#1e4d3a]">Gender</legend>
-            <div className="mt-2 grid grid-cols-3 gap-2">
-              {(["boy", "girl", "other"] as const).map((gender) => (
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {(
+                [
+                  ["boy", "Boy"],
+                  ["girl", "Girl"],
+                  ["unspecified", "Prefer not to say"],
+                ] as const
+              ).map(([gender, label]) => (
                 <button
                   key={gender}
                   type="button"
                   aria-pressed={child.gender === gender}
                   onClick={() => patchChild({ gender })}
-                  className={`h-12 rounded-2xl text-sm font-extrabold capitalize ${child.gender === gender ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
+                  className={`h-12 rounded-2xl px-2 text-sm font-extrabold ${gender === "unspecified" ? "col-span-2" : ""} ${child.gender === gender ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
                 >
-                  {gender}
+                  {label}
                 </button>
               ))}
             </div>
@@ -288,7 +294,10 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
           <fieldset className="mt-5">
             <legend className="text-sm font-extrabold text-[#1e4d3a]">Face</legend>
-            <p className="mt-1 text-xs text-[#5e7266]">Head and shoulders for now. Packs will unlock outfits later.</p>
+            <p className="mt-1 text-xs text-[#5e7266]">
+              {child.gender === "girl" ? "Girl faces." : child.gender ? "Boy faces." : "Choose boy or girl first."} Head and shoulders for now. Packs will unlock outfits later.
+            </p>
+            {child.gender && (
             <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-6">
               {AVATAR_FACES.map((face) => (
                 <button
@@ -306,11 +315,13 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                     hairColour={child.hairColour}
                     glasses={child.glasses}
                     hat={child.hat}
+                    gender={child.gender === "girl" ? "girl" : "boy"}
                     className="mx-auto h-24 w-full"
                   />
                 </button>
               ))}
             </div>
+            )}
           </fieldset>
 
           <fieldset className="mt-5">

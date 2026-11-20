@@ -9,7 +9,7 @@ alter table public.children
   add column avatar_hat text;
 
 alter table public.children
-  add constraint children_gender_chk check (gender is null or gender in ('boy', 'girl', 'other')),
+  add constraint children_gender_chk check (gender is null or gender in ('boy', 'girl', 'unspecified')),
   add constraint children_first_name_chk check (
     first_name is null
     or (

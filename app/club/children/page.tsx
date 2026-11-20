@@ -12,7 +12,7 @@ export default async function ChildrenPage() {
     : await (async () => {
         const { data, error } = await supabase
           .from("children")
-          .select("id, nickname, avatar_key, age_years, avatar_bg, avatar_face, avatar_hair_style, avatar_hair_colour, avatar_glasses, avatar_hat")
+          .select("id, nickname, avatar_key, age_years, avatar_bg, avatar_face, avatar_hair_style, avatar_hair_colour, avatar_glasses, avatar_hat, gender")
           .eq("account_id", account.id)
           .order("created_at");
         if (error) throw new Error(error.message);
@@ -27,6 +27,7 @@ export default async function ChildrenPage() {
           avatar_hair_colour?: string | null;
           avatar_glasses?: boolean | null;
           avatar_hat?: string | null;
+          gender?: "boy" | "girl" | "unspecified" | null;
         }>;
       })();
 
@@ -50,6 +51,7 @@ export default async function ChildrenPage() {
                 hairColour={child.avatar_hair_colour}
                 glasses={child.avatar_glasses}
                 hat={child.avatar_hat}
+                gender={child.gender === "girl" ? "girl" : child.gender === "boy" ? "boy" : undefined}
                 className="h-16 w-12"
               />
               <div>

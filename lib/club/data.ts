@@ -14,7 +14,7 @@ export type ClubChild = {
   avatar_key: AvatarKey;
   age_years: number;
   first_name?: string | null;
-  gender?: "boy" | "girl" | "other" | null;
+  gender?: "boy" | "girl" | "unspecified" | null;
   avatar_bg?: string | null;
   avatar_face?: string | null;
   avatar_hair_style?: string | null;
@@ -223,6 +223,7 @@ export type PackChildView = {
   avatar_hair_colour?: string | null;
   avatar_glasses?: boolean | null;
   avatar_hat?: string | null;
+  gender?: "boy" | "girl" | "unspecified" | null;
   started: boolean;
   finished: boolean;
   nextPosition: number | null;

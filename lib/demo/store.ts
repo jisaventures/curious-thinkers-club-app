@@ -25,7 +25,7 @@ export type DemoChild = {
   age_years: number;
   created_at: string;
   first_name?: string;
-  gender?: "boy" | "girl" | "other";
+  gender?: "boy" | "girl" | "unspecified";
   avatar_bg?: string;
   avatar_face?: string;
   avatar_hair_style?: string;
@@ -483,7 +483,7 @@ export function createDemoFamily(input: {
     firstName: string;
     nickname: string;
     ageYears: number;
-    gender: "boy" | "girl" | "other";
+    gender: "boy" | "girl" | "unspecified";
     avatarBg: string;
     avatarFace: string;
     hairStyle: string;

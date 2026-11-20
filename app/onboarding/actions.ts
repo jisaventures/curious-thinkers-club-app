@@ -22,7 +22,7 @@ const familySchema = z.object({
         firstName: displayNameSchema,
         nickname: nicknameSchema,
         ageYears: ageSchema,
-        gender: z.enum(["boy", "girl", "other"]),
+        gender: z.enum(["boy", "girl", "unspecified"]),
         avatarBg: z.enum(AVATAR_COLOURS.map((colour) => colour.id) as [string, ...string[]]),
         avatarFace: z.enum(AVATAR_FACES),
         hairStyle: z.enum(HAIR_STYLES),
