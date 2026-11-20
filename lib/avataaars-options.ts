@@ -1,9 +1,13 @@
 const OPTION_LABELS: Record<string, string> = {
-  prescription01: "Prescription 1",
-  prescription02: "Prescription 2",
+  prescription01: "Square",
   eyepatch: "Eye patch",
-  winterHat03: "Winter hat 3",
-  winterHat04: "Winter hat 4",
+  dreads: "Locs",
+  dreads01: "Spiked",
+  shortCurly: "Short",
+  theCaesar: "Buzz",
+  longButNotTooLong: "Long",
+  frida: "Flowers",
+  straight01: "Straight",
 };
 
 export function optionLabel(id: string) {
@@ -47,7 +51,34 @@ export const AVATAAARS_TOPS = [
   "winterHat04",
 ] as const;
 
-export const AVATAAARS_HAT_TOPS = ["hijab", "turban", "winterHat03", "winterHat04"] as const;
+export const BOY_HAIR = [
+  "bun",
+  "curly",
+  "dreads",
+  "dreads01",
+  "fro",
+  "shaggy",
+  "shortCurly",
+  "shortFlat",
+  "shortRound",
+  "shortWaved",
+  "theCaesar",
+  "longButNotTooLong",
+] as const satisfies readonly (typeof AVATAAARS_TOPS)[number][];
+
+export const GIRL_HAIR = [
+  "bob",
+  "bun",
+  "curly",
+  "curvy",
+  "dreads",
+  "fro",
+  "froBand",
+  "hijab",
+  "frida",
+  "longButNotTooLong",
+  "straight01",
+] as const satisfies readonly (typeof AVATAAARS_TOPS)[number][];
 
 export const AVATAAARS_EYES = ["happy", "side", "wink"] as const;
 
@@ -57,7 +88,7 @@ export const AVATAAARS_MOUTHS = ["default", "smile", "tongue"] as const;
 
 export const AVATAAARS_FACIAL_HAIR = ["none"] as const;
 
-export const AVATAAARS_ACCESSORIES = ["none", "prescription01", "prescription02", "round", "eyepatch"] as const;
+export const AVATAAARS_ACCESSORIES = ["none", "prescription01", "round", "eyepatch"] as const;
 
 export const AVATAAARS_CLOTHES = ["shirtCrewNeck", "shirtVNeck"] as const;
 
@@ -89,7 +120,7 @@ export function boyAvatar(): AvatarBuild {
     hatColor: "1e4d3a",
     skin: "ffdbb4",
     eyes: "happy",
-    eyeColor: "6b4423",
+    eyeColor: "2c1b18",
     eyebrows: "defaultNatural",
     mouth: "smile",
     facialHair: "none",

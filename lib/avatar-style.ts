@@ -5,8 +5,6 @@ export const AVATAR_COLOURS = [
   { id: "coral", label: "Coral", hex: "#e07a5f" },
   { id: "sea", label: "Sea", hex: "#3d8ea8" },
   { id: "plum", label: "Plum", hex: "#7b6bb8" },
-  { id: "sand", label: "Sand", hex: "#e6c89a" },
-  { id: "sky", label: "Sky", hex: "#8ecae6" },
 ] as const;
 
 export const AVATAR_FACES = ["smile", "beam", "curious", "calm", "wink", "freckles"] as const;
@@ -34,19 +32,16 @@ export const SKIN_COLOURS = [
   { id: "light", label: "Light", hex: "#ffdbb4" },
   { id: "peach", label: "Peach", hex: "#fd9841" },
   { id: "warm", label: "Warm", hex: "#edb98a" },
-  { id: "golden", label: "Golden", hex: "#f8d25c" },
   { id: "tan", label: "Tan", hex: "#d08b5b" },
   { id: "brown", label: "Brown", hex: "#ae5d29" },
   { id: "deep", label: "Deep", hex: "#614335" },
 ] as const;
 
 export const EYE_COLOURS = [
-  { id: "brown", label: "Brown", hex: "#6b4423" },
-  { id: "hazel", label: "Hazel", hex: "#8a7a3a" },
+  { id: "brown", label: "Brown", hex: "#2c1b18" },
   { id: "green", label: "Green", hex: "#3d7a4a" },
   { id: "blue", label: "Blue", hex: "#3d6fbf" },
   { id: "grey", label: "Grey", hex: "#6d7278" },
-  { id: "dark", label: "Dark", hex: "#2c1b18" },
 ] as const;
 
 export const HAT_COLOURS = [

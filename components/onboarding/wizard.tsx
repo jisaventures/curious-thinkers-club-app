@@ -6,13 +6,13 @@ import { FamilyAvatar } from "@/components/brand/family-avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ACCESSORY_COLOURS, AVATAR_COLOURS, CLOTHES_COLOURS, EYE_COLOURS, HAIR_COLOURS, HAT_COLOURS, SKIN_COLOURS } from "@/lib/avatar-style";
+import { ACCESSORY_COLOURS, AVATAR_COLOURS, CLOTHES_COLOURS, EYE_COLOURS, HAIR_COLOURS, SKIN_COLOURS } from "@/lib/avatar-style";
 import {
   AVATAAARS_ACCESSORIES,
   AVATAAARS_EYES,
-  AVATAAARS_HAT_TOPS,
   AVATAAARS_MOUTHS,
-  AVATAAARS_TOPS,
+  BOY_HAIR,
+  GIRL_HAIR,
   boyAvatar,
   girlAvatar,
   optionLabel,
@@ -137,7 +137,10 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
   function openAvatarModal() {
     if (!child) return;
-    setAvatarDraft({ ...child.avatar });
+    const hair = child.gender === "girl" ? GIRL_HAIR : BOY_HAIR;
+    const avatar = { ...child.avatar };
+    if (!new Set<string>(hair).has(avatar.top)) avatar.top = hair[0];
+    setAvatarDraft(avatar);
     setAvatarOpen(true);
   }
 
@@ -166,6 +169,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
   const profileHint = missingProfileHint(child);
   const profileReady = profileHint === "";
+  const hairOptions = child?.gender === "girl" ? GIRL_HAIR : BOY_HAIR;
+  const hairValue = avatarDraft && new Set<string>(hairOptions).has(avatarDraft.top) ? avatarDraft.top : hairOptions[0];
 
   useEffect(() => {
     const el = tabsRef.current;
@@ -484,7 +489,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             role="dialog"
             aria-modal="true"
             aria-labelledby="avatar-editor-title"
-            className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[28px] bg-white p-5 shadow-xl sm:p-7"
+            className="relative max-h-[92vh] w-full max-w-6xl overflow-y-auto rounded-[28px] bg-white p-5 shadow-xl sm:p-6 lg:max-h-none lg:overflow-visible"
             onKeyDown={(event) => {
               if (event.key === "Escape") setAvatarOpen(false);
             }}
@@ -500,25 +505,40 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             <h2 id="avatar-editor-title" className="step-title pr-10 text-3xl">
               Edit avatar
             </h2>
-            <div className="mt-4 flex justify-center rounded-[24px] bg-[#f6efe2] p-3">
-              <FamilyAvatar build={avatarDraft} className="h-36 w-36" title="Avatar preview" />
-            </div>
-            <ChoiceRow legend="Hair and hats" value={avatarDraft.top} options={AVATAAARS_TOPS} onChange={(top) => setAvatarDraft({ ...avatarDraft, top })} />
-            <div className="grid sm:grid-cols-2 sm:gap-x-4">
-              <ColourRow legend="Hair colour" value={avatarDraft.hairColor} colours={HAIR_COLOURS} onChange={(hairColor) => setAvatarDraft({ ...avatarDraft, hairColor })} />
-              {AVATAAARS_HAT_TOPS.includes(avatarDraft.top as (typeof AVATAAARS_HAT_TOPS)[number]) && (
-                <ColourRow legend="Hat colour" value={avatarDraft.hatColor} colours={HAT_COLOURS} onChange={(hatColor) => setAvatarDraft({ ...avatarDraft, hatColor })} />
-              )}
-              <ColourRow legend="Skin" value={avatarDraft.skin} colours={SKIN_COLOURS} onChange={(skin) => setAvatarDraft({ ...avatarDraft, skin })} />
-              <ChoiceRow legend="Eyes" value={avatarDraft.eyes} options={AVATAAARS_EYES} onChange={(eyes) => setAvatarDraft({ ...avatarDraft, eyes })} />
-              <ColourRow legend="Eye colour" value={avatarDraft.eyeColor} colours={EYE_COLOURS} onChange={(eyeColor) => setAvatarDraft({ ...avatarDraft, eyeColor })} />
-              <ChoiceRow legend="Mouth" value={avatarDraft.mouth} options={AVATAAARS_MOUTHS} onChange={(mouth) => setAvatarDraft({ ...avatarDraft, mouth })} />
-              <ChoiceRow legend="Glasses" value={avatarDraft.accessory} options={AVATAAARS_ACCESSORIES} onChange={(accessory) => setAvatarDraft({ ...avatarDraft, accessory })} />
-              {avatarDraft.accessory !== "none" && (
-                <ColourRow legend="Glasses colour" value={avatarDraft.accessoryColor} colours={ACCESSORY_COLOURS} onChange={(accessoryColor) => setAvatarDraft({ ...avatarDraft, accessoryColor })} />
-              )}
-              <ColourRow legend="Clothes colour" value={avatarDraft.clothesColor} colours={CLOTHES_COLOURS} onChange={(clothesColor) => setAvatarDraft({ ...avatarDraft, clothesColor })} />
-              <ColourRow legend="Background" value={avatarDraft.background} colours={AVATAR_COLOURS} onChange={(background) => setAvatarDraft({ ...avatarDraft, background })} />
+            <div className="mt-3 grid items-start gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+              <div>
+                <div className="flex justify-center rounded-[24px] bg-[#f6efe2] p-3">
+                  <FamilyAvatar build={avatarDraft} className="h-40 w-40" title="Avatar preview" />
+                </div>
+                <ColourRow legend="Background" value={avatarDraft.background} colours={AVATAR_COLOURS} onChange={(background) => setAvatarDraft({ ...avatarDraft, background })} className="mt-3" />
+                <ColourRow legend="Skin" value={avatarDraft.skin} colours={SKIN_COLOURS} onChange={(skin) => setAvatarDraft({ ...avatarDraft, skin })} className="mt-3" />
+              </div>
+              <div>
+                <ChoiceRow
+                  legend="Hair"
+                  value={hairValue}
+                  options={hairOptions}
+                  onChange={(top) => setAvatarDraft({ ...avatarDraft, top, hatColor: avatarDraft.hairColor })}
+                  className="mt-0"
+                />
+                <div className="grid sm:grid-cols-2 sm:gap-x-4">
+                  <ColourRow
+                    legend="Hair / head accessory colour"
+                    value={avatarDraft.hairColor}
+                    colours={HAIR_COLOURS}
+                    onChange={(hairColor) => setAvatarDraft({ ...avatarDraft, hairColor, hatColor: hairColor })}
+                    className="mt-3 sm:col-span-2"
+                  />
+                  <ChoiceRow legend="Eyes" value={avatarDraft.eyes} options={AVATAAARS_EYES} onChange={(eyes) => setAvatarDraft({ ...avatarDraft, eyes })} className="mt-3" />
+                  <ColourRow legend="Eye colour" value={avatarDraft.eyeColor} colours={EYE_COLOURS} onChange={(eyeColor) => setAvatarDraft({ ...avatarDraft, eyeColor })} className="mt-3" />
+                  <ChoiceRow legend="Mouth" value={avatarDraft.mouth} options={AVATAAARS_MOUTHS} onChange={(mouth) => setAvatarDraft({ ...avatarDraft, mouth })} className="mt-3" />
+                  <ChoiceRow legend="Glasses" value={avatarDraft.accessory} options={AVATAAARS_ACCESSORIES} onChange={(accessory) => setAvatarDraft({ ...avatarDraft, accessory })} className="mt-3" />
+                  {avatarDraft.accessory !== "none" && (
+                    <ColourRow legend="Glasses colour" value={avatarDraft.accessoryColor} colours={ACCESSORY_COLOURS} onChange={(accessoryColor) => setAvatarDraft({ ...avatarDraft, accessoryColor })} className="mt-3" />
+                  )}
+                  <ColourRow legend="Clothes colour" value={avatarDraft.clothesColor} colours={CLOTHES_COLOURS} onChange={(clothesColor) => setAvatarDraft({ ...avatarDraft, clothesColor })} className="mt-3" />
+                </div>
+              </div>
             </div>
             <Button type="button" variant="mustard" size="lg" className="mt-6 w-full" onClick={saveAvatar}>
               Save
@@ -549,7 +569,7 @@ function ChoiceRow<T extends string>({
   compact?: boolean;
 }) {
   return (
-    <fieldset className={`${compact ? "mt-1 flex flex-wrap items-center gap-x-2" : "mt-5"} ${className}`}>
+    <fieldset className={`${compact ? "mt-1 flex flex-wrap items-center gap-x-2" : ""} ${className}`}>
       <legend className={`${compact ? "text-[11px]" : "text-sm"} font-extrabold text-[#1e4d3a]`}>{legend}</legend>
       {hint && <p className="mt-1 text-xs text-[#5e7266]">{hint}</p>}
       <div className={`${compact ? "gap-1" : "mt-2 gap-2"} flex flex-wrap`}>
@@ -675,7 +695,7 @@ function ColourRow({
   compact?: boolean;
 }) {
   return (
-    <fieldset className={`${compact ? "mt-1 flex flex-wrap items-center gap-x-2" : "mt-5"} ${className}`}>
+    <fieldset className={`${compact ? "mt-1 flex flex-wrap items-center gap-x-2" : ""} ${className}`}>
       <legend className={`${compact ? "text-[11px]" : "text-sm"} font-extrabold text-[#1e4d3a]`}>{legend}</legend>
       {hint && <p className="basis-full text-[10px] leading-tight text-[#5e7266]">{hint}</p>}
       <div className={`${compact ? "flex-nowrap gap-1" : "mt-2 flex-wrap gap-2"} flex`}>
