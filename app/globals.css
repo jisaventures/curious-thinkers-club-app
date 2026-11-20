@@ -40,6 +40,73 @@
   font-size: clamp(2rem, 7vw, 3.25rem);
 }
 
+.gender-row {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  gap: 0.375rem;
+}
+
+.gender-row button {
+  flex: 0 0 auto;
+  gap: 0.3rem;
+  padding-inline: 0.55rem;
+  font-size: 0.8rem;
+}
+
+.gender-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+@media (max-width: 380px) {
+  .gender-row {
+    gap: 0.3rem;
+  }
+
+  .gender-row button {
+    padding-inline: 0.4rem;
+    font-size: 0.72rem;
+  }
+}
+
+@media (min-width: 480px) {
+  .gender-row button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-inline: 0.7rem;
+    font-size: 1rem;
+  }
+
+  .gender-row button:last-child {
+    flex-grow: 1.45;
+  }
+
+  .gender-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .gender-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .gender-row button {
+    gap: 0.5rem;
+    padding-inline: 0.5rem;
+    font-size: 1.125rem;
+  }
+
+  .gender-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
 .celebrate {
   position: fixed;
   inset: 0;

@@ -386,7 +386,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
           <fieldset className="mt-5 lg:mt-2">
             <legend className="text-sm font-extrabold text-[#1e4d3a]">Gender</legend>
-            <div className="mt-2 grid grid-cols-2 gap-2 lg:grid-cols-3">
+            <div className="gender-row mt-2">
               {(
                 [
                   ["boy", "Boy"],
@@ -405,10 +405,10 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                       avatar: { ...child.avatar, top: base.top, clothing: base.clothing, eyebrows: "defaultNatural", facialHair: "none" },
                     });
                   }}
-                  className={`fredoka-bold inline-flex h-12 items-center justify-center gap-2 rounded-2xl border-2 px-2 text-base leading-none lg:h-11 lg:text-lg ${child.gender === gender ? `border-[#306A51] ${gender === "boy" ? "bg-[#3d6fbf] text-white" : gender === "girl" ? "bg-[#e36aa2] text-white" : "bg-[#1e4d3a] text-white"}` : "border-transparent bg-[#f6efe2] text-[#1e4d3a]"}`}
+                  className={`fredoka-bold inline-flex h-11 items-center justify-center rounded-2xl border-2 leading-none whitespace-nowrap ${child.gender === gender ? `border-[#306A51] ${gender === "boy" ? "bg-[#3d6fbf] text-white" : gender === "girl" ? "bg-[#e36aa2] text-white" : "bg-[#1e4d3a] text-white"}` : "border-transparent bg-[#f6efe2] text-[#1e4d3a]"}`}
                 >
-                  {gender === "boy" && <Mars className="size-5" aria-hidden="true" />}
-                  {gender === "girl" && <Venus className="size-5" aria-hidden="true" />}
+                  {gender === "boy" && <Mars className="gender-icon shrink-0" aria-hidden="true" />}
+                  {gender === "girl" && <Venus className="gender-icon shrink-0" aria-hidden="true" />}
                   {label}
                 </button>
               ))}
