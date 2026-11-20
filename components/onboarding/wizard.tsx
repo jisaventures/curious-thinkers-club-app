@@ -19,7 +19,7 @@ import {
   type AvatarBuild,
 } from "@/lib/avataaars-options";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
-import { Check, Mars, Venus } from "lucide-react";
+import { Mars, Venus } from "lucide-react";
 
 type Gender = "boy" | "girl" | "unspecified";
 
@@ -33,7 +33,7 @@ type ChildDraft = {
   nicknameMessage: string;
 };
 
-type Screen = "welcome" | "terms" | "family" | "details" | "avatar";
+type Screen = "welcome" | "family" | "details" | "avatar";
 
 const emptyChild = (): ChildDraft => ({
   firstName: "",
@@ -55,7 +55,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   const [pending, setPending] = useState(false);
 
   const child = children[editing];
-  const progress = screen === "welcome" ? 0 : screen === "terms" ? 1 : 2;
+  const progressLabels = ["Welcome", "Children", ...Array.from({ length: count }, (_, index) => `Child ${index + 1}`)];
+  const progress = screen === "welcome" ? 0 : screen === "family" ? 1 : 2 + editing;
 
   const siblingNames = useMemo(
     () => children.filter((_, index) => index !== editing).map((item) => item.nickname),
@@ -128,13 +129,6 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
     );
   }
 
-  function childComplete(item: ChildDraft) {
-    return detailsReady(item) && item.avatarSaved;
-  }
-
-  const family = children.slice(0, count);
-  const allComplete = family.every(childComplete);
-
   useEffect(() => {
     if (screen !== "details" || children[editing]?.nickname) return;
     let cancelled = false;
@@ -171,7 +165,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   return (
     <div className="flex w-full flex-1 flex-col">
       <ol className="mb-5 flex gap-2" aria-label="Onboarding progress">
-        {["Welcome", "Terms", "Children"].map((label, index) => (
+        {progressLabels.map((label, index) => (
           <li key={label} className={`h-1.5 flex-1 rounded-full ${index <= progress ? "bg-[#1e4d3a]" : "bg-[#eadfce]"}`}>
             <span className="sr-only">{label}</span>
           </li>
@@ -190,16 +184,6 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               ? "Your first name comes from your Curious Thinkers shop account."
               : "Your first name will come from your Curious Thinkers shop account when that account is created."}
           </p>
-          <Button type="button" className="mt-6 w-full" size="lg" onClick={() => setScreen("terms")}>
-            Get started
-          </Button>
-        </section>
-      )}
-
-      {screen === "terms" && (
-        <section className="mx-auto max-w-2xl rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
-          <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">Before the club</p>
-          <h1 className="mt-2 font-display text-4xl text-[#1e4d3a]">Terms and conditions</h1>
           <p className="mt-3 text-sm leading-relaxed text-[#5e7266]">
             This club must be managed by a parent or guardian. Children do not get their own login. The full terms will be published later.
           </p>
@@ -213,19 +197,14 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               .
             </span>
           </label>
-          <div className="mt-6 flex gap-2">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => setScreen("welcome")}>
-              Back
-            </Button>
-            <Button type="button" className="flex-1" disabled={!terms} onClick={() => setScreen("family")}>
-              Continue
-            </Button>
-          </div>
+          <Button type="button" className="mt-6 w-full" size="lg" disabled={!terms} onClick={() => setScreen("family")}>
+            Get started
+          </Button>
         </section>
       )}
 
       {screen === "family" && (
-        <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
+        <section className="mx-auto max-w-2xl rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
           <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">Your family</p>
           <h1 className="mt-2 font-display text-4xl text-[#1e4d3a]">How many children are in the family?</h1>
           <p className="mt-3 text-sm leading-relaxed text-[#5e7266]">
@@ -244,49 +223,20 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               </button>
             ))}
           </div>
-          <ul className="mt-5 grid gap-3 md:grid-cols-5">
-            {family.map((item, index) => {
-              const complete = childComplete(item);
-              const label = item.firstName.trim() || `Child ${index + 1}`;
-              return (
-                <li
-                  key={index}
-                  className={`flex min-h-0 flex-col items-center justify-between gap-2 rounded-3xl p-3 text-center md:aspect-square ${complete ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
-                >
-                  <p className="w-full truncate text-sm font-extrabold">{label}</p>
-                  {complete ? (
-                    <span className="grid size-11 place-items-center rounded-full bg-white text-[#1e4d3a]" aria-hidden="true">
-                      <Check className="size-6" strokeWidth={3} />
-                    </span>
-                  ) : (
-                    <span className="grid size-11 place-items-center rounded-full bg-white font-display text-lg text-[#1e4d3a]">{index + 1}</span>
-                  )}
-                  {complete ? <p className="text-sm font-extrabold text-white">Complete</p> : <span className="text-xs font-bold text-[#8a4b3a]">Not finished</span>}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => {
-                      setEditing(index);
-                      setMessage(null);
-                      setScreen("details");
-                    }}
-                  >
-                    Edit
-                  </Button>
-                </li>
-              );
-            })}
-          </ul>
-          <p className="mt-3 text-xs leading-relaxed text-[#5e7266]">Every child needs a name and an avatar before you can continue.</p>
-          {message && <p className="mt-4 text-sm font-bold text-[#8a4b3a]">{message}</p>}
           <div className="mt-6 flex gap-2">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => setScreen("terms")}>
+            <Button type="button" variant="outline" className="flex-1" onClick={() => setScreen("welcome")}>
               Back
             </Button>
-            <Button type="button" className="flex-1" size="lg" disabled={!allComplete || !terms || pending} onClick={() => void finish()}>
-              {pending ? "Starting…" : "Get started"}
+            <Button
+              type="button"
+              className="flex-1"
+              onClick={() => {
+                setEditing(0);
+                setMessage(null);
+                setScreen("details");
+              }}
+            >
+              {count === 1 ? "Add your child" : `Add ${count} children`}
             </Button>
           </div>
         </section>
@@ -353,7 +303,19 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
           {message && <p className="mt-4 text-sm font-bold text-[#8a4b3a]">{message}</p>}
           <div className="mt-6 flex gap-2">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => setScreen("family")}>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => {
+                setMessage(null);
+                if (editing === 0) setScreen("family");
+                else {
+                  setEditing(editing - 1);
+                  setScreen("avatar");
+                }
+              }}
+            >
               Back
             </Button>
             <Button type="button" className="flex-1" onClick={() => void openAvatar()}>
@@ -398,16 +360,24 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             <Button type="button" variant="outline" className="flex-1" onClick={() => setScreen("details")}>
               Back
             </Button>
-            <Button
-              type="button"
-              className="flex-1"
-              onClick={() => {
-                patchChild({ avatarSaved: true });
-                setScreen("family");
-              }}
-            >
-              Save avatar
-            </Button>
+            {editing < count - 1 ? (
+              <Button
+                type="button"
+                className="flex-1"
+                onClick={() => {
+                  patchChild({ avatarSaved: true });
+                  setMessage(null);
+                  setEditing(editing + 1);
+                  setScreen("details");
+                }}
+              >
+                Next child
+              </Button>
+            ) : (
+              <Button type="button" className="flex-1" size="lg" disabled={!terms || pending} onClick={() => void finish()}>
+                {pending ? "Starting…" : "Get started"}
+              </Button>
+            )}
           </div>
         </section>
       )}
