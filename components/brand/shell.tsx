@@ -9,14 +9,16 @@ export function AppShell({
   account,
   children,
   hideShop = false,
+  centered = false,
 }: {
   account: AccountRecord | null;
   children: React.ReactNode;
   hideShop?: boolean;
+  centered?: boolean;
 }) {
   const shop = shopUrl();
   return (
-    <div className="mx-auto w-full max-w-none px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5">
+    <div className={centered ? "mx-auto w-full max-w-2xl px-3 py-6 sm:px-4 sm:py-10" : "mx-auto w-full max-w-none px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5"}>
       <div className="min-w-0 rounded-[28px] border border-white/80 bg-[#fffdf8] shadow-[0_24px_70px_rgba(30,77,58,0.08)]">
         <header className="flex items-center gap-3 px-3 py-3 sm:px-5 sm:py-4">
           <Link href={account ? "/club" : "/login"} className="flex min-w-0 items-center gap-2">

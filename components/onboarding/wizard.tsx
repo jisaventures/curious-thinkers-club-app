@@ -138,7 +138,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   }
 
   return (
-    <div className="mx-auto w-full max-w-lg">
+    <div className="w-full">
       <ol className="mb-5 flex gap-2" aria-label="Onboarding progress">
         {Array.from({ length: lastStep + 1 }, (_, index) => (
           <li key={index} className={`h-1.5 flex-1 rounded-full ${index <= step ? "bg-[#1e4d3a]" : "bg-[#eadfce]"}`} />
