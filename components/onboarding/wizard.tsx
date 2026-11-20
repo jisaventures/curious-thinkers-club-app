@@ -6,16 +6,12 @@ import { FamilyAvatar } from "@/components/brand/family-avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AVATAR_COLOURS, EYE_COLOURS, HAIR_COLOURS, SHIRT_COLOURS, SKIN_COLOURS } from "@/lib/avatar-style";
+import { ACCESSORY_COLOURS, AVATAR_COLOURS, CLOTHES_COLOURS, EYE_COLOURS, HAIR_COLOURS, HAT_COLOURS, SKIN_COLOURS } from "@/lib/avatar-style";
 import {
   AVATAAARS_ACCESSORIES,
-  AVATAAARS_CLOTHES,
-  AVATAAARS_EYEBROWS,
   AVATAAARS_EYES,
-  AVATAAARS_FACIAL_HAIR,
-  AVATAAARS_GRAPHICS,
+  AVATAAARS_HAT_TOPS,
   AVATAAARS_MOUTHS,
-  AVATAAARS_PALETTE,
   AVATAAARS_TOPS,
   boyAvatar,
   girlAvatar,
@@ -270,7 +266,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                     const base = gender === "girl" ? girlAvatar() : boyAvatar();
                     patchChild({
                       gender,
-                      avatar: { ...child.avatar, top: base.top, eyes: base.eyes, eyebrows: base.eyebrows, clothing: base.clothing },
+                      avatar: { ...child.avatar, top: base.top, clothing: base.clothing, eyebrows: "defaultNatural", facialHair: "none" },
                     });
                   }}
                   className={`h-12 rounded-2xl px-2 text-sm font-extrabold ${gender === "unspecified" ? "col-span-2" : ""} ${child.gender === gender ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
@@ -286,19 +282,24 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           </div>
           <ChoiceRow legend="Hair and hats" value={child.avatar.top} options={AVATAAARS_TOPS} onChange={(top) => patchChild({ avatar: { ...child.avatar, top } })} />
           <ColourRow legend="Hair colour" value={child.avatar.hairColor} colours={HAIR_COLOURS} onChange={(hairColor) => patchChild({ avatar: { ...child.avatar, hairColor: hairColor.replace("#", "") } })} />
-          <HexRow legend="Hat colour" value={child.avatar.hatColor} onChange={(hatColor) => patchChild({ avatar: { ...child.avatar, hatColor } })} />
+          {AVATAAARS_HAT_TOPS.includes(child.avatar.top as (typeof AVATAAARS_HAT_TOPS)[number]) && (
+            <ColourRow legend="Hat colour" value={child.avatar.hatColor} colours={HAT_COLOURS} onChange={(hatColor) => patchChild({ avatar: { ...child.avatar, hatColor } })} />
+          )}
           <ColourRow legend="Skin" value={child.avatar.skin} colours={SKIN_COLOURS} onChange={(skin) => patchChild({ avatar: { ...child.avatar, skin: skin.replace("#", "") } })} />
           <ChoiceRow legend="Eyes" value={child.avatar.eyes} options={AVATAAARS_EYES} onChange={(eyes) => patchChild({ avatar: { ...child.avatar, eyes } })} />
           <ColourRow legend="Eye colour" value={child.avatar.eyeColor} colours={EYE_COLOURS} onChange={(eyeColor) => patchChild({ avatar: { ...child.avatar, eyeColor: eyeColor.replace("#", "") } })} />
-          <ChoiceRow legend="Eyebrows" value={child.avatar.eyebrows} options={AVATAAARS_EYEBROWS} onChange={(eyebrows) => patchChild({ avatar: { ...child.avatar, eyebrows } })} />
           <ChoiceRow legend="Mouth" value={child.avatar.mouth} options={AVATAAARS_MOUTHS} onChange={(mouth) => patchChild({ avatar: { ...child.avatar, mouth } })} />
-          <ChoiceRow legend="Facial hair" value={child.avatar.facialHair} options={AVATAAARS_FACIAL_HAIR} onChange={(facialHair) => patchChild({ avatar: { ...child.avatar, facialHair } })} />
-          <HexRow legend="Facial hair colour" value={child.avatar.facialHairColor} onChange={(facialHairColor) => patchChild({ avatar: { ...child.avatar, facialHairColor } })} />
-          <ChoiceRow legend="Glasses and accessories" value={child.avatar.accessory} options={AVATAAARS_ACCESSORIES} onChange={(accessory) => patchChild({ avatar: { ...child.avatar, accessory } })} />
-          <HexRow legend="Accessory colour" value={child.avatar.accessoryColor} onChange={(accessoryColor) => patchChild({ avatar: { ...child.avatar, accessoryColor } })} />
-          <ChoiceRow legend="Clothes" value={child.avatar.clothing} options={AVATAAARS_CLOTHES} onChange={(clothing) => patchChild({ avatar: { ...child.avatar, clothing } })} />
-          <ColourRow legend="Clothes colour" value={child.avatar.clothesColor} colours={SHIRT_COLOURS} onChange={(clothesColor) => patchChild({ avatar: { ...child.avatar, clothesColor: clothesColor.replace("#", "") } })} />
-          <ChoiceRow legend="Shirt graphic" hint="Shows on the graphic shirt." value={child.avatar.clothingGraphic} options={AVATAAARS_GRAPHICS} onChange={(clothingGraphic) => patchChild({ avatar: { ...child.avatar, clothingGraphic } })} />
+          <ChoiceRow legend="Glasses" value={child.avatar.accessory} options={AVATAAARS_ACCESSORIES} onChange={(accessory) => patchChild({ avatar: { ...child.avatar, accessory } })} />
+          {child.avatar.accessory !== "none" && (
+            <ColourRow legend="Glasses colour" value={child.avatar.accessoryColor} colours={ACCESSORY_COLOURS} onChange={(accessoryColor) => patchChild({ avatar: { ...child.avatar, accessoryColor } })} />
+          )}
+          <ColourRow
+            legend="Clothes colour"
+            hint="Girls wear a v-neck. Boys, and prefer not to say, wear a crew neck."
+            value={child.avatar.clothesColor}
+            colours={CLOTHES_COLOURS}
+            onChange={(clothesColor) => patchChild({ avatar: { ...child.avatar, clothesColor } })}
+          />
           <ColourRow legend="Background" value={child.avatar.background} colours={AVATAR_COLOURS} onChange={(background) => patchChild({ avatar: { ...child.avatar, background: background.replace("#", "") } })} />
 
           {message && <p className="mt-4 text-sm font-bold text-[#8a4b3a]">{message}</p>}
@@ -358,11 +359,13 @@ function ChoiceRow<T extends string>({
 
 function ColourRow({
   legend,
+  hint,
   colours,
   value,
   onChange,
 }: {
   legend: string;
+  hint?: string;
   colours: readonly { id: string; label: string; hex: string }[];
   value: string;
   onChange: (hex: string) => void;
@@ -370,6 +373,7 @@ function ColourRow({
   return (
     <fieldset className="mt-5">
       <legend className="text-sm font-extrabold text-[#1e4d3a]">{legend}</legend>
+      {hint && <p className="mt-1 text-xs text-[#5e7266]">{hint}</p>}
       <div className="mt-2 flex flex-wrap gap-2">
         {colours.map((colour) => {
           const hex = colour.hex.replace("#", "");
@@ -390,23 +394,3 @@ function ColourRow({
   );
 }
 
-function HexRow({ legend, value, onChange }: { legend: string; value: string; onChange: (hex: string) => void }) {
-  return (
-    <fieldset className="mt-5">
-      <legend className="text-sm font-extrabold text-[#1e4d3a]">{legend}</legend>
-      <div className="mt-2 flex max-h-28 flex-wrap gap-2 overflow-y-auto">
-        {AVATAAARS_PALETTE.map((hex) => (
-          <button
-            key={hex}
-            type="button"
-            aria-label={hex}
-            aria-pressed={value.toLowerCase() === hex.toLowerCase()}
-            onClick={() => onChange(hex)}
-            className={`size-8 rounded-full border-2 ${value.toLowerCase() === hex.toLowerCase() ? "border-[#173528]" : "border-white"}`}
-            style={{ background: `#${hex}` }}
-          />
-        ))}
-      </div>
-    </fieldset>
-  );
-}

@@ -22,9 +22,8 @@ export function FamilyAvatar({
     top: [build.top],
     hairColor: [build.hairColor.replace("#", "")],
     hatColor: [build.hatColor.replace("#", "")],
-    facialHair: build.facialHair === "none" ? ["beardLight"] : [build.facialHair],
-    facialHairProbability: build.facialHair === "none" ? 0 : 100,
-    facialHairColor: [build.facialHairColor.replace("#", "")],
+    facialHair: ["beardLight"],
+    facialHairProbability: 0,
     accessories: build.accessory === "none" ? ["round"] : [build.accessory],
     accessoriesProbability: build.accessory === "none" ? 0 : 100,
     accessoriesColor: [build.accessoryColor.replace("#", "")],
@@ -34,19 +33,13 @@ export function FamilyAvatar({
     skinColor: [build.skin.replace("#", "")],
     mouth: [build.mouth],
     eyes: [build.eyes],
-    eyebrows: [build.eyebrows],
+    eyebrows: ["defaultNatural"],
     backgroundColor: [build.background.replace("#", "")],
     backgroundType: ["solid"],
     randomizeIds: true,
   }).toString();
   svg = svg.replace("<svg ", '<svg width="100%" height="100%" ');
   svg = paintEyes(svg, build.eyeColor.replace("#", ""));
-  if (build.top === "hat" || build.top.startsWith("winterHat")) {
-    svg = svg.replace(
-      "</svg>",
-      `<g transform="translate(118,46)"><circle cx="22" cy="16" r="12" fill="#f5d90a"/><rect x="16" y="26" width="12" height="6" rx="1.5" fill="#e6c36a"/></g></svg>`,
-    );
-  }
   return (
     <span
       className={`inline-block ${className}`}

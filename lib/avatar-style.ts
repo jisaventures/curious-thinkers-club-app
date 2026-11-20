@@ -17,6 +17,7 @@ export const HAIR_COLOURS = [
   { id: "black", label: "Black", hex: "#1c1c1c" },
   { id: "brown", label: "Brown", hex: "#6b4423" },
   { id: "red", label: "Red", hex: "#c4482d" },
+  { id: "ginger", label: "Ginger", hex: "#ff7a22" },
   { id: "blue", label: "Blue", hex: "#3d6fbf" },
   { id: "purple", label: "Purple", hex: "#7b4ea3" },
   { id: "pink", label: "Pink", hex: "#e36aa2" },
@@ -46,6 +47,29 @@ export const EYE_COLOURS = [
   { id: "blue", label: "Blue", hex: "#3d6fbf" },
   { id: "grey", label: "Grey", hex: "#6d7278" },
   { id: "dark", label: "Dark", hex: "#2c1b18" },
+] as const;
+
+export const HAT_COLOURS = [
+  { id: "black", label: "Black", hex: "#1c1c1c" },
+  { id: "white", label: "White", hex: "#ffffff" },
+  { id: "green", label: "Green", hex: "#1e4d3a" },
+  { id: "gold", label: "Gold", hex: "#f0b429" },
+] as const;
+
+export const ACCESSORY_COLOURS = [
+  { id: "black", label: "Black", hex: "#1c1c1c" },
+  { id: "white", label: "White", hex: "#ffffff" },
+  { id: "brown", label: "Brown", hex: "#6b4423" },
+  { id: "gold", label: "Gold", hex: "#f0b429" },
+] as const;
+
+export const CLOTHES_COLOURS = [
+  { id: "white", label: "White", hex: "#ffffff" },
+  { id: "black", label: "Black", hex: "#1c1c1c" },
+  { id: "red", label: "Red", hex: "#e23d3d" },
+  { id: "blue", label: "Blue", hex: "#3d6fbf" },
+  { id: "green", label: "Green", hex: "#1e4d3a" },
+  { id: "yellow", label: "Yellow", hex: "#f0b429" },
 ] as const;
 
 export const SHIRT_COLOURS = [

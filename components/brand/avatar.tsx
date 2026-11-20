@@ -26,10 +26,10 @@ function legacyBuild(input: {
   if (!input.colour || !input.face) return null;
   const build = input.gender === "girl" ? girlAvatar() : boyAvatar();
   const length = input.hairStyle === "long" ? "long" : input.hairStyle === "medium" ? "medium" : "short";
-  const tops = input.gender === "girl"
-    ? { short: "bob", medium: "straightAndStrand", long: "straight01" }
-    : { short: "shortRound", medium: "shaggy", long: "shaggyMullet" };
-  build.top = input.hat === "cap" ? "hat" : input.hat === "beanie" ? "winterHat1" : (tops[length] as AvatarBuild["top"]);
+  const girlTops = { short: "bob", medium: "straightAndStrand", long: "straight01" } as const;
+  const boyTops = { short: "shortRound", medium: "shaggy", long: "shaggyMullet" } as const;
+  const tops = input.gender === "girl" ? girlTops : boyTops;
+  build.top = input.hat === "cap" || input.hat === "beanie" ? "winterHat03" : tops[length];
   build.background = avatarColourHex(input.colour).replace("#", "");
   build.hairColor = hairColourHex(input.hairColour ?? "brown").replace("#", "");
   build.skin = skinColourHex(input.skin ?? "light").replace("#", "");
