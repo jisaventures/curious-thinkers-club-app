@@ -19,7 +19,7 @@ import {
   type AvatarBuild,
 } from "@/lib/avataaars-options";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
-import { Check, Mars, Venus } from "lucide-react";
+import { Check, Mars, Pencil, Venus, X } from "lucide-react";
 
 type Gender = "boy" | "girl" | "unspecified";
 
@@ -33,7 +33,7 @@ type ChildDraft = {
   nicknameMessage: string;
 };
 
-type Screen = "welcome" | "family" | "details" | "avatar";
+type Screen = "welcome" | "family" | "details";
 
 const stepCard = "mx-auto w-full rounded-[28px] bg-white p-5 shadow-sm sm:p-7";
 
@@ -55,14 +55,12 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   const [editing, setEditing] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [avatarOpen, setAvatarOpen] = useState(false);
+  const [avatarDraft, setAvatarDraft] = useState<AvatarBuild | null>(null);
 
   const child = children[editing];
-  const progressLabels = [
-    "Welcome",
-    "Create Family",
-    ...Array.from({ length: count }, (_, index) => [`Child ${index + 1} Profile`, `Child ${index + 1} Avatar`]).flat(),
-  ];
-  const progress = screen === "welcome" ? 0 : screen === "family" ? 1 : screen === "details" ? 2 + editing * 2 : 3 + editing * 2;
+  const progressLabels = ["Welcome", "Create Family", ...Array.from({ length: count }, (_, index) => `Child ${index + 1} Profile`)];
+  const progress = screen === "welcome" ? 0 : screen === "family" ? 1 : 2 + editing;
 
   const siblingNames = useMemo(
     () => children.filter((_, index) => index !== editing).map((item) => item.nickname),
@@ -110,7 +108,19 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
     return result.ok ? "" : result.message;
   }
 
-  async function openAvatar() {
+  function openAvatarModal() {
+    if (!child) return;
+    setAvatarDraft({ ...child.avatar });
+    setAvatarOpen(true);
+  }
+
+  function saveAvatar() {
+    if (!avatarDraft) return;
+    patchChild({ avatar: avatarDraft, avatarSaved: true });
+    setAvatarOpen(false);
+  }
+
+  async function continueProfile() {
     if (!child) return;
     const problem = await nicknameProblem(child.nickname);
     patchChild({ nicknameMessage: problem });
@@ -120,7 +130,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       return;
     }
     setMessage(null);
-    setScreen("avatar");
+    if (editing < count - 1) setEditing(editing + 1);
+    else void finish();
   }
 
   function detailsReady(item: ChildDraft) {
@@ -268,28 +279,43 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             Child {editing + 1} of {count}
           </p>
           <h1 className="mt-2 font-display text-4xl text-[#1e4d3a] lg:mt-1 lg:text-3xl">{child.firstName.trim() || `Child ${editing + 1}`}</h1>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:mt-3 lg:gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First name only</Label>
-              <Input id="firstName" value={child.firstName} onChange={(event) => patchChild({ firstName: event.target.value })} maxLength={40} autoComplete="off" />
+          <div className="mt-5 flex items-start gap-4 lg:mt-3">
+            <button
+              type="button"
+              onClick={openAvatarModal}
+              className="group relative size-28 shrink-0 overflow-hidden rounded-[24px] bg-[#f6efe2] sm:size-32"
+              aria-label="Edit avatar"
+            >
+              <FamilyAvatar build={child.avatar} className="size-full" title="Child avatar" />
+              <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition group-hover:bg-black/45 group-hover:opacity-100">
+                <Pencil className="size-7" aria-hidden="true" />
+              </span>
+            </button>
+            <div className="min-w-0 flex-1 space-y-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First name only</Label>
+                  <Input id="firstName" value={child.firstName} onChange={(event) => patchChild({ firstName: event.target.value })} maxLength={40} autoComplete="off" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="age">Age</Label>
+                  <Input id="age" inputMode="numeric" value={child.ageYears} onChange={(event) => patchChild({ ageYears: event.target.value })} placeholder="2–15" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="nickname">Nickname</Label>
+                <div className="flex gap-2">
+                  <Input id="nickname" value={child.nickname} readOnly aria-readonly="true" />
+                  <Button type="button" variant="outline" className="shrink-0" onClick={regenerateNickname}>
+                    Re-generate
+                  </Button>
+                </div>
+                <p className="text-sm leading-relaxed text-[#5e7266] lg:text-lg">
+                  A playful nickname is made for them. Re-generate it if you want a different one.
+                </p>
+                {child.nicknameMessage && <p className="text-sm font-bold text-[#8a4b3a]">{child.nicknameMessage}</p>}
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="age">Age</Label>
-              <Input id="age" inputMode="numeric" value={child.ageYears} onChange={(event) => patchChild({ ageYears: event.target.value })} placeholder="2–15" />
-            </div>
-          </div>
-          <div className="mt-4 space-y-2 lg:mt-2">
-            <Label htmlFor="nickname">Nickname</Label>
-            <div className="flex gap-2">
-              <Input id="nickname" value={child.nickname} readOnly aria-readonly="true" />
-              <Button type="button" variant="outline" className="shrink-0" onClick={regenerateNickname}>
-                Re-generate
-              </Button>
-            </div>
-            <p className="text-sm leading-relaxed text-[#5e7266] lg:text-lg">
-              A playful nickname is made for them. Re-generate it if you want a different one.
-            </p>
-            {child.nicknameMessage && <p className="text-sm font-bold text-[#8a4b3a]">{child.nicknameMessage}</p>}
           </div>
 
           <fieldset className="mt-5 lg:mt-2">
@@ -332,84 +358,71 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               onClick={() => {
                 setMessage(null);
                 if (editing === 0) setScreen("family");
-                else {
-                  setEditing(editing - 1);
-                  setScreen("avatar");
-                }
+                else setEditing(editing - 1);
               }}
             >
               Back
             </Button>
-            <Button type="button" className="flex-1" onClick={() => void openAvatar()}>
-              Create avatar
+            <Button type="button" className="flex-1" disabled={pending} onClick={() => void continueProfile()}>
+              {editing < count - 1 ? "Next child" : pending ? "Starting…" : "Get started"}
             </Button>
           </div>
         </section>
       )}
 
-      {screen === "avatar" && child && (
-        <section className={stepCard}>
-          <div className="flex items-center gap-3">
-            <div className="min-w-0">
-              <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">
-                Child {editing + 1} of {count}
-              </p>
-              <h1 className="mt-1 font-display text-2xl text-[#1e4d3a]">Create an avatar</h1>
+      {avatarOpen && avatarDraft && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setAvatarOpen(false);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="avatar-editor-title"
+            className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[28px] bg-white p-5 shadow-xl sm:p-7"
+            onKeyDown={(event) => {
+              if (event.key === "Escape") setAvatarOpen(false);
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setAvatarOpen(false)}
+              className="absolute top-4 right-4 rounded-full p-2 text-[#1e4d3a] hover:bg-[#f6efe2]"
+              aria-label="Close"
+            >
+              <X className="size-5" />
+            </button>
+            <h2 id="avatar-editor-title" className="pr-10 font-display text-3xl text-[#1e4d3a]">
+              Edit avatar
+            </h2>
+            <div className="mt-4 flex justify-center rounded-[24px] bg-[#f6efe2] p-3">
+              <FamilyAvatar build={avatarDraft} className="h-36 w-36" title="Avatar preview" />
             </div>
-            <div className="ml-auto shrink-0 rounded-2xl bg-[#f6efe2] p-1">
-              <FamilyAvatar build={child.avatar} className="h-14 w-14" title="Avatar preview" />
+            <ChoiceRow legend="Hair and hats" value={avatarDraft.top} options={AVATAAARS_TOPS} onChange={(top) => setAvatarDraft({ ...avatarDraft, top })} />
+            <div className="grid sm:grid-cols-2 sm:gap-x-4">
+              <ColourRow legend="Hair colour" value={avatarDraft.hairColor} colours={HAIR_COLOURS} onChange={(hairColor) => setAvatarDraft({ ...avatarDraft, hairColor })} />
+              {AVATAAARS_HAT_TOPS.includes(avatarDraft.top as (typeof AVATAAARS_HAT_TOPS)[number]) && (
+                <ColourRow legend="Hat colour" value={avatarDraft.hatColor} colours={HAT_COLOURS} onChange={(hatColor) => setAvatarDraft({ ...avatarDraft, hatColor })} />
+              )}
+              <ColourRow legend="Skin" value={avatarDraft.skin} colours={SKIN_COLOURS} onChange={(skin) => setAvatarDraft({ ...avatarDraft, skin })} />
+              <ChoiceRow legend="Eyes" value={avatarDraft.eyes} options={AVATAAARS_EYES} onChange={(eyes) => setAvatarDraft({ ...avatarDraft, eyes })} />
+              <ColourRow legend="Eye colour" value={avatarDraft.eyeColor} colours={EYE_COLOURS} onChange={(eyeColor) => setAvatarDraft({ ...avatarDraft, eyeColor })} />
+              <ChoiceRow legend="Mouth" value={avatarDraft.mouth} options={AVATAAARS_MOUTHS} onChange={(mouth) => setAvatarDraft({ ...avatarDraft, mouth })} />
+              <ChoiceRow legend="Glasses" value={avatarDraft.accessory} options={AVATAAARS_ACCESSORIES} onChange={(accessory) => setAvatarDraft({ ...avatarDraft, accessory })} />
+              {avatarDraft.accessory !== "none" && (
+                <ColourRow legend="Glasses colour" value={avatarDraft.accessoryColor} colours={ACCESSORY_COLOURS} onChange={(accessoryColor) => setAvatarDraft({ ...avatarDraft, accessoryColor })} />
+              )}
+              <ColourRow legend="Clothes colour" value={avatarDraft.clothesColor} colours={CLOTHES_COLOURS} onChange={(clothesColor) => setAvatarDraft({ ...avatarDraft, clothesColor })} />
+              <ColourRow legend="Background" value={avatarDraft.background} colours={AVATAR_COLOURS} onChange={(background) => setAvatarDraft({ ...avatarDraft, background })} />
             </div>
-          </div>
-          <div className="mt-1 min-h-0 flex-1">
-          <ChoiceRow compact legend="Hair and hats" value={child.avatar.top} options={AVATAAARS_TOPS} onChange={(top) => patchChild({ avatar: { ...child.avatar, top } })} />
-          <div className="grid grid-cols-2 gap-x-3">
-          <ColourRow compact legend="Hair colour" value={child.avatar.hairColor} colours={HAIR_COLOURS} onChange={(hairColor) => patchChild({ avatar: { ...child.avatar, hairColor: hairColor.replace("#", "") } })} />
-          {AVATAAARS_HAT_TOPS.includes(child.avatar.top as (typeof AVATAAARS_HAT_TOPS)[number]) && (
-            <ColourRow compact legend="Hat colour" value={child.avatar.hatColor} colours={HAT_COLOURS} onChange={(hatColor) => patchChild({ avatar: { ...child.avatar, hatColor } })} />
-          )}
-          <ColourRow compact legend="Skin" value={child.avatar.skin} colours={SKIN_COLOURS} onChange={(skin) => patchChild({ avatar: { ...child.avatar, skin: skin.replace("#", "") } })} />
-          <ChoiceRow compact legend="Eyes" value={child.avatar.eyes} options={AVATAAARS_EYES} onChange={(eyes) => patchChild({ avatar: { ...child.avatar, eyes } })} />
-          <ColourRow compact legend="Eye colour" value={child.avatar.eyeColor} colours={EYE_COLOURS} onChange={(eyeColor) => patchChild({ avatar: { ...child.avatar, eyeColor: eyeColor.replace("#", "") } })} />
-          <ChoiceRow compact legend="Mouth" value={child.avatar.mouth} options={AVATAAARS_MOUTHS} onChange={(mouth) => patchChild({ avatar: { ...child.avatar, mouth } })} />
-          <ChoiceRow compact legend="Glasses" value={child.avatar.accessory} options={AVATAAARS_ACCESSORIES} onChange={(accessory) => patchChild({ avatar: { ...child.avatar, accessory } })} />
-          {child.avatar.accessory !== "none" && (
-            <ColourRow compact legend="Glasses colour" value={child.avatar.accessoryColor} colours={ACCESSORY_COLOURS} onChange={(accessoryColor) => patchChild({ avatar: { ...child.avatar, accessoryColor } })} />
-          )}
-          <ColourRow
-            compact
-            legend="Clothes colour"
-            value={child.avatar.clothesColor}
-            colours={CLOTHES_COLOURS}
-            onChange={(clothesColor) => patchChild({ avatar: { ...child.avatar, clothesColor } })}
-          />
-          <ColourRow compact legend="Background" value={child.avatar.background} colours={AVATAR_COLOURS} onChange={(background) => patchChild({ avatar: { ...child.avatar, background: background.replace("#", "") } })} />
-          </div>
-          </div>
-
-          <div className="mt-4 flex gap-2">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => setScreen("details")}>
-              Back
+            <Button type="button" className="mt-6 w-full" size="lg" onClick={saveAvatar}>
+              Save
             </Button>
-            {editing < count - 1 ? (
-              <Button
-                type="button"
-                className="flex-1"
-                onClick={() => {
-                  patchChild({ avatarSaved: true });
-                  setMessage(null);
-                  setEditing(editing + 1);
-                  setScreen("details");
-                }}
-              >
-                Next child
-              </Button>
-            ) : (
-              <Button type="button" className="flex-1" size="lg" disabled={!terms || pending} onClick={() => void finish()}>
-                {pending ? "Starting…" : "Get started"}
-              </Button>
-            )}
           </div>
-        </section>
+        </div>
       )}
       </div>
     </div>
