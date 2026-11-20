@@ -129,6 +129,21 @@ select {
   filter: none;
 }
 
+.footer-cta {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 22rem;
+  text-transform: uppercase;
+}
+
+@media (max-width: 639px) {
+  .footer-cta {
+    max-width: none;
+    font-size: 0.95rem;
+    padding-inline: 0.7rem;
+  }
+}
+
 ::selection {
   background: #f0b429;
   color: #173528;

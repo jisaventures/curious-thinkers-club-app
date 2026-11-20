@@ -344,6 +344,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               type="button"
               variant="green"
               size="lg"
+              className="footer-cta"
               onClick={() => {
                 setMessage(null);
                 if (screen === "family") setScreen("welcome");
@@ -355,7 +356,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             </Button>
           )}
           {screen === "welcome" && (
-            <Button type="button" variant="mustard" size="lg" disabled={!terms} onClick={() => setScreen("family")}>
+            <Button type="button" variant="mustard" size="lg" className="footer-cta" disabled={!terms} onClick={() => setScreen("family")}>
               Get started
             </Button>
           )}
@@ -364,6 +365,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               type="button"
               variant="mustard"
               size="lg"
+              className="footer-cta"
               onClick={() => {
                 setEditing(0);
                 setMessage(null);
@@ -374,7 +376,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             </Button>
           )}
           {screen === "details" && (
-            <Button type="button" variant="mustard" size="lg" disabled={pending} onClick={() => void continueProfile()}>
+            <Button type="button" variant="mustard" size="lg" className="footer-cta" disabled={pending} onClick={() => void continueProfile()}>
               {editing < count - 1 ? "Next child" : pending ? "Starting…" : "Get started"}
             </Button>
           )}
