@@ -35,7 +35,7 @@ type ChildDraft = {
 
 type Screen = "welcome" | "family" | "details" | "avatar";
 
-const stepCard = "mx-auto flex w-full max-w-2xl flex-col rounded-[28px] bg-white p-5 shadow-sm sm:p-7 lg:max-w-none lg:flex-1";
+const stepCard = "mx-auto w-full rounded-[28px] bg-white p-5 shadow-sm sm:p-7";
 
 const emptyChild = (): ChildDraft => ({
   firstName: "",
@@ -169,7 +169,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   }
 
   return (
-    <div className="flex w-full flex-1 flex-col">
+    <div className="w-full">
       <ol className="mb-5 flex gap-2 overflow-x-auto px-1 pt-3" aria-label="Onboarding progress">
         {progressLabels.map((label, index) => {
           const done = index < progress;
@@ -191,7 +191,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           );
         })}
       </ol>
-      <div className="flex flex-1 flex-col">
+      <div>
 
       {screen === "welcome" && (
         <section className={stepCard}>
