@@ -35,6 +35,8 @@ type ChildDraft = {
 
 type Screen = "welcome" | "family" | "details" | "avatar";
 
+const stepCard = "mx-auto flex w-full max-w-2xl flex-col overflow-hidden rounded-[28px] bg-white p-5 shadow-sm lg:h-[33.5rem] lg:p-5";
+
 const emptyChild = (): ChildDraft => ({
   firstName: "",
   nickname: "",
@@ -192,7 +194,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       <div className="flex flex-1 flex-col [justify-content:safe_center]">
 
       {screen === "welcome" && (
-        <section className="mx-auto max-w-2xl rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
+        <section className={stepCard}>
           <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">Welcome</p>
           <h1 className="mt-2 font-display text-4xl leading-tight text-[#1e4d3a] sm:text-5xl">
             Welcome{shopFirstName ? ` ${shopFirstName}` : ""}
@@ -215,14 +217,14 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               .
             </span>
           </label>
-          <Button type="button" className="mt-6 w-full" size="lg" disabled={!terms} onClick={() => setScreen("family")}>
+          <Button type="button" className="mt-auto w-full" size="lg" disabled={!terms} onClick={() => setScreen("family")}>
             Get started
           </Button>
         </section>
       )}
 
       {screen === "family" && (
-        <section className="mx-auto max-w-2xl rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
+        <section className={stepCard}>
           <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">Your family</p>
           <h1 className="mt-2 font-display text-4xl text-[#1e4d3a]">How many children are in the family?</h1>
           <p className="mt-3 text-sm leading-relaxed text-[#5e7266]">
@@ -241,7 +243,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               </button>
             ))}
           </div>
-          <div className="mt-6 flex gap-2">
+          <div className="mt-auto flex gap-2 pt-4">
             <Button type="button" variant="outline" className="flex-1" onClick={() => setScreen("welcome")}>
               Back
             </Button>
@@ -261,12 +263,12 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       )}
 
       {screen === "details" && child && (
-        <section className="mx-auto max-w-2xl rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
+        <section className={stepCard}>
           <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">
             Child {editing + 1} of {count}
           </p>
-          <h1 className="mt-2 font-display text-4xl text-[#1e4d3a]">{child.firstName.trim() || `Child ${editing + 1}`}</h1>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <h1 className="mt-2 font-display text-4xl text-[#1e4d3a] lg:mt-1 lg:text-3xl">{child.firstName.trim() || `Child ${editing + 1}`}</h1>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:mt-3 lg:gap-3">
             <div className="space-y-2">
               <Label htmlFor="firstName">First name only</Label>
               <Input id="firstName" value={child.firstName} onChange={(event) => patchChild({ firstName: event.target.value })} maxLength={40} autoComplete="off" />
@@ -276,21 +278,23 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               <Input id="age" inputMode="numeric" value={child.ageYears} onChange={(event) => patchChild({ ageYears: event.target.value })} placeholder="2–15" />
             </div>
           </div>
-          <div className="mt-4 space-y-2">
+          <div className="mt-4 space-y-2 lg:mt-2">
             <Label htmlFor="nickname">Nickname</Label>
-            <Input id="nickname" value={child.nickname} readOnly aria-readonly="true" />
-            <Button type="button" variant="outline" onClick={regenerateNickname}>
-              Re-generate nickname
-            </Button>
-            <p className="text-xs leading-relaxed text-[#5e7266]">
+            <div className="flex gap-2">
+              <Input id="nickname" value={child.nickname} readOnly aria-readonly="true" />
+              <Button type="button" variant="outline" className="shrink-0" onClick={regenerateNickname}>
+                Re-generate
+              </Button>
+            </div>
+            <p className="text-[11px] leading-tight text-[#5e7266]">
               A playful nickname is made for them. Re-generate it if you want a different one.
             </p>
             {child.nicknameMessage && <p className="text-sm font-bold text-[#8a4b3a]">{child.nicknameMessage}</p>}
           </div>
 
-          <fieldset className="mt-5">
+          <fieldset className="mt-5 lg:mt-2">
             <legend className="text-sm font-extrabold text-[#1e4d3a]">Gender</legend>
-            <div className="mt-2 grid grid-cols-2 gap-2">
+            <div className="mt-2 grid grid-cols-2 gap-2 lg:grid-cols-3">
               {(
                 [
                   ["boy", "Boy"],
@@ -309,7 +313,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                       avatar: { ...child.avatar, top: base.top, clothing: base.clothing, eyebrows: "defaultNatural", facialHair: "none" },
                     });
                   }}
-                  className={`inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-2 text-sm font-extrabold ${gender === "unspecified" ? "col-span-2" : ""} ${child.gender === gender ? (gender === "boy" ? "bg-[#3d6fbf] text-white" : gender === "girl" ? "bg-[#e36aa2] text-white" : "bg-[#1e4d3a] text-white") : "bg-[#f6efe2] text-[#1e4d3a]"}`}
+                  className={`inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-2 text-sm font-extrabold lg:h-10 ${child.gender === gender ? (gender === "boy" ? "bg-[#3d6fbf] text-white" : gender === "girl" ? "bg-[#e36aa2] text-white" : "bg-[#1e4d3a] text-white") : "bg-[#f6efe2] text-[#1e4d3a]"}`}
                 >
                   {gender === "boy" && <Mars className="size-5" aria-hidden="true" />}
                   {gender === "girl" && <Venus className="size-5" aria-hidden="true" />}
@@ -320,7 +324,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           </fieldset>
 
           {message && <p className="mt-4 text-sm font-bold text-[#8a4b3a]">{message}</p>}
-          <div className="mt-6 flex gap-2">
+          <div className="mt-auto flex gap-2 pt-2">
             <Button
               type="button"
               variant="outline"
@@ -344,37 +348,45 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       )}
 
       {screen === "avatar" && child && (
-        <section className="mx-auto max-w-2xl rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
-          <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">
-            Child {editing + 1} of {count}
-          </p>
-          <h1 className="mt-2 font-display text-4xl text-[#1e4d3a]">Create an avatar</h1>
-          <div className="mt-5 flex justify-center rounded-[24px] bg-[#f6efe2] p-3">
-            <FamilyAvatar build={child.avatar} className="h-40 w-40" title="Avatar preview" />
+        <section className={stepCard}>
+          <div className="flex items-center gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">
+                Child {editing + 1} of {count}
+              </p>
+              <h1 className="mt-1 font-display text-2xl text-[#1e4d3a]">Create an avatar</h1>
+            </div>
+            <div className="ml-auto shrink-0 rounded-2xl bg-[#f6efe2] p-1">
+              <FamilyAvatar build={child.avatar} className="h-14 w-14" title="Avatar preview" />
+            </div>
           </div>
-          <ChoiceRow legend="Hair and hats" value={child.avatar.top} options={AVATAAARS_TOPS} onChange={(top) => patchChild({ avatar: { ...child.avatar, top } })} />
-          <ColourRow legend="Hair colour" value={child.avatar.hairColor} colours={HAIR_COLOURS} onChange={(hairColor) => patchChild({ avatar: { ...child.avatar, hairColor: hairColor.replace("#", "") } })} />
+          <div className="mt-1 min-h-0 flex-1">
+          <ChoiceRow compact legend="Hair and hats" value={child.avatar.top} options={AVATAAARS_TOPS} onChange={(top) => patchChild({ avatar: { ...child.avatar, top } })} />
+          <div className="grid grid-cols-2 gap-x-3">
+          <ColourRow compact legend="Hair colour" value={child.avatar.hairColor} colours={HAIR_COLOURS} onChange={(hairColor) => patchChild({ avatar: { ...child.avatar, hairColor: hairColor.replace("#", "") } })} />
           {AVATAAARS_HAT_TOPS.includes(child.avatar.top as (typeof AVATAAARS_HAT_TOPS)[number]) && (
-            <ColourRow legend="Hat colour" value={child.avatar.hatColor} colours={HAT_COLOURS} onChange={(hatColor) => patchChild({ avatar: { ...child.avatar, hatColor } })} />
+            <ColourRow compact legend="Hat colour" value={child.avatar.hatColor} colours={HAT_COLOURS} onChange={(hatColor) => patchChild({ avatar: { ...child.avatar, hatColor } })} />
           )}
-          <ColourRow legend="Skin" value={child.avatar.skin} colours={SKIN_COLOURS} onChange={(skin) => patchChild({ avatar: { ...child.avatar, skin: skin.replace("#", "") } })} />
-          <ChoiceRow legend="Eyes" value={child.avatar.eyes} options={AVATAAARS_EYES} onChange={(eyes) => patchChild({ avatar: { ...child.avatar, eyes } })} />
-          <ColourRow legend="Eye colour" value={child.avatar.eyeColor} colours={EYE_COLOURS} onChange={(eyeColor) => patchChild({ avatar: { ...child.avatar, eyeColor: eyeColor.replace("#", "") } })} />
-          <ChoiceRow legend="Mouth" value={child.avatar.mouth} options={AVATAAARS_MOUTHS} onChange={(mouth) => patchChild({ avatar: { ...child.avatar, mouth } })} />
-          <ChoiceRow legend="Glasses" value={child.avatar.accessory} options={AVATAAARS_ACCESSORIES} onChange={(accessory) => patchChild({ avatar: { ...child.avatar, accessory } })} />
+          <ColourRow compact legend="Skin" value={child.avatar.skin} colours={SKIN_COLOURS} onChange={(skin) => patchChild({ avatar: { ...child.avatar, skin: skin.replace("#", "") } })} />
+          <ChoiceRow compact legend="Eyes" value={child.avatar.eyes} options={AVATAAARS_EYES} onChange={(eyes) => patchChild({ avatar: { ...child.avatar, eyes } })} />
+          <ColourRow compact legend="Eye colour" value={child.avatar.eyeColor} colours={EYE_COLOURS} onChange={(eyeColor) => patchChild({ avatar: { ...child.avatar, eyeColor: eyeColor.replace("#", "") } })} />
+          <ChoiceRow compact legend="Mouth" value={child.avatar.mouth} options={AVATAAARS_MOUTHS} onChange={(mouth) => patchChild({ avatar: { ...child.avatar, mouth } })} />
+          <ChoiceRow compact legend="Glasses" value={child.avatar.accessory} options={AVATAAARS_ACCESSORIES} onChange={(accessory) => patchChild({ avatar: { ...child.avatar, accessory } })} />
           {child.avatar.accessory !== "none" && (
-            <ColourRow legend="Glasses colour" value={child.avatar.accessoryColor} colours={ACCESSORY_COLOURS} onChange={(accessoryColor) => patchChild({ avatar: { ...child.avatar, accessoryColor } })} />
+            <ColourRow compact legend="Glasses colour" value={child.avatar.accessoryColor} colours={ACCESSORY_COLOURS} onChange={(accessoryColor) => patchChild({ avatar: { ...child.avatar, accessoryColor } })} />
           )}
           <ColourRow
+            compact
             legend="Clothes colour"
-            hint="Girls wear a v-neck. Boys, and prefer not to say, wear a crew neck."
             value={child.avatar.clothesColor}
             colours={CLOTHES_COLOURS}
             onChange={(clothesColor) => patchChild({ avatar: { ...child.avatar, clothesColor } })}
           />
-          <ColourRow legend="Background" value={child.avatar.background} colours={AVATAR_COLOURS} onChange={(background) => patchChild({ avatar: { ...child.avatar, background: background.replace("#", "") } })} />
+          <ColourRow compact legend="Background" value={child.avatar.background} colours={AVATAR_COLOURS} onChange={(background) => patchChild({ avatar: { ...child.avatar, background: background.replace("#", "") } })} />
+          </div>
+          </div>
 
-          <div className="mt-6 flex gap-2">
+          <div className="mt-auto flex gap-2 pt-2">
             <Button type="button" variant="outline" className="flex-1" onClick={() => setScreen("details")}>
               Back
             </Button>
@@ -410,25 +422,29 @@ function ChoiceRow<T extends string>({
   options,
   value,
   onChange,
+  className = "",
+  compact = false,
 }: {
   legend: string;
   hint?: string;
   options: readonly T[];
   value: T;
   onChange: (value: T) => void;
+  className?: string;
+  compact?: boolean;
 }) {
   return (
-    <fieldset className="mt-5">
-      <legend className="text-sm font-extrabold text-[#1e4d3a]">{legend}</legend>
+    <fieldset className={`${compact ? "mt-1 flex flex-wrap items-center gap-x-2" : "mt-5"} ${className}`}>
+      <legend className={`${compact ? "text-[11px]" : "text-sm"} font-extrabold text-[#1e4d3a]`}>{legend}</legend>
       {hint && <p className="mt-1 text-xs text-[#5e7266]">{hint}</p>}
-      <div className="mt-2 flex max-h-40 flex-wrap gap-2 overflow-y-auto">
+      <div className={`${compact ? "gap-1" : "mt-2 gap-2"} flex flex-wrap`}>
         {options.map((option) => (
           <button
             key={option}
             type="button"
             aria-pressed={value === option}
             onClick={() => onChange(option)}
-            className={`rounded-full px-3 py-2 text-xs font-extrabold ${value === option ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
+            className={`rounded-full font-extrabold ${compact ? "px-1.5 py-0.5 text-[10px] leading-none" : "px-3 py-2 text-xs"} ${value === option ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
           >
             {option === "none" ? "None" : optionLabel(option)}
           </button>
@@ -444,18 +460,22 @@ function ColourRow({
   colours,
   value,
   onChange,
+  className = "",
+  compact = false,
 }: {
   legend: string;
   hint?: string;
   colours: readonly { id: string; label: string; hex: string }[];
   value: string;
   onChange: (hex: string) => void;
+  className?: string;
+  compact?: boolean;
 }) {
   return (
-    <fieldset className="mt-5">
-      <legend className="text-sm font-extrabold text-[#1e4d3a]">{legend}</legend>
-      {hint && <p className="mt-1 text-xs text-[#5e7266]">{hint}</p>}
-      <div className="mt-2 flex flex-wrap gap-2">
+    <fieldset className={`${compact ? "mt-1 flex flex-wrap items-center gap-x-2" : "mt-5"} ${className}`}>
+      <legend className={`${compact ? "text-[11px]" : "text-sm"} font-extrabold text-[#1e4d3a]`}>{legend}</legend>
+      {hint && <p className="basis-full text-[10px] leading-tight text-[#5e7266]">{hint}</p>}
+      <div className={`${compact ? "flex-nowrap gap-1" : "mt-2 flex-wrap gap-2"} flex`}>
         {colours.map((colour) => {
           const hex = colour.hex.replace("#", "");
           return (
@@ -465,7 +485,7 @@ function ColourRow({
               aria-label={colour.label}
               aria-pressed={value.toLowerCase() === hex.toLowerCase()}
               onClick={() => onChange(hex)}
-              className={`size-11 rounded-full border-2 ${value.toLowerCase() === hex.toLowerCase() ? "border-[#173528]" : "border-white"}`}
+              className={`${compact ? "size-5 shrink-0" : "size-11"} rounded-full border-2 ${value.toLowerCase() === hex.toLowerCase() ? "border-[#173528]" : "border-white"}`}
               style={{ background: colour.hex }}
             />
           );

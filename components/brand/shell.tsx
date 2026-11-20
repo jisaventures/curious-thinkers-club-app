@@ -21,7 +21,7 @@ export function AppShell({
     <div
       className={
         centered
-          ? "mx-auto flex min-h-svh w-full max-w-6xl flex-col px-3 py-4 sm:px-4 sm:py-6"
+          ? "mx-auto flex min-h-svh w-full max-w-6xl flex-col px-3 py-4 sm:px-4 sm:py-6 lg:h-svh lg:overflow-hidden lg:py-3"
           : "mx-auto w-full max-w-none px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5"
       }
     >
@@ -103,7 +103,7 @@ export function AppShell({
             </div>
           </div>
         )}
-        <div className={`px-3 pb-6 sm:px-5 md:px-7 md:pb-8 ${centered ? "flex flex-1 flex-col" : ""}`}>{children}</div>
+        <div className={`px-3 pb-6 sm:px-5 md:px-7 md:pb-8 ${centered ? "flex flex-1 flex-col lg:pb-4" : ""}`}>{children}</div>
       </div>
     </div>
   );
