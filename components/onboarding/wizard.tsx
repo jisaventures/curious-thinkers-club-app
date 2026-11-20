@@ -19,7 +19,7 @@ import {
   type AvatarBuild,
 } from "@/lib/avataaars-options";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
-import { Check, Mars, Pencil, Venus, X } from "lucide-react";
+import { Check, Mars, Venus, X } from "lucide-react";
 
 type Gender = "boy" | "girl" | "unspecified";
 
@@ -275,20 +275,23 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
       {screen === "details" && child && (
         <section className={stepCard}>
-          <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">
-            Child {editing + 1} of {count}
-          </p>
-          <h1 className="mt-2 font-display text-4xl text-[#1e4d3a] lg:mt-1 lg:text-3xl">{child.firstName.trim() || `Child ${editing + 1}`}</h1>
+          <div className="flex flex-wrap items-baseline gap-x-3">
+            <h1 className="font-display text-4xl text-[#1e4d3a] lg:text-3xl">{child.firstName.trim() || `Child ${editing + 1}`}</h1>
+            <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">
+              Child {editing + 1} of {count}
+            </p>
+          </div>
           <div className="mt-5 flex items-start gap-4 lg:mt-3">
             <button
               type="button"
               onClick={openAvatarModal}
-              className="group relative size-28 shrink-0 overflow-hidden rounded-[24px] bg-[#f6efe2] sm:size-32"
+              className="group relative size-45 shrink-0 overflow-hidden rounded-[28px] bg-[#f6efe2]"
               aria-label="Edit avatar"
             >
               <FamilyAvatar build={child.avatar} className="size-full" title="Child avatar" />
-              <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition group-hover:bg-black/45 group-hover:opacity-100">
-                <Pencil className="size-7" aria-hidden="true" />
+              <span className="pointer-events-none absolute inset-0 bg-black/0 transition group-hover:bg-black/45" />
+              <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent pt-6 pb-2 text-center text-sm font-extrabold text-white">
+                Edit
               </span>
             </button>
             <div className="min-w-0 flex-1 space-y-3">
