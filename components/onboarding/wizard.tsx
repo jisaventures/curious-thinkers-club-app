@@ -199,15 +199,15 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           <h1 className="mt-2 font-display text-4xl leading-tight text-[#1e4d3a] sm:text-5xl">
             Welcome{shopFirstName ? ` ${shopFirstName}` : ""}
           </h1>
-          <p className="mt-3 text-base leading-relaxed text-[#3d5348]">
+          <p className="mt-3 text-base leading-relaxed text-[#3d5348] lg:text-xl">
             {shopFirstName
               ? "Your first name comes from your Curious Thinkers shop account."
               : "Your first name will come from your Curious Thinkers shop account when that account is created."}
           </p>
-          <p className="mt-3 text-sm leading-relaxed text-[#5e7266]">
+          <p className="mt-3 text-base leading-relaxed text-[#5e7266] lg:text-xl">
             This club must be managed by a parent or guardian. Children do not get their own login. The full terms will be published later.
           </p>
-          <label className="mt-4 flex items-start gap-3 rounded-2xl bg-[#f6efe2] p-3 text-sm leading-snug">
+          <label className="mt-4 flex items-start gap-3 rounded-2xl bg-[#f6efe2] p-3 text-base leading-snug lg:text-lg">
             <input type="checkbox" checked={terms} onChange={(event) => setTerms(event.target.checked)} className="mt-0.5 size-5 accent-[#1e4d3a]" />
             <span>
               I agree to the{" "}
@@ -227,7 +227,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
         <section className={stepCard}>
           <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">Your family</p>
           <h1 className="mt-2 font-display text-4xl text-[#1e4d3a]">How many children are in the family?</h1>
-          <p className="mt-3 text-sm leading-relaxed text-[#5e7266]">
+          <p className="mt-3 text-base leading-relaxed text-[#5e7266] lg:text-xl">
             You can add up to 5 children on this account. You don&apos;t have to add everyone now. More can be added later, still up to 5.
           </p>
           <div className="mt-5 grid grid-cols-5 gap-2">
@@ -286,7 +286,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 Re-generate
               </Button>
             </div>
-            <p className="text-[11px] leading-tight text-[#5e7266]">
+            <p className="text-sm leading-relaxed text-[#5e7266] lg:text-lg">
               A playful nickname is made for them. Re-generate it if you want a different one.
             </p>
             {child.nicknameMessage && <p className="text-sm font-bold text-[#8a4b3a]">{child.nicknameMessage}</p>}
