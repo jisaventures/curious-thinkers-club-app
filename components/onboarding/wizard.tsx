@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { checkNickname, completeOnboarding } from "@/app/onboarding/actions";
 import { FamilyAvatar } from "@/components/brand/family-avatar";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import {
   type AvatarBuild,
 } from "@/lib/avataaars-options";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
+import { Check, Mars, Venus } from "lucide-react";
 
 type Gender = "boy" | "girl" | "unspecified";
 
@@ -74,19 +75,26 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
     setChildren((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, ...patch } : item)));
   }
 
-  function autogenerateNickname() {
-    if (!child?.firstName.trim()) {
-      patchChild({ nicknameMessage: "Add a first name, then we can make a nickname." });
-      return;
+  async function assignNickname(avoid: string[] = [], cancelled: () => boolean = () => false) {
+    const taken = [...siblingNames, ...avoid];
+    let suggestion = suggestNickname("", taken);
+    let problem = await nicknameProblem(suggestion);
+    for (let attempt = 0; attempt < 4 && problem; attempt += 1) {
+      taken.push(suggestion);
+      suggestion = suggestNickname("", taken);
+      problem = await nicknameProblem(suggestion);
     }
-    const suggestion = suggestNickname(child.firstName, siblingNames);
-    patchChild({ nickname: suggestion, nicknameMessage: "" });
-    void reviewNickname(suggestion);
+    if (cancelled()) return;
+    patchChild({ nickname: suggestion, nicknameMessage: problem });
+  }
+
+  function regenerateNickname() {
+    void assignNickname(child?.nickname ? [child.nickname] : []);
   }
 
   async function nicknameProblem(value: string) {
     const local = value.trim();
-    if (!local) return "Add a nickname, or autogenerate one.";
+    if (!local) return "Making a nickname…";
     if (siblingNames.some((name) => name.trim() && name.toLowerCase() === local.toLowerCase())) {
       return "Another child in this family already has that nickname.";
     }
@@ -95,21 +103,13 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
     return result.ok ? "" : result.message;
   }
 
-  async function reviewNickname(value: string) {
-    if (!value.trim()) {
-      patchChild({ nicknameMessage: "" });
-      return;
-    }
-    patchChild({ nicknameMessage: await nicknameProblem(value) });
-  }
-
   async function openAvatar() {
     if (!child) return;
     const problem = await nicknameProblem(child.nickname);
     patchChild({ nicknameMessage: problem });
     if (problem) return;
     if (!detailsReady({ ...child, nicknameMessage: "" })) {
-      setMessage("Add a first name, an age from 2 to 12, and a gender.");
+      setMessage("Add a first name, an age from 2 to 15, and a gender.");
       return;
     }
     setMessage(null);
@@ -123,7 +123,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       !item.nicknameMessage &&
       !isRudeNickname(item.nickname) &&
       Number(item.ageYears) >= 2 &&
-      Number(item.ageYears) <= 12 &&
+      Number(item.ageYears) <= 15 &&
       item.gender !== ""
     );
   }
@@ -134,6 +134,17 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
   const family = children.slice(0, count);
   const allComplete = family.every(childComplete);
+
+  useEffect(() => {
+    if (screen !== "details" || children[editing]?.nickname) return;
+    let cancelled = false;
+    void assignNickname([], () => cancelled);
+    return () => {
+      cancelled = true;
+    };
+    // Generate once when this child's editor opens. Re-generate is a separate button.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, editing]);
 
   async function finish() {
     setPending(true);
@@ -168,7 +179,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       </ol>
 
       {screen === "welcome" && (
-        <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
+        <section className="mx-auto max-w-2xl rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
           <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">Welcome</p>
           <h1 className="mt-2 font-display text-4xl leading-tight text-[#1e4d3a] sm:text-5xl">
             Welcome{shopFirstName ? ` ${shopFirstName}` : ""}
@@ -185,7 +196,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       )}
 
       {screen === "terms" && (
-        <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
+        <section className="mx-auto max-w-2xl rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
           <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">Before the club</p>
           <h1 className="mt-2 font-display text-4xl text-[#1e4d3a]">Terms and conditions</h1>
           <p className="mt-3 text-sm leading-relaxed text-[#5e7266]">
@@ -232,25 +243,29 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               </button>
             ))}
           </div>
-          <ul className="mt-5 space-y-2">
+          <ul className="mt-5 grid gap-3 md:grid-cols-5">
             {family.map((item, index) => {
               const complete = childComplete(item);
               const label = item.firstName.trim() || `Child ${index + 1}`;
               return (
-                <li key={index} className="flex items-center gap-3 rounded-2xl bg-[#f6efe2] p-3">
+                <li
+                  key={index}
+                  className={`flex min-h-0 flex-col items-center justify-between gap-2 rounded-3xl p-3 text-center md:aspect-square ${complete ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
+                >
+                  <p className="w-full truncate text-sm font-extrabold">{label}</p>
                   {complete ? (
-                    <FamilyAvatar build={item.avatar} className="size-12 shrink-0" title="" />
+                    <span className="grid size-11 place-items-center rounded-full bg-white text-[#1e4d3a]" aria-hidden="true">
+                      <Check className="size-6" strokeWidth={3} />
+                    </span>
                   ) : (
-                    <span className="grid size-12 shrink-0 place-items-center rounded-full bg-white font-display text-lg text-[#1e4d3a]">{index + 1}</span>
+                    <span className="grid size-11 place-items-center rounded-full bg-white font-display text-lg text-[#1e4d3a]">{index + 1}</span>
                   )}
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-extrabold text-[#1e4d3a]">{label}</p>
-                    <p className={`text-xs font-bold ${complete ? "text-[#1e4d3a]" : "text-[#8a4b3a]"}`}>{complete ? "Complete" : "Not finished"}</p>
-                  </div>
+                  {complete ? <p className="text-sm font-extrabold text-white">Complete</p> : <span className="text-xs font-bold text-[#8a4b3a]">Not finished</span>}
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
+                    className="w-full"
                     onClick={() => {
                       setEditing(index);
                       setMessage(null);
@@ -277,7 +292,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       )}
 
       {screen === "details" && child && (
-        <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
+        <section className="mx-auto max-w-2xl rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
           <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">
             Child {editing + 1} of {count}
           </p>
@@ -289,25 +304,17 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             </div>
             <div className="space-y-2">
               <Label htmlFor="age">Age</Label>
-              <Input id="age" inputMode="numeric" value={child.ageYears} onChange={(event) => patchChild({ ageYears: event.target.value })} placeholder="2–12" />
+              <Input id="age" inputMode="numeric" value={child.ageYears} onChange={(event) => patchChild({ ageYears: event.target.value })} placeholder="2–15" />
             </div>
           </div>
           <div className="mt-4 space-y-2">
             <Label htmlFor="nickname">Nickname</Label>
-            <div className="flex gap-2">
-              <Input
-                id="nickname"
-                value={child.nickname}
-                maxLength={24}
-                onChange={(event) => patchChild({ nickname: event.target.value, nicknameMessage: "" })}
-                onBlur={(event) => void reviewNickname(event.target.value)}
-              />
-              <Button type="button" variant="outline" className="shrink-0" onClick={autogenerateNickname}>
-                Autogenerate
-              </Button>
-            </div>
+            <Input id="nickname" value={child.nickname} readOnly aria-readonly="true" />
+            <Button type="button" variant="outline" onClick={regenerateNickname}>
+              Re-generate nickname
+            </Button>
             <p className="text-xs leading-relaxed text-[#5e7266]">
-              Type one, or autogenerate it from the first name. It has to be free, and it can&apos;t include rude words.
+              A playful nickname is made for them. Re-generate it if you want a different one.
             </p>
             {child.nicknameMessage && <p className="text-sm font-bold text-[#8a4b3a]">{child.nicknameMessage}</p>}
           </div>
@@ -333,8 +340,10 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                       avatar: { ...child.avatar, top: base.top, clothing: base.clothing, eyebrows: "defaultNatural", facialHair: "none" },
                     });
                   }}
-                  className={`h-12 rounded-2xl px-2 text-sm font-extrabold ${gender === "unspecified" ? "col-span-2" : ""} ${child.gender === gender ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
+                  className={`inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-2 text-sm font-extrabold ${gender === "unspecified" ? "col-span-2" : ""} ${child.gender === gender ? (gender === "boy" ? "bg-[#3d6fbf] text-white" : gender === "girl" ? "bg-[#e36aa2] text-white" : "bg-[#1e4d3a] text-white") : "bg-[#f6efe2] text-[#1e4d3a]"}`}
                 >
+                  {gender === "boy" && <Mars className="size-5" aria-hidden="true" />}
+                  {gender === "girl" && <Venus className="size-5" aria-hidden="true" />}
                   {label}
                 </button>
               ))}
@@ -354,7 +363,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       )}
 
       {screen === "avatar" && child && (
-        <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
+        <section className="mx-auto max-w-2xl rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
           <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">
             Child {editing + 1} of {count}
           </p>

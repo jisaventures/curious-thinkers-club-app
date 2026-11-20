@@ -38,7 +38,7 @@ export const nicknameSchema = z
   )
   .refine((value) => value.split(/\s+/).length <= 3, "Keep the nickname short");
 
-export const ageSchema = z.coerce.number().int().min(2).max(12);
+export const ageSchema = z.coerce.number().int().min(2).max(15);
 
 export const avatarSchema = z.enum(AVATARS);
 
