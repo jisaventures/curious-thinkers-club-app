@@ -1,0 +1,14 @@
+---
+description: Curious Thinkers Club architecture and demo mode
+alwaysApply: true
+---
+
+# Curious Thinkers Club
+
+Next.js App Router + TypeScript. Supabase (auth, Postgres RLS, storage) is the production backend. Local Cursor runs in demo mode with no Docker: `isDemoMode()` in `lib/demo/mode.ts` is on when Supabase env vars are missing or `NEXT_PUBLIC_DEMO_MODE=true`.
+
+Demo state is the in-memory seed in `lib/demo/store.ts` (Sam, Pip, Lou, Mo, pirate pack). Mutations go through `lib/demo/handlers.ts`. Any new server action or page that reads or writes data must work in demo mode before it touches `createClient()` or the service role.
+
+Family UI is `app/club`. Admin is `app/admin` and must call `requireAdmin()`. Do not store child surnames, photos, or passwords. Points are awarded by the database trigger or `markDemoSteps`, not by the client. Leaderboards show nicknames only.
+
+Keep the bottle-green, gold, and cream look, Nunito + Fredoka, and UK English. See AGENTS.md for the fuller map.
