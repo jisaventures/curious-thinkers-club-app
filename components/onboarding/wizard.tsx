@@ -301,7 +301,13 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             This club must be managed by a parent or guardian. Children do not get their own login. The full terms will be published later.
           </p>
           <label className="mt-4 flex items-start gap-3 rounded-2xl bg-[#f6efe2] p-3 text-base leading-snug lg:text-lg">
-            <input type="checkbox" checked={terms} onChange={(event) => setTerms(event.target.checked)} className="mt-0.5 size-5 accent-[#1e4d3a]" />
+            <input
+              type="checkbox"
+              checked={terms}
+              onChange={(event) => setTerms(event.target.checked)}
+              className="mt-0.5 size-5 accent-[#1e4d3a]"
+              suppressHydrationWarning
+            />
             <span>
               I agree to the{" "}
               <a href="/terms" className="font-extrabold text-[#1e4d3a] underline">
@@ -457,8 +463,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             </Button>
           )}
           {screen === "details" && editing >= count - 1 && (
-            <Button type="button" variant="green" size="lg" className="footer-cta gap-5" disabled={pending} onClick={() => void continueProfile()}>
-              <SolidTrophy className="size-6 shrink-0 text-[#e8a428]" />
+            <Button type="button" variant="green" size="lg" className="footer-cta gap-2" disabled={pending} onClick={() => void continueProfile()}>
+              <SolidTrophy className="size-7 shrink-0 text-[#e8a428]" />
               {pending ? "Starting…" : "Enter Club"}
             </Button>
           )}
