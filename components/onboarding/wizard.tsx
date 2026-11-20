@@ -41,7 +41,7 @@ const emptyChild = (): ChildDraft => ({
   firstName: "",
   nickname: "",
   ageYears: "",
-  gender: "",
+  gender: "boy",
   avatar: boyAvatar(),
   avatarSaved: false,
   nicknameMessage: "",
@@ -205,19 +205,23 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
         {progressLabels.map((label, index) => {
           const done = index < progress;
           const current = index === progress;
+          const tabClass =
+            done || (current && index === 0)
+              ? "bg-[#1e4d3a] text-white"
+              : current
+                ? "bg-mustard text-white"
+                : "bg-[#c8c4bc] text-[#6f6b64]";
           return (
             <li key={label} className="relative flex min-w-36 shrink-0 flex-1" aria-current={current ? "step" : undefined}>
               {done && (
-                <p className="absolute top-0 left-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 rounded-full bg-[#d7efc8] px-2 py-0.5 text-xs font-extrabold whitespace-nowrap text-[#1e4d3a]">
+                <span className="absolute top-0 left-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 rounded-full bg-[#d7efc8] px-2 py-0.5 text-xs font-extrabold whitespace-nowrap text-[#1e4d3a]">
                   <Check className="size-3 shrink-0" strokeWidth={3} aria-hidden="true" />
                   Complete
-                </p>
+                </span>
               )}
-              <p
-                className={`flex min-h-16 w-full items-center justify-center rounded-2xl px-2 py-3 text-center text-sm leading-tight font-extrabold md:text-base ${done || (current && index === 0) ? "bg-[#1e4d3a] text-white" : current ? "bg-mustard text-white" : "bg-[#c8c4bc] text-[#6f6b64]"}`}
-              >
+              <div className={`flex min-h-16 w-full items-center justify-center rounded-2xl px-2 py-3 text-center text-sm leading-tight font-extrabold md:text-base ${tabClass}`}>
                 Step {index + 1}:<br />{label}
-              </p>
+              </div>
             </li>
           );
         })}
@@ -374,7 +378,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                       avatar: { ...child.avatar, top: base.top, clothing: base.clothing, eyebrows: "defaultNatural", facialHair: "none" },
                     });
                   }}
-                  className={`inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-2 text-sm font-extrabold lg:h-10 ${child.gender === gender ? (gender === "boy" ? "bg-[#3d6fbf] text-white" : gender === "girl" ? "bg-[#e36aa2] text-white" : "bg-[#1e4d3a] text-white") : "bg-[#f6efe2] text-[#1e4d3a]"}`}
+                  className={`inline-flex h-12 items-center justify-center gap-2 rounded-2xl border-2 px-2 text-sm font-extrabold lg:h-10 ${child.gender === gender ? `border-[#306A51] ${gender === "boy" ? "bg-[#3d6fbf] text-white" : gender === "girl" ? "bg-[#e36aa2] text-white" : "bg-[#1e4d3a] text-white"}` : "border-transparent bg-[#f6efe2] text-[#1e4d3a]"}`}
                 >
                   {gender === "boy" && <Mars className="size-5" aria-hidden="true" />}
                   {gender === "girl" && <Venus className="size-5" aria-hidden="true" />}
