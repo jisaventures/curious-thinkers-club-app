@@ -21,7 +21,7 @@ import {
 import { BirthdayPicker } from "@/components/onboarding/birthday-picker";
 import { ageFromBirthday, isBirthdayAllowed } from "@/lib/birthday";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
-import { Check, ChevronLeft, ChevronRight, Mars, Rocket, Trophy, Venus, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Mars, Plus, Rocket, Trophy, Venus, X } from "lucide-react";
 
 type Gender = "boy" | "girl" | "unspecified";
 
@@ -452,7 +452,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               type="button"
               variant="mustard"
               size="lg"
-              className="footer-cta"
+              className="footer-cta gap-2"
               onClick={() => {
                 setEditing(0);
                 setMessage(null);
@@ -460,6 +460,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               }}
             >
               {count === 1 ? "Add your child" : `Add ${count} children`}
+              <Plus className="size-7 shrink-0" strokeWidth={2.4} aria-hidden="true" />
             </Button>
           )}
           {screen === "details" && editing < count - 1 && (
@@ -469,8 +470,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           )}
           {screen === "details" && editing >= count - 1 && (
             <HintedButton type="button" variant="green" size="lg" className="footer-cta gap-2" disabled={pending || !profileReady} hint={profileHint} onClick={() => void continueProfile()}>
-              <SolidTrophy className="size-7 shrink-0 text-[#e8a428]" />
               {pending ? "Starting…" : "Enter Club"}
+              <SolidTrophy className="size-7 shrink-0 text-[#e8a428]" />
             </HintedButton>
           )}
         </div>
