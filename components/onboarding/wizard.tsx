@@ -35,7 +35,7 @@ type ChildDraft = {
 
 type Screen = "welcome" | "family" | "details" | "avatar";
 
-const stepCard = "mx-auto w-full max-w-2xl rounded-[28px] bg-white p-5 shadow-sm sm:p-7";
+const stepCard = "mx-auto flex w-full max-w-2xl flex-col rounded-[28px] bg-white p-5 shadow-sm sm:p-7 lg:max-w-none lg:flex-1";
 
 const emptyChild = (): ChildDraft => ({
   firstName: "",
@@ -191,7 +191,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           );
         })}
       </ol>
-      <div className="flex flex-1 flex-col [justify-content:safe_center]">
+      <div className="flex flex-1 flex-col">
 
       {screen === "welcome" && (
         <section className={stepCard}>
