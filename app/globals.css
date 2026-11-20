@@ -56,21 +56,11 @@ select {
 }
 
 .tab-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: var(--ctc-green) transparent;
+  scrollbar-width: none;
 }
 
 .tab-scroll::-webkit-scrollbar {
-  height: 4px;
-}
-
-.tab-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.tab-scroll::-webkit-scrollbar-thumb {
-  background: var(--ctc-green);
-  border-radius: 999px;
+  display: none;
 }
 
 .ctc-button {

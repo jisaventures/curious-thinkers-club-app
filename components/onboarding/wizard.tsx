@@ -210,7 +210,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 </p>
               )}
               <p
-                className={`flex min-h-16 w-full items-center justify-center rounded-2xl px-2 py-3 text-center text-sm leading-tight font-extrabold text-white md:text-base ${done || current ? "bg-[#1e4d3a]" : "bg-[#8eaa9b]"}`}
+                className={`flex min-h-16 w-full items-center justify-center rounded-2xl px-2 py-3 text-center text-sm leading-tight font-extrabold md:text-base ${done ? "bg-[#1e4d3a] text-white" : current ? "bg-mustard text-white" : "bg-[#c8c4bc] text-[#6f6b64]"}`}
               >
                 Step {index + 1}:<br />{label}
               </p>
@@ -223,9 +223,9 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#fffdf8] to-transparent" />
           <Button
             type="button"
-            variant="green"
+            variant="mustard"
             size="sm"
-            className="absolute right-1 bottom-2 z-10"
+            className="absolute top-[calc(0.5rem_+_2rem)] right-1 z-10 -translate-y-1/2"
             aria-label="Show more steps"
             onClick={() => tabsRef.current?.scrollBy({ left: 200, behavior: "smooth" })}
           >
