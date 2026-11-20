@@ -28,7 +28,7 @@ export function AppShell({
       <SiteHeader account={account} shop={shop} centered={centered} onboarding={onboarding} />
       <div className={frame}>
         <div className="min-w-0 rounded-[28px] border border-white/80 bg-[#fffdf8] shadow-[0_24px_70px_rgba(30,77,58,0.08)]">
-          <div className="px-3 pb-6 sm:px-5 md:px-7 md:pb-8">{children}</div>
+          <div className={centered ? "px-3 pt-9 pb-8 sm:px-5 md:px-7" : "px-3 pb-6 sm:px-5 md:px-7 md:pb-8"}>{children}</div>
         </div>
       </div>
       {isDemoMode() && <DemoModeMenu />}

@@ -181,7 +181,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
   return (
     <div className="w-full">
-      <ol className="mb-5 flex gap-2 overflow-x-auto px-1 pt-3" aria-label="Onboarding progress">
+      <ol className="mb-5 flex gap-2 overflow-x-auto px-1 pt-2" aria-label="Onboarding progress">
         {progressLabels.map((label, index) => {
           const done = index < progress;
           const current = index === progress;
