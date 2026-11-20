@@ -644,8 +644,11 @@ function HintedButton({
 function SolidPlus({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-      <circle cx="12" cy="12" r="10" fill="#fff" />
-      <path fill="#306a51" d="M11 6.5h2v4.5h4.5v2H13v4.5h-2V13H6.5v-2H11z" />
+      <path
+        fill="#fff"
+        fillRule="evenodd"
+        d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20m-1 4.5h2V11h4.5v2H13v4.5h-2V13H6.5v-2H11z"
+      />
     </svg>
   );
 }
