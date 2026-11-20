@@ -18,17 +18,36 @@ export function Avatar({
   avatar,
   colour,
   face,
+  hairStyle,
+  hairColour,
+  glasses,
+  hat,
   className = "size-11",
   title,
 }: {
   avatar: AvatarKey;
   colour?: string | null;
   face?: string | null;
+  hairStyle?: string | null;
+  hairColour?: string | null;
+  glasses?: boolean | null;
+  hat?: string | null;
   className?: string;
   title?: string;
 }) {
   if (colour && face) {
-    return <FamilyAvatar colour={colour} face={face} className={className} title={title} />;
+    return (
+      <FamilyAvatar
+        colour={colour}
+        face={face}
+        hairStyle={hairStyle ?? "short"}
+        hairColour={hairColour ?? "brown"}
+        glasses={Boolean(glasses)}
+        hat={hat ?? "none"}
+        className={className}
+        title={title}
+      />
+    );
   }
   return (
     <svg viewBox="0 0 64 64" className={className} role={title ? "img" : undefined} aria-label={title} aria-hidden={title ? undefined : true}>

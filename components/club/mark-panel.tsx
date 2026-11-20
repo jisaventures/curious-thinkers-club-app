@@ -15,6 +15,10 @@ export type MarkChild = {
   avatar_key: AvatarKey;
   avatar_bg?: string | null;
   avatar_face?: string | null;
+  avatar_hair_style?: string | null;
+  avatar_hair_colour?: string | null;
+  avatar_glasses?: boolean | null;
+  avatar_hat?: string | null;
   tickable: boolean;
   detail: string;
 };
@@ -88,7 +92,16 @@ export function MarkPanel({
               }}
               aria-label={`Mark ${child.nickname} complete`}
             />
-            <Avatar avatar={child.avatar_key} colour={child.avatar_bg} face={child.avatar_face} className="size-9" />
+            <Avatar
+              avatar={child.avatar_key}
+              colour={child.avatar_bg}
+              face={child.avatar_face}
+              hairStyle={child.avatar_hair_style}
+              hairColour={child.avatar_hair_colour}
+              glasses={child.avatar_glasses}
+              hat={child.avatar_hat}
+              className="h-12 w-9"
+            />
             <div className="min-w-0">
               <p className="text-sm font-extrabold">
                 {child.nickname}, {child.age_years}

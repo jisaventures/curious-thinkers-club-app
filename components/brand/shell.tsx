@@ -8,9 +8,11 @@ import { AdultAvatar, LogoMark } from "@/components/brand/logo";
 export function AppShell({
   account,
   children,
+  hideShop = false,
 }: {
   account: AccountRecord | null;
   children: React.ReactNode;
+  hideShop?: boolean;
 }) {
   const shop = shopUrl();
   return (
@@ -40,15 +42,17 @@ export function AppShell({
                 Admin
               </Link>
             )}
-            <a
-              href={shop}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full px-2 py-2 text-sm font-extrabold text-[#1e4d3a] hover:bg-[#e7f5e1] sm:px-3"
-            >
-              <BagIcon />
-              <span className="hidden min-[380px]:inline">Shop packs</span>
-            </a>
+            {!hideShop && (
+              <a
+                href={shop}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-full px-2 py-2 text-sm font-extrabold text-[#1e4d3a] hover:bg-[#e7f5e1] sm:px-3"
+              >
+                <BagIcon />
+                <span className="hidden min-[380px]:inline">Shop packs</span>
+              </a>
+            )}
             {account && (
               <details className="relative hidden sm:block">
                 <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full py-1 pr-2 pl-1 hover:bg-[#f6f1e6]">

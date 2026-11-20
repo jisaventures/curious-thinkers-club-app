@@ -217,6 +217,10 @@ function StepPanel({
       avatar_key: child.avatar_key,
       avatar_bg: child.avatar_bg,
       avatar_face: child.avatar_face,
+      avatar_hair_style: child.avatar_hair_style,
+      avatar_hair_colour: child.avatar_hair_colour,
+      avatar_glasses: child.avatar_glasses,
+      avatar_hat: child.avatar_hat,
       tickable: onStep,
       detail,
     };

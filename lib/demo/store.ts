@@ -28,6 +28,10 @@ export type DemoChild = {
   gender?: "boy" | "girl" | "other";
   avatar_bg?: string;
   avatar_face?: string;
+  avatar_hair_style?: string;
+  avatar_hair_colour?: string;
+  avatar_glasses?: boolean;
+  avatar_hat?: string;
 };
 
 export type DemoPack = {
@@ -482,6 +486,10 @@ export function createDemoFamily(input: {
     gender: "boy" | "girl" | "other";
     avatarBg: string;
     avatarFace: string;
+    hairStyle: string;
+    hairColour: string;
+    glasses: boolean;
+    hat: string;
   }>;
 }) {
   const db = demoDb();
@@ -507,6 +515,10 @@ export function createDemoFamily(input: {
       gender: child.gender,
       avatar_bg: child.avatarBg,
       avatar_face: child.avatarFace,
+      avatar_hair_style: child.hairStyle,
+      avatar_hair_colour: child.hairColour,
+      avatar_glasses: child.glasses,
+      avatar_hat: child.hat,
     });
     return id;
   });

@@ -13,7 +13,7 @@ export default async function OnboardingPage() {
     const account = demoAccountFromCookie(jar.get("ctc_demo_persona")?.value);
     if (account?.is_adult_confirmed) redirect(account.role === "admin" ? "/admin" : "/club");
     return (
-      <AppShell account={null}>
+      <AppShell account={null} hideShop>
         <OnboardingWizard shopFirstName={firstNameFromShopAccount(account?.display_name)} />
       </AppShell>
     );
@@ -23,7 +23,7 @@ export default async function OnboardingPage() {
   if (!user) redirect("/login");
   if (account?.is_adult_confirmed) redirect("/club");
   return (
-    <AppShell account={account}>
+    <AppShell account={account} hideShop>
       <OnboardingWizard shopFirstName={firstNameFromShopAccount(account?.display_name)} />
     </AppShell>
   );

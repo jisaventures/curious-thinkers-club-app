@@ -6,7 +6,7 @@ import { FamilyAvatar } from "@/components/brand/family-avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AVATAR_COLOURS, AVATAR_FACES, type AvatarFaceId } from "@/lib/avatar-style";
+import { AVATAR_COLOURS, AVATAR_FACES, AVATAR_HATS, HAIR_COLOURS, HAIR_STYLES, type AvatarFaceId, type AvatarHatId, type HairColourId, type HairStyleId } from "@/lib/avatar-style";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
 
 type Gender = "boy" | "girl" | "other";
@@ -19,6 +19,10 @@ type ChildDraft = {
   gender: Gender | "";
   avatarBg: string;
   avatarFace: AvatarFaceId;
+  hairStyle: HairStyleId;
+  hairColour: HairColourId;
+  glasses: boolean;
+  hat: AvatarHatId;
   nicknameMessage: string;
 };
 
@@ -30,20 +34,24 @@ const emptyChild = (): ChildDraft => ({
   gender: "",
   avatarBg: AVATAR_COLOURS[0].id,
   avatarFace: AVATAR_FACES[0],
+  hairStyle: "short",
+  hairColour: "brown",
+  glasses: false,
+  hat: "none",
   nicknameMessage: "",
 });
 
 export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | null }) {
   const [step, setStep] = useState(0);
-  const [adult, setAdult] = useState(true);
+  const [terms, setTerms] = useState(false);
   const [count, setCount] = useState(1);
   const [children, setChildren] = useState<ChildDraft[]>([emptyChild()]);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
-  const childIndex = step - 2;
+  const childIndex = step - 3;
   const child = children[childIndex];
-  const lastStep = 1 + count;
+  const lastStep = 2 + count;
 
   const siblingNames = useMemo(
     () => children.filter((_, index) => index !== childIndex).map((item) => item.nickname),
@@ -114,6 +122,10 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
         gender: item.gender as Gender,
         avatarBg: item.avatarBg,
         avatarFace: item.avatarFace,
+        hairStyle: item.hairStyle,
+        hairColour: item.hairColour,
+        glasses: item.glasses,
+        hat: item.hat,
       })),
     }).catch((error: { digest?: string; message?: string }) => {
       if (typeof error?.digest === "string" && error.digest.startsWith("NEXT_REDIRECT")) throw error;
@@ -126,7 +138,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   }
 
   return (
-    <div className="w-full py-2 sm:py-4">
+    <div className="mx-auto w-full max-w-lg">
       <ol className="mb-5 flex gap-2" aria-label="Onboarding progress">
         {Array.from({ length: lastStep + 1 }, (_, index) => (
           <li key={index} className={`h-1.5 flex-1 rounded-full ${index <= step ? "bg-[#1e4d3a]" : "bg-[#eadfce]"}`} />
@@ -136,43 +148,49 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       {step === 0 && (
         <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
           <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">Welcome</p>
-          <h1 className="mt-2 font-display text-4xl leading-tight text-[#1e4d3a] sm:text-5xl">Welcome to the Curious Thinkers Club</h1>
+          <h1 className="mt-2 font-display text-4xl leading-tight text-[#1e4d3a] sm:text-5xl">
+            Welcome{shopFirstName ? ` ${shopFirstName}` : ""}
+          </h1>
           <p className="mt-3 text-base leading-relaxed text-[#3d5348]">
-            Printable packs, short videos, and a path your family can follow together. This is your first visit, so let&apos;s set up the club before the dashboard.
-          </p>
-          <p className="mt-4 rounded-2xl bg-[#f6efe2] p-3 text-sm leading-relaxed text-[#1e4d3a]">
             {shopFirstName
-              ? <>Your first name is <span className="font-extrabold">{shopFirstName}</span>. It comes from your Curious Thinkers shop account, so you don&apos;t type it here.</>
-              : "Your first name will come from your Curious Thinkers shop account when that account is created. You don't type it in this club."}
+              ? "Your first name comes from your Curious Thinkers shop account."
+              : "Your first name will come from your Curious Thinkers shop account when that account is created."}
           </p>
-          <label className="mt-4 flex items-start gap-3 rounded-2xl bg-[#fffdf8] p-3 text-sm leading-snug">
-            <input type="checkbox" checked={adult} onChange={(event) => setAdult(event.target.checked)} className="mt-0.5 size-5 accent-[#1e4d3a]" />
-            <span>I confirm I am a parent or guardian, and I am over 18.</span>
-          </label>
-          <p className="mt-3 text-sm leading-relaxed text-[#5e7266]">
-            This club must be managed by a parent or guardian. Children do not get their own login.{" "}
-            <a href="/terms" className="font-extrabold text-[#1e4d3a] underline">
-              Terms and conditions
-            </a>{" "}
-            will be published here later.
-          </p>
-          {message && <p className="mt-3 text-sm font-bold text-[#8a4b3a]">{message}</p>}
-          <Button
-            type="button"
-            className="mt-5 w-full"
-            size="lg"
-            disabled={!adult}
-            onClick={() => {
-              setMessage(null);
-              setStep(1);
-            }}
-          >
-            Continue
+          <Button type="button" className="mt-6 w-full" size="lg" onClick={() => setStep(1)}>
+            Get started
           </Button>
         </section>
       )}
 
       {step === 1 && (
+        <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
+          <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">Before the club</p>
+          <h1 className="mt-2 font-display text-4xl text-[#1e4d3a]">Terms and conditions</h1>
+          <p className="mt-3 text-sm leading-relaxed text-[#5e7266]">
+            This club must be managed by a parent or guardian. Children do not get their own login. The full terms will be published later.
+          </p>
+          <label className="mt-4 flex items-start gap-3 rounded-2xl bg-[#f6efe2] p-3 text-sm leading-snug">
+            <input type="checkbox" checked={terms} onChange={(event) => setTerms(event.target.checked)} className="mt-0.5 size-5 accent-[#1e4d3a]" />
+            <span>
+              I agree to the{" "}
+              <a href="/terms" className="font-extrabold text-[#1e4d3a] underline">
+                terms and conditions
+              </a>
+              .
+            </span>
+          </label>
+          <div className="mt-6 flex gap-2">
+            <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(0)}>
+              Back
+            </Button>
+            <Button type="button" className="flex-1" disabled={!terms} onClick={() => setStep(2)}>
+              Continue
+            </Button>
+          </div>
+        </section>
+      )}
+
+      {step === 2 && (
         <section className="rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
           <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">Your family</p>
           <h1 className="mt-2 font-display text-4xl text-[#1e4d3a]">How many children are in the family?</h1>
@@ -193,10 +211,10 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             ))}
           </div>
           <div className="mt-6 flex gap-2">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(0)}>
+            <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(1)}>
               Back
             </Button>
-            <Button type="button" className="flex-1" onClick={() => setStep(2)}>
+            <Button type="button" className="flex-1" onClick={() => setStep(3)}>
               Add {count === 1 ? "your child" : `${count} children`}
             </Button>
           </div>
@@ -281,10 +299,74 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                   onClick={() => patchChild({ avatarFace: face })}
                   className={`rounded-2xl border p-1 ${child.avatarFace === face ? "border-[#1e4d3a] bg-[#e7f5e1]" : "border-[#eadfce] bg-white"}`}
                 >
-                  <FamilyAvatar colour={child.avatarBg} face={face} className="mx-auto h-20 w-full" />
+                  <FamilyAvatar
+                    colour={child.avatarBg}
+                    face={face}
+                    hairStyle={child.hairStyle}
+                    hairColour={child.hairColour}
+                    glasses={child.glasses}
+                    hat={child.hat}
+                    className="mx-auto h-24 w-full"
+                  />
                 </button>
               ))}
             </div>
+          </fieldset>
+
+          <fieldset className="mt-5">
+            <legend className="text-sm font-extrabold text-[#1e4d3a]">Hair</legend>
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              {HAIR_STYLES.map((style) => (
+                <button
+                  key={style}
+                  type="button"
+                  aria-pressed={child.hairStyle === style}
+                  onClick={() => patchChild({ hairStyle: style })}
+                  className={`h-11 rounded-2xl text-sm font-extrabold capitalize ${child.hairStyle === style ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
+                >
+                  {style}
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {HAIR_COLOURS.map((colour) => (
+                <button
+                  key={colour.id}
+                  type="button"
+                  aria-label={colour.label}
+                  aria-pressed={child.hairColour === colour.id}
+                  onClick={() => patchChild({ hairColour: colour.id })}
+                  className={`size-11 rounded-full border-2 ${child.hairColour === colour.id ? "border-[#173528]" : "border-white"}`}
+                  style={{ background: colour.hex }}
+                />
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset className="mt-5">
+            <legend className="text-sm font-extrabold text-[#1e4d3a]">Extras</legend>
+            <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+              <button
+                type="button"
+                aria-pressed={child.glasses}
+                onClick={() => patchChild({ glasses: !child.glasses })}
+                className={`h-11 rounded-2xl text-sm font-extrabold ${child.glasses ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
+              >
+                Glasses
+              </button>
+              {AVATAR_HATS.filter((hat) => hat !== "none").map((hat) => (
+                <button
+                  key={hat}
+                  type="button"
+                  aria-pressed={child.hat === hat}
+                  onClick={() => patchChild({ hat: child.hat === hat ? "none" : hat })}
+                  className={`h-11 rounded-2xl text-sm font-extrabold capitalize ${child.hat === hat ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
+                >
+                  {hat}
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-[#5e7266]">The cap and the beanie have a yellow light bulb on the front.</p>
           </fieldset>
 
           {message && <p className="mt-4 text-sm font-bold text-[#8a4b3a]">{message}</p>}
@@ -297,7 +379,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 Next child
               </Button>
             ) : (
-              <Button type="button" className="flex-1" size="lg" disabled={!childReady(child) || !adult || pending} onClick={() => void finish()}>
+              <Button type="button" className="flex-1" size="lg" disabled={!childReady(child) || !terms || pending} onClick={() => void finish()}>
                 {pending ? "Starting…" : "Get started"}
               </Button>
             )}

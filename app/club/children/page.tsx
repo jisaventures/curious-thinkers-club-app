@@ -12,7 +12,7 @@ export default async function ChildrenPage() {
     : await (async () => {
         const { data, error } = await supabase
           .from("children")
-          .select("id, nickname, avatar_key, age_years, avatar_bg, avatar_face")
+          .select("id, nickname, avatar_key, age_years, avatar_bg, avatar_face, avatar_hair_style, avatar_hair_colour, avatar_glasses, avatar_hat")
           .eq("account_id", account.id)
           .order("created_at");
         if (error) throw new Error(error.message);
@@ -23,6 +23,10 @@ export default async function ChildrenPage() {
           age_years: number;
           avatar_bg?: string | null;
           avatar_face?: string | null;
+          avatar_hair_style?: string | null;
+          avatar_hair_colour?: string | null;
+          avatar_glasses?: boolean | null;
+          avatar_hat?: string | null;
         }>;
       })();
 
@@ -38,7 +42,16 @@ export default async function ChildrenPage() {
         {children.map((child) => (
           <section key={child.id} className="rounded-[22px] bg-white p-4">
             <div className="mb-3 flex items-center gap-3">
-              <Avatar avatar={child.avatar_key} colour={child.avatar_bg} face={child.avatar_face} className="size-12" />
+              <Avatar
+                avatar={child.avatar_key}
+                colour={child.avatar_bg}
+                face={child.avatar_face}
+                hairStyle={child.avatar_hair_style}
+                hairColour={child.avatar_hair_colour}
+                glasses={child.avatar_glasses}
+                hat={child.avatar_hat}
+                className="h-16 w-12"
+              />
               <div>
                 <p className="font-extrabold">{child.nickname}</p>
                 <p className="text-xs text-[#5e7266]">Age {child.age_years}</p>

@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { AVATAR_COLOURS, AVATAR_FACES } from "@/lib/avatar-style";
+import { AVATAR_COLOURS, AVATAR_FACES, AVATAR_HATS, HAIR_COLOURS, HAIR_STYLES } from "@/lib/avatar-style";
 import { authCookieOptions } from "@/lib/env";
 import { isDemoMode } from "@/lib/demo/mode";
 import { createDemoFamily, demoDb, nicknameTaken } from "@/lib/demo/store";
@@ -25,6 +25,10 @@ const familySchema = z.object({
         gender: z.enum(["boy", "girl", "other"]),
         avatarBg: z.enum(AVATAR_COLOURS.map((colour) => colour.id) as [string, ...string[]]),
         avatarFace: z.enum(AVATAR_FACES),
+        hairStyle: z.enum(HAIR_STYLES),
+        hairColour: z.enum(HAIR_COLOURS.map((colour) => colour.id) as [string, ...string[]]),
+        glasses: z.boolean(),
+        hat: z.enum(AVATAR_HATS),
       }),
     )
     .min(1)
@@ -131,6 +135,10 @@ export async function completeOnboarding(input: z.infer<typeof familySchema>) {
       gender: child.gender,
       avatar_bg: child.avatarBg,
       avatar_face: child.avatarFace,
+      avatar_hair_style: child.hairStyle,
+      avatar_hair_colour: child.hairColour,
+      avatar_glasses: child.glasses,
+      avatar_hat: child.hat,
     })),
   );
   if (error) return { ok: false as const, message: friendlyError(error.message) };

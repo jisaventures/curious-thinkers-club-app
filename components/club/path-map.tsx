@@ -105,7 +105,17 @@ export function PathMap({
                 transform: "translate(30%, 20%)",
               }}
             >
-              <Avatar avatar={child.avatar_key} colour={child.avatar_bg} face={child.avatar_face} title={child.nickname} className="size-7 rounded-full ring-2 ring-white" />
+              <Avatar
+                avatar={child.avatar_key}
+                colour={child.avatar_bg}
+                face={child.avatar_face}
+                hairStyle={child.avatar_hair_style}
+                hairColour={child.avatar_hair_colour}
+                glasses={child.avatar_glasses}
+                hat={child.avatar_hat}
+                title={child.nickname}
+                className="h-10 w-7 ring-2 ring-white"
+              />
               {showPill && (
                 <span className="absolute top-7 left-0 whitespace-nowrap rounded-full bg-[#f0b429] px-2 py-0.5 text-[10px] font-extrabold text-[#1a3b2c]">
                   {shortName(child.nickname)} is here
