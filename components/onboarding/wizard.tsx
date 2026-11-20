@@ -21,7 +21,7 @@ import {
 import { BirthdayPicker } from "@/components/onboarding/birthday-picker";
 import { ageFromBirthday, isBirthdayAllowed } from "@/lib/birthday";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
-import { Check, ChevronLeft, ChevronRight, Mars, Plus, Rocket, Trophy, Venus, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Mars, Rocket, Trophy, Venus, X } from "lucide-react";
 
 type Gender = "boy" | "girl" | "unspecified";
 
@@ -460,7 +460,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               }}
             >
               {count === 1 ? "Add your child" : `Add ${count} children`}
-              <Plus className="size-7 shrink-0" strokeWidth={2.4} aria-hidden="true" />
+              <SolidPlus className="size-7 shrink-0" />
             </Button>
           )}
           {screen === "details" && editing < count - 1 && (
@@ -638,6 +638,15 @@ function HintedButton({
         {hint}
       </span>
     </span>
+  );
+}
+
+function SolidPlus({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="10" fill="#fff" />
+      <path fill="#306a51" d="M11 6.5h2v4.5h4.5v2H13v4.5h-2V13H6.5v-2H11z" />
+    </svg>
   );
 }
 
