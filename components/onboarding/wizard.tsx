@@ -489,23 +489,26 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             role="dialog"
             aria-modal="true"
             aria-labelledby="avatar-editor-title"
-            className="relative max-h-[92vh] w-full max-w-6xl overflow-y-auto rounded-[28px] bg-white p-5 shadow-xl sm:p-6 lg:max-h-none lg:overflow-visible"
+            className="relative flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[28px] bg-white shadow-xl lg:max-h-none lg:overflow-visible"
             onKeyDown={(event) => {
               if (event.key === "Escape") setAvatarOpen(false);
             }}
           >
-            <button
-              type="button"
-              onClick={() => setAvatarOpen(false)}
-              className="absolute top-4 right-4 rounded-full p-2 text-[#1e4d3a] hover:bg-[#f6efe2]"
-              aria-label="Close"
-            >
-              <X className="size-5" />
-            </button>
-            <h2 id="avatar-editor-title" className="step-title pr-10 text-3xl">
-              Edit avatar
-            </h2>
-            <div className="mt-3 grid items-start gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+            <div className="flex items-center justify-between gap-3 border-b border-[#eadfce] bg-white px-5 py-4 sm:px-6 lg:border-0 lg:pb-0">
+              <h2 id="avatar-editor-title" className="step-title text-3xl">
+                Edit avatar
+              </h2>
+              <button
+                type="button"
+                onClick={() => setAvatarOpen(false)}
+                className="rounded-full p-2 text-[#1e4d3a] hover:bg-[#f6efe2]"
+                aria-label="Close"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+            <div className="avatar-modal-scroll min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6 lg:overflow-visible">
+            <div className="grid items-start gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
               <div>
                 <div className="flex justify-center rounded-[24px] bg-[#f6efe2] p-3">
                   <FamilyAvatar build={avatarDraft} className="h-40 w-40" title="Avatar preview" />
@@ -540,9 +543,12 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 </div>
               </div>
             </div>
-            <Button type="button" variant="mustard" size="lg" className="mt-6 w-full" onClick={saveAvatar}>
-              Save
-            </Button>
+            </div>
+            <div className="border-t border-[#eadfce] bg-white px-5 py-4 sm:px-6 lg:border-0 lg:pt-2">
+              <Button type="button" variant="mustard" size="lg" className="w-full" onClick={saveAvatar}>
+                Save
+              </Button>
+            </div>
           </div>
         </div>
       )}
