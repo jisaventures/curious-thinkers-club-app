@@ -19,7 +19,7 @@ import {
   type AvatarBuild,
 } from "@/lib/avataaars-options";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
-import { Check, ChevronRight, Mars, Venus, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Mars, Venus, X } from "lucide-react";
 
 type Gender = "boy" | "girl" | "unspecified";
 
@@ -58,7 +58,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [avatarDraft, setAvatarDraft] = useState<AvatarBuild | null>(null);
   const tabsRef = useRef<HTMLOListElement>(null);
-  const [tabsOverflow, setTabsOverflow] = useState(false);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
   const child = children[editing];
   const progressLabels = ["Welcome", "Create Family", ...Array.from({ length: count }, (_, index) => `Child ${index + 1} Profile`)];
@@ -151,7 +152,10 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   useEffect(() => {
     const el = tabsRef.current;
     if (!el) return;
-    const sync = () => setTabsOverflow(el.scrollWidth - el.clientWidth - el.scrollLeft > 8);
+    const sync = () => {
+      setCanScrollLeft(el.scrollLeft > 8);
+      setCanScrollRight(el.scrollWidth - el.clientWidth - el.scrollLeft > 8);
+    };
     sync();
     el.addEventListener("scroll", sync, { passive: true });
     window.addEventListener("resize", sync);
@@ -210,7 +214,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 </p>
               )}
               <p
-                className={`flex min-h-16 w-full items-center justify-center rounded-2xl px-2 py-3 text-center text-sm leading-tight font-extrabold md:text-base ${done ? "bg-[#1e4d3a] text-white" : current ? "bg-mustard text-white" : "bg-[#c8c4bc] text-[#6f6b64]"}`}
+                className={`flex min-h-16 w-full items-center justify-center rounded-2xl px-2 py-3 text-center text-sm leading-tight font-extrabold md:text-base ${done || (current && index === 0) ? "bg-[#1e4d3a] text-white" : current ? "bg-mustard text-white" : "bg-[#c8c4bc] text-[#6f6b64]"}`}
               >
                 Step {index + 1}:<br />{label}
               </p>
@@ -218,7 +222,22 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           );
         })}
       </ol>
-      {tabsOverflow && (
+      {canScrollLeft && (
+        <>
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[#fffdf8] to-transparent" />
+          <Button
+            type="button"
+            variant="mustard"
+            size="sm"
+            className="absolute top-[calc(0.5rem_+_2rem)] left-1 z-10 -translate-y-1/2"
+            aria-label="Show previous steps"
+            onClick={() => tabsRef.current?.scrollBy({ left: -200, behavior: "smooth" })}
+          >
+            <ChevronLeft className="size-5" />
+          </Button>
+        </>
+      )}
+      {canScrollRight && (
         <>
           <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#fffdf8] to-transparent" />
           <Button
@@ -374,7 +393,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           {screen !== "welcome" && (
             <Button
               type="button"
-              variant="green"
+              variant="grey"
               size="lg"
               className="footer-cta"
               onClick={() => {
