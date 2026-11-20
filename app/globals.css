@@ -8,9 +8,30 @@
   --color-ink: #173528;
   --color-muted: #5e7266;
   --color-bottle: #1e4d3a;
+  --color-club: #306a51;
   --color-gold: #f0b429;
+  --color-mustard: #e8a428;
+  --color-header: #fbf6ee;
   --color-leaf: #e7f5e1;
   --color-line: #efe2d0;
+}
+
+.onboarding-label {
+  font-family: var(--font-fredoka), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--color-club);
+  font-size: clamp(18px, 2.2vw, 28px);
+}
+
+.wordmark {
+  font-family: var(--font-fredoka), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--color-club);
+  font-size: clamp(22px, calc(22px + (100vw - 390px) * 0.095833), 45px);
 }
 
 * {
