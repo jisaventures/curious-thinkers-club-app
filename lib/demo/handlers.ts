@@ -82,26 +82,31 @@ export async function demoMark(accountId: string, input: { stepId: string; child
   return result;
 }
 
-export async function demoMarkNext(accountId: string, formData: FormData) {
-  const packId = uuidSchema.safeParse(text(formData, "packId"));
-  const childId = uuidSchema.safeParse(text(formData, "childId"));
-  if (!packId.success || !childId.success) redirect("/club");
+export async function demoMarkNextResult(accountId: string, packId: string, childId: string) {
   const db = demoDb();
-  const steps = db.steps.filter((step) => step.pack_id === packId.data).sort((a, b) => a.position - b.position);
+  const steps = db.steps.filter((step) => step.pack_id === packId).sort((a, b) => a.position - b.position);
   const complete = db.progress
-    .filter((row) => row.child_id === childId.data && row.status === "complete")
+    .filter((row) => row.child_id === childId && row.status === "complete")
     .map((row) => steps.find((step) => step.id === row.step_id)?.position)
     .filter((position): position is number => typeof position === "number");
   const next = nextStepPosition(steps.map((step) => step.position), complete);
   const step = steps.find((item) => item.position === next);
-  if (!step) redirect("/club?notice=This+pack+is+already+finished");
-  const result = markDemoSteps(accountId, step.id, [childId.data]);
+  if (!step) return { ok: false as const, message: "This pack is already finished." };
+  const result = markDemoSteps(accountId, step.id, [childId]);
   revalidatePath("/club");
-  const notice = result.ok
-    ? result.certificate
-      ? "Pack+finished.+Certificate+and+bonus+points+added."
-      : "Step+marked+complete"
-    : encodeURIComponent(result.message);
+  if (!result.ok) return result;
+  return {
+    ...result,
+    message: result.certificate ? "Pack finished. Certificate and bonus points added." : "Step marked complete",
+  };
+}
+
+export async function demoMarkNext(accountId: string, formData: FormData) {
+  const packId = uuidSchema.safeParse(text(formData, "packId"));
+  const childId = uuidSchema.safeParse(text(formData, "childId"));
+  if (!packId.success || !childId.success) redirect("/club");
+  const result = await demoMarkNextResult(accountId, packId.data, childId.data);
+  const notice = result.ok ? encodeURIComponent(result.message) : encodeURIComponent(result.message);
   redirect(`/club?notice=${notice}`);
 }
 

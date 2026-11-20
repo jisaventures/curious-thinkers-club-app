@@ -14,6 +14,13 @@ export async function POST(request: Request) {
   const persona = form.get("persona");
 
   if (isDemoMode()) {
+    if (persona === "new") {
+      const response = NextResponse.redirect(`${siteUrl()}/onboarding`, { status: 303 });
+      response.cookies.set("ctc_demo_persona", "", { ...authCookieOptions, maxAge: 0 });
+      response.cookies.set("ctc_demo_signed_out", "", { ...authCookieOptions, maxAge: 0 });
+      response.cookies.set("ctc_focus_child", "", { ...authCookieOptions, maxAge: 0 });
+      return response;
+    }
     if (persona !== "admin" && persona !== "guardian") {
       return NextResponse.json({ error: "Unknown demo." }, { status: 400 });
     }

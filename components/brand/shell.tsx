@@ -3,108 +3,160 @@ import { signOut } from "@/app/login/actions";
 import { isDemoMode } from "@/lib/demo/mode";
 import { shopUrl } from "@/lib/env";
 import type { AccountRecord } from "@/lib/auth/session";
-import { AdultAvatar, LogoMark } from "@/components/brand/logo";
+import { LogoMark } from "@/components/brand/logo";
 
 export function AppShell({
   account,
   children,
+  hideShop: _hideShop = false,
+  centered = false,
+  onboarding = false,
 }: {
   account: AccountRecord | null;
   children: React.ReactNode;
+  hideShop?: boolean;
+  centered?: boolean;
+  onboarding?: boolean;
 }) {
+  void _hideShop;
   const shop = shopUrl();
+  const frame = centered
+    ? `mx-auto flex w-full max-w-6xl flex-1 flex-col px-3 [justify-content:safe_center] sm:px-4 ${onboarding ? "pt-4 pb-28 sm:pt-6" : "py-4 sm:py-6"}`
+    : "mx-auto w-full max-w-none px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5";
   return (
-    <div className="mx-auto w-full max-w-[1180px] px-3 py-3 sm:px-5 sm:py-6">
-      <div className="rounded-[28px] border border-white/80 bg-[#fffdf8] shadow-[0_24px_70px_rgba(30,77,58,0.08)]">
-        <header className="flex items-center gap-3 px-3 py-3 sm:px-5 sm:py-4">
-          <Link href={account ? "/club" : "/login"} className="flex min-w-0 items-center gap-2">
-            <LogoMark className="size-10 shrink-0" />
-            <span className="truncate font-display text-lg leading-none text-[#1e4d3a] sm:text-xl">
-              Curious Thinkers
-            </span>
-          </Link>
-          <nav className="ml-auto flex items-center gap-1 sm:gap-2">
-            {account && (
-              <Link
-                href="/club"
-                className="hidden rounded-full px-3 py-2 text-sm font-extrabold text-[#1e4d3a] hover:bg-[#e7f5e1] sm:inline-flex"
-              >
-                My Club
-              </Link>
-            )}
-            {account?.role === "admin" && (
-              <Link
-                href="/admin"
-                className="hidden rounded-full px-3 py-2 text-sm font-extrabold text-[#1e4d3a] hover:bg-[#e7f5e1] md:inline-flex"
-              >
-                Admin
-              </Link>
-            )}
-            <a
-              href={shop}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full px-2 py-2 text-sm font-extrabold text-[#1e4d3a] hover:bg-[#e7f5e1] sm:px-3"
-            >
-              <BagIcon />
-              <span className="hidden min-[380px]:inline">Shop packs</span>
-            </a>
-            {account && (
-              <details className="relative hidden sm:block">
-                <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full py-1 pr-2 pl-1 hover:bg-[#f6f1e6]">
-                  <AdultAvatar className="size-9" />
-                  <span className="text-sm font-extrabold">Hi, {account.display_name}</span>
-                </summary>
-                <div className="absolute right-0 z-20 mt-2 w-48 rounded-2xl border border-[#efe2d0] bg-white p-2 shadow-lg">
-                  <Link href="/club/children" className="block rounded-xl px-3 py-2 text-sm font-bold hover:bg-[#f6f1e6]">
-                    Children
-                  </Link>
-                  {account.role === "admin" && (
-                    <Link href="/admin" className="block rounded-xl px-3 py-2 text-sm font-bold hover:bg-[#f6f1e6] md:hidden">
-                      Admin
-                    </Link>
-                  )}
-                  <form action={signOut}>
-                    <button className="w-full rounded-xl px-3 py-2 text-left text-sm font-bold hover:bg-[#f6f1e6]">
-                      Sign out
-                    </button>
-                  </form>
-                </div>
-              </details>
-            )}
-          </nav>
-        </header>
-        {isDemoMode() && (
-          <div className="mx-3 mb-2 flex flex-col gap-2 rounded-2xl bg-[#fff6dc] px-3 py-2 text-sm text-[#1e4d3a] sm:mx-5 sm:flex-row sm:items-center sm:justify-between">
-            <p>
-              <span className="font-extrabold">Demo mode.</span> In-memory sample family. No Docker or Supabase. It resets when the dev server restarts.
-            </p>
-            <div className="flex gap-2">
-              <form action="/api/dev/demo-login" method="post">
-                <input type="hidden" name="persona" value="guardian" />
-                <button className="rounded-full bg-white px-3 py-1.5 text-xs font-extrabold">Sam&apos;s club</button>
-              </form>
-              <form action="/api/dev/demo-login" method="post">
-                <input type="hidden" name="persona" value="admin" />
-                <button className="rounded-full bg-[#1e4d3a] px-3 py-1.5 text-xs font-extrabold text-white">Admin</button>
-              </form>
-            </div>
-          </div>
-        )}
-        <div className="px-3 pb-6 sm:px-5 md:px-7 md:pb-8">{children}</div>
+    <div className="flex min-h-svh flex-col">
+      <SiteHeader account={account} shop={shop} centered={centered} onboarding={onboarding} />
+      <div className={frame}>
+        <div className="min-w-0 rounded-[28px] border border-white/80 bg-[#fffdf8] shadow-[0_24px_70px_rgba(30,77,58,0.08)]">
+          <div className={centered ? "px-3 pt-9 pb-8 sm:px-5 md:px-7" : "px-3 pb-6 sm:px-5 md:px-7 md:pb-8"}>{children}</div>
+        </div>
       </div>
+      {isDemoMode() && <DemoModeMenu />}
     </div>
   );
 }
 
-function BagIcon() {
+function SiteHeader({
+  account,
+  shop,
+  centered,
+  onboarding,
+}: {
+  account: AccountRecord | null;
+  shop: string;
+  centered: boolean;
+  onboarding: boolean;
+}) {
+  const row = centered ? "mx-auto w-full max-w-6xl px-3 sm:px-4" : "w-full px-3 sm:px-4 lg:px-6";
   return (
-    <span className="relative inline-flex">
-      <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-        <path d="M6 8h12l-1 12H7L6 8z" strokeLinejoin="round" />
-        <path d="M9 8V7a3 3 0 0 1 6 0v1" strokeLinecap="round" />
-      </svg>
-      <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-[#1e4d3a]" />
-    </span>
+    <header className="w-full border-b border-dashed border-club/25 bg-header">
+      <div className={`flex items-center gap-3 py-2.5 ${row} ${onboarding ? "justify-center" : ""} ${!onboarding && isDemoMode() ? "pr-16 sm:pr-20" : ""}`}>
+        <Link href={account ? "/club" : "/"} className="flex min-w-0 items-center gap-2">
+          <img src="/brand/bulb.png" alt="" className="h-14 w-auto shrink-0 bg-transparent" />
+          <span className="wordmark">Curious Thinkers Club</span>
+        </Link>
+        {!onboarding && (
+        <div className="ml-auto flex items-center gap-3 sm:gap-5">
+          <nav className="hidden items-center gap-5 md:flex" aria-label="Site">
+            <a href={shop} className="font-sans text-base font-semibold text-club no-underline hover:underline">
+              Free pack
+            </a>
+            <Link href={account ? "/club" : "/login"} className="font-sans text-base font-semibold text-club no-underline hover:underline">
+              Club login
+            </Link>
+            {account?.role === "admin" && (
+              <Link href="/admin" className="font-sans text-base font-semibold text-club no-underline hover:underline">
+                Admin
+              </Link>
+            )}
+          </nav>
+          <details className="relative md:hidden">
+            <summary className="cursor-pointer list-none rounded-full px-3 py-2 font-sans text-base font-semibold text-club [&::-webkit-details-marker]:hidden">
+              Menu
+            </summary>
+            <div className="absolute right-0 z-30 mt-2 w-48 rounded-2xl border border-line bg-white p-2 shadow-lg">
+              <a href={shop} className="block rounded-xl px-3 py-2 font-sans text-sm font-semibold text-club no-underline hover:underline">
+                Free pack
+              </a>
+              <a href={shop} className="block rounded-xl px-3 py-2 font-sans text-sm font-semibold text-club no-underline hover:underline">
+                Shop the packs
+              </a>
+              <Link href={account ? "/club" : "/login"} className="block rounded-xl px-3 py-2 font-sans text-sm font-semibold text-club no-underline hover:underline">
+                Club login
+              </Link>
+              {account && (
+                <Link href="/club/children" className="block rounded-xl px-3 py-2 font-sans text-sm font-semibold text-club no-underline hover:underline">
+                  Children
+                </Link>
+              )}
+              {account?.role === "admin" && (
+                <Link href="/admin" className="block rounded-xl px-3 py-2 font-sans text-sm font-semibold text-club no-underline hover:underline">
+                  Admin
+                </Link>
+              )}
+              {account && (
+                <form action={signOut}>
+                  <button className="w-full rounded-xl px-3 py-2 text-left font-sans text-sm font-semibold text-club hover:underline">
+                    Log out
+                  </button>
+                </form>
+              )}
+            </div>
+          </details>
+          <a
+            href={shop}
+              className="hidden rounded-full bg-mustard px-4 py-2.5 font-sans text-sm font-bold text-white shadow-[0_6px_16px_rgba(232,164,40,0.35)] md:inline-flex"
+          >
+            Shop the packs
+          </a>
+          <a href={`${shop}/cart`} className="relative inline-flex text-club" aria-label="Cart, 0 items">
+            <CartIcon />
+            <span className="absolute -top-2 -right-2 min-w-4 rounded-full bg-mustard px-1 text-center text-[10px] leading-4 font-bold text-white">
+              0
+            </span>
+          </a>
+        </div>
+        )}
+      </div>
+    </header>
+  );
+}
+
+function DemoModeMenu() {
+  return (
+    <details className="fixed top-3 right-3 z-50">
+      <summary
+        className="flex cursor-pointer list-none flex-col items-center [&::-webkit-details-marker]:hidden"
+        aria-label="Demo mode"
+      >
+        <LogoMark className="size-11 drop-shadow-md" />
+        <span className="-mt-1 rounded-full bg-[#f0b429] px-1.5 text-[10px] font-extrabold text-[#1a3b2c]">Demo</span>
+      </summary>
+      <div className="absolute right-0 mt-2 w-44 rounded-2xl border border-[#efe2d0] bg-white p-2 shadow-lg">
+        <p className="px-3 py-1 text-[11px] font-extrabold tracking-wide text-[#c45b73] uppercase">Demo mode</p>
+        <form action="/api/dev/demo-login" method="post">
+          <input type="hidden" name="persona" value="guardian" />
+          <button className="w-full rounded-xl px-3 py-2 text-left text-sm font-bold hover:bg-[#f6f1e6]">Sam&apos;s club</button>
+        </form>
+        <form action="/api/dev/demo-login" method="post">
+          <input type="hidden" name="persona" value="admin" />
+          <button className="w-full rounded-xl px-3 py-2 text-left text-sm font-bold hover:bg-[#f6f1e6]">Admin</button>
+        </form>
+        <form action={signOut}>
+          <button className="w-full rounded-xl px-3 py-2 text-left text-sm font-bold hover:bg-[#f6f1e6]">Log out</button>
+        </form>
+      </div>
+    </details>
+  );
+}
+
+function CartIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-7" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path d="M6 7h15l-1.5 9h-12z" strokeLinejoin="round" />
+      <path d="M6 7 5 4H2" strokeLinecap="round" />
+      <circle cx="9" cy="20" r="1.3" fill="currentColor" stroke="none" />
+      <circle cx="18" cy="20" r="1.3" fill="currentColor" stroke="none" />
+    </svg>
   );
 }

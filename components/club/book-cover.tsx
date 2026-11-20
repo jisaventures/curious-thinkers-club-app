@@ -18,7 +18,7 @@ export function BookCover({
   locked?: boolean;
 }) {
   return (
-    <div className={`relative h-[92px] w-[72px] shrink-0 rounded-2xl ${tones[tone]} shadow-md sm:h-[104px] sm:w-[80px]`}>
+    <div className={`relative h-[92px] w-[72px] shrink-0 overflow-hidden rounded-2xl ${tones[tone]} shadow-md sm:h-[104px] sm:w-[80px]`}>
       <span className="absolute inset-y-2 left-1.5 w-1 rounded-full bg-white/25" />
       <span className="absolute right-2 bottom-2 left-3 rounded-lg bg-[#fff7e8]/95 px-1.5 py-1 text-[10px] leading-tight font-extrabold text-[#1e4d3a]">
         {coverLabel(title)}

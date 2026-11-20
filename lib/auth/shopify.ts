@@ -1,4 +1,5 @@
 import { shopifyConfig } from "@/lib/env";
+import { displayNameSchema } from "@/lib/validators";
 
 /**
  * TODO(shopify-customer-account-api):
@@ -16,12 +17,20 @@ import { shopifyConfig } from "@/lib/env";
  * 1. Redirect the adult to the Customer Account authorization endpoint.
  * 2. Exchange the authorization code on the server. The client secret never
  *    reaches the browser.
- * 3. Read the Shopify customer id and the verified email.
+ * 3. Read the Shopify customer id, the verified email, and the customer's
+ *    first name. Onboarding does not ask for that name. It is saved as
+ *    accounts.display_name when the shop account is created.
  * 4. Store the customer id on accounts.shopify_customer_id.
  * 5. Issue a Supabase session with auth.admin.generateLink so Row Level
  *    Security stays in Postgres. Do not invent a second session store.
  * 6. Refuse the login when Shopify does not return a verified email.
  */
+/** First name already stored from Shopify account creation, when it is a real given name. */
+export function firstNameFromShopAccount(displayName: string | null | undefined) {
+  const name = displayName?.trim() ?? "";
+  return displayNameSchema.safeParse(name).success ? name : null;
+}
+
 export async function startShopifyCustomerLogin() {
   const config = shopifyConfig();
   if (!config.domain || !config.clientId || !config.clientSecret || !config.issuer) {

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { markStepForChildren } from "@/app/club/actions";
 import { Avatar } from "@/components/brand/avatar";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,17 @@ export type MarkChild = {
   nickname: string;
   age_years: number;
   avatar_key: AvatarKey;
+  avatar_bg?: string | null;
+  avatar_face?: string | null;
+  avatar_hair_style?: string | null;
+  avatar_hair_colour?: string | null;
+  avatar_glasses?: boolean | null;
+  avatar_hat?: string | null;
+  gender?: "boy" | "girl" | "unspecified" | null;
+  avatar_skin?: string | null;
+  avatar_eyes?: string | null;
+  avatar_shirt?: string | null;
+  avatar_options?: string | null;
   tickable: boolean;
   detail: string;
 };
@@ -23,13 +33,16 @@ export function MarkPanel({
   points,
   learners,
   defaultTicked,
+  onAdvance,
+  onRevert,
 }: {
   stepId: string;
   points: number;
   learners: MarkChild[];
   defaultTicked: string[];
+  onAdvance?: (childIds: string[]) => void;
+  onRevert?: () => void;
 }) {
-  const router = useRouter();
   const [ticked, setTicked] = useState<string[]>(defaultTicked);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -47,10 +60,13 @@ export function MarkPanel({
       setMessage("Tick the children who finished this step.");
       return;
     }
+    const childIds = chosen.map((child) => child.id);
+    onAdvance?.(childIds);
     setPending(true);
-    const result = await markStepForChildren({ stepId, childIds: chosen.map((child) => child.id) });
+    const result = await markStepForChildren({ stepId, childIds });
     setPending(false);
     if (!result.ok) {
+      onRevert?.();
       setMessage(result.message ?? "Something went wrong.");
       return;
     }
@@ -60,7 +76,6 @@ export function MarkPanel({
         ? `${names} finished the pack. Certificate and bonus points added.`
         : `${names} earned ${result.points} points.`,
     );
-    router.refresh();
   }
 
   return (
@@ -82,7 +97,21 @@ export function MarkPanel({
               }}
               aria-label={`Mark ${child.nickname} complete`}
             />
-            <Avatar avatar={child.avatar_key} className="size-9" />
+            <Avatar
+              avatar={child.avatar_key}
+              colour={child.avatar_bg}
+              face={child.avatar_face}
+              hairStyle={child.avatar_hair_style}
+              hairColour={child.avatar_hair_colour}
+              glasses={child.avatar_glasses}
+              hat={child.avatar_hat}
+              gender={child.gender === "girl" ? "girl" : "boy"}
+              skin={child.avatar_skin}
+              eyeColour={child.avatar_eyes}
+              shirt={child.avatar_shirt}
+              options={child.avatar_options}
+              className="h-12 w-9"
+            />
             <div className="min-w-0">
               <p className="text-sm font-extrabold">
                 {child.nickname}, {child.age_years}

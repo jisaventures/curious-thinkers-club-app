@@ -20,7 +20,7 @@ export default async function HomePage() {
     const message = error instanceof Error ? error.message : "Supabase is not configured.";
     return (
       <AppShell account={null}>
-        <div className="mx-auto max-w-lg py-10">
+        <div className="w-full py-6">
           <h1 className="font-display text-4xl text-[#1e4d3a]">Curious Thinkers Club</h1>
           <p className="mt-3 text-sm leading-relaxed text-[#5e7266]">
             The members&apos; area needs a local Supabase project before it can open. Add

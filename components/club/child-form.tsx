@@ -57,7 +57,7 @@ export function ChildForm({
           name="ageYears"
           type="number"
           min={2}
-          max={12}
+          max={15}
           required
           defaultValue={child?.age_years ?? 6}
         />

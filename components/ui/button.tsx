@@ -12,6 +12,9 @@ const buttonVariants = cva(
         bottle: "bg-[#1e4d3a] text-white hover:bg-[#16392c]",
         outline: "border border-[#e6d8c4] bg-white text-[#1a3b2c] hover:bg-[#fbf6ee]",
         ghost: "bg-transparent text-[#1e4d3a] hover:bg-[#e7f5e1]",
+        mustard: "ctc-button",
+        green: "ctc-button",
+        grey: "ctc-button",
       },
       size: {
         sm: "h-9 px-3.5",
@@ -35,5 +38,13 @@ export function Button({
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : "button";
-  return <Comp className={cn(buttonVariants({ variant, size }), className)} {...props} />;
+  const chunky = variant === "mustard" || variant === "green" || variant === "grey";
+  return (
+    <Comp
+      data-variant={chunky ? variant : undefined}
+      data-size={chunky ? size ?? "md" : undefined}
+      className={cn(chunky ? "ctc-button" : buttonVariants({ variant, size }), className)}
+      {...props}
+    />
+  );
 }

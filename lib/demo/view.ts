@@ -34,7 +34,7 @@ export async function demoDashboard(account: AccountRecord) {
   const packs = db.packs
     .filter((pack) => pack.published || account.role === "admin")
     .map((pack) => {
-      const packSteps = db.steps.filter((step) => step.pack_id === pack.id);
+      const packSteps = db.steps.filter((step) => step.pack_id === pack.id).sort((a, b) => a.position - b.position);
       const done = focus
         ? packSteps.filter((step) =>
             db.progress.some((row) => row.child_id === focus.id && row.step_id === step.id && row.status === "complete"),
@@ -54,13 +54,24 @@ export async function demoDashboard(account: AccountRecord) {
         owned: owned.has(pack.id),
         done,
         total: pack.step_count || packSteps.length,
+        stepPoints: packSteps.map((step) => step.points),
       };
     })
     .sort((a, b) => (PACK_ORDER.indexOf(a.slug) === -1 ? 99 : PACK_ORDER.indexOf(a.slug)) - (PACK_ORDER.indexOf(b.slug) === -1 ? 99 : PACK_ORDER.indexOf(b.slug)));
 
-  const focusPoints = focus
-    ? db.ledger.filter((row) => row.child_id === focus.id).reduce((sum, row) => sum + row.amount, 0)
-    : 0;
+  const doneByChild: Record<string, Record<string, number>> = {};
+  const pointsByChild: Record<string, number> = {};
+  for (const child of children) {
+    pointsByChild[child.id] = db.ledger.filter((row) => row.child_id === child.id).reduce((sum, row) => sum + row.amount, 0);
+    doneByChild[child.id] = {};
+    for (const pack of db.packs) {
+      const packSteps = db.steps.filter((step) => step.pack_id === pack.id);
+      doneByChild[child.id][pack.id] = packSteps.filter((step) =>
+        db.progress.some((row) => row.child_id === child.id && row.step_id === step.id && row.status === "complete"),
+      ).length;
+    }
+  }
+  const focusPoints = focus ? (pointsByChild[focus.id] ?? 0) : 0;
   const totals = new Map<string, number>();
   for (const row of db.ledger) totals.set(row.child_id, (totals.get(row.child_id) ?? 0) + row.amount);
   const ranked = db.children
@@ -87,8 +98,18 @@ export async function demoDashboard(account: AccountRecord) {
     prizes: [...db.prizes].sort((a, b) => a.sort_order - b.sort_order),
     unlockedReward: rewards.find((reward) => reward.active && focusPoints >= reward.min_points) ?? null,
     nextReward: [...rewards].filter((reward) => reward.active && focusPoints < reward.min_points).sort((a, b) => a.min_points - b.min_points)[0] ?? null,
-    submissions: db.submissions.filter((row) => !focus || row.child_id === focus.id).slice(0, 3),
+    submissions: db.submissions.slice(0, 12),
     partial: null,
+    doneByChild,
+    pointsByChild,
+    rewardLadder: rewards
+      .filter((reward) => reward.active)
+      .map((reward) => ({
+        code: reward.code,
+        headline: reward.headline,
+        description: reward.description,
+        min_points: reward.min_points,
+      })),
   };
 }
 
@@ -117,7 +138,10 @@ export function demoPackPage(account: AccountRecord, slug: string, modeRaw?: str
     };
   }
 
-  const steps = db.steps.filter((step) => step.pack_id === pack.id).sort((a, b) => a.position - b.position);
+  const steps = db.steps
+    .filter((step) => step.pack_id === pack.id)
+    .sort((a, b) => a.position - b.position)
+    .map((step) => ({ ...step, video: resolve(step.video_url) }));
   const childViews = children.map((child) => {
     const rows = db.progress.filter((row) => row.child_id === child.id && steps.some((step) => step.id === row.step_id));
     const next = childNextPosition(child.id, pack.id);
@@ -134,6 +158,7 @@ export function demoPackPage(account: AccountRecord, slug: string, modeRaw?: str
   const focus = childViews.find((child) => child.id === childRaw) ?? childViews[0] ?? null;
   const activePosition = focus ? (focus.finished ? null : (focus.nextPosition ?? steps[0]?.position ?? null)) : null;
   const activeStep = steps.find((step) => step.position === activePosition) ?? null;
+  const video = activeStep?.video ?? { provider: "none" as const, src: "" };
   const nudge =
     mode === "together" && focus
       ? catchUpNudge(
@@ -158,7 +183,7 @@ export function demoPackPage(account: AccountRecord, slug: string, modeRaw?: str
     focus,
     mode,
     activeStep,
-    video: activeStep ? resolve(activeStep.video_url) : { provider: "none" as const, src: "" },
+    video,
     nudge: nudge && behind ? { ...nudge, childId: behind.id } : null,
     certificates: db.certificates.filter((row) => row.pack_id === pack.id).map((row) => row.child_id),
     progress: db.progress,
@@ -238,4 +263,12 @@ export function demoAccount(persona: "sam" | "admin"): AccountRecord {
   const account = demoDb().accounts.find((item) => item.id === id);
   if (!account) throw new Error("Demo family is missing.");
   return asAccount(account);
+}
+
+export function demoAccountFromCookie(persona: string | undefined): AccountRecord | null {
+  if (!persona) return null;
+  if (persona === "admin") return demoAccount("admin");
+  if (persona === "sam") return demoAccount("sam");
+  const account = demoDb().accounts.find((item) => item.id === persona);
+  return account ? asAccount(account) : null;
 }
