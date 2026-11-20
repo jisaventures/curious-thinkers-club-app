@@ -1,0 +1,241 @@
+import "server-only";
+import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
+import { levelProgress } from "@/lib/levels";
+import { catchUpNudge } from "@/lib/progress";
+import { detectVideoProvider, vimeoId, youtubeId, type AvatarKey } from "@/lib/validators";
+import type { AccountRecord } from "@/lib/auth/session";
+import {
+  childNextPosition,
+  demoDb,
+  type DemoAccount,
+} from "@/lib/demo/store";
+
+const PACK_ORDER = [
+  "be-a-pirate-for-the-day",
+  "be-an-egyptian-explorer",
+  "become-a-spy",
+  "be-a-knight-for-the-day",
+  "be-a-space-explorer",
+];
+
+function asAccount(account: DemoAccount): AccountRecord {
+  return account;
+}
+
+export async function demoDashboard(account: AccountRecord) {
+  const db = demoDb();
+  const children = db.children
+    .filter((child) => child.account_id === account.id)
+    .sort((a, b) => a.created_at.localeCompare(b.created_at));
+  const jar = await cookies();
+  const focus = children.find((child) => child.id === jar.get("ctc_focus_child")?.value) ?? children[0] ?? null;
+  const owned = new Set(db.ownership.filter((row) => row.account_id === account.id).map((row) => row.pack_id));
+  const packs = db.packs
+    .filter((pack) => pack.published || account.role === "admin")
+    .map((pack) => {
+      const packSteps = db.steps.filter((step) => step.pack_id === pack.id);
+      const done = focus
+        ? packSteps.filter((step) =>
+            db.progress.some((row) => row.child_id === focus.id && row.step_id === step.id && row.status === "complete"),
+          ).length
+        : 0;
+      return {
+        id: pack.id,
+        slug: pack.slug,
+        title: pack.title,
+        theme: pack.theme,
+        blurb: pack.blurb,
+        duration_label: pack.duration_label,
+        cover_tone: pack.cover_tone,
+        price_pence: pack.price_pence,
+        step_count: pack.step_count,
+        certificate_bonus_points: pack.certificate_bonus_points,
+        owned: owned.has(pack.id),
+        done,
+        total: pack.step_count || packSteps.length,
+      };
+    })
+    .sort((a, b) => (PACK_ORDER.indexOf(a.slug) === -1 ? 99 : PACK_ORDER.indexOf(a.slug)) - (PACK_ORDER.indexOf(b.slug) === -1 ? 99 : PACK_ORDER.indexOf(b.slug)));
+
+  const focusPoints = focus
+    ? db.ledger.filter((row) => row.child_id === focus.id).reduce((sum, row) => sum + row.amount, 0)
+    : 0;
+  const totals = new Map<string, number>();
+  for (const row of db.ledger) totals.set(row.child_id, (totals.get(row.child_id) ?? 0) + row.amount);
+  const ranked = db.children
+    .map((child) => ({
+      nickname: child.nickname,
+      age_years: child.age_years,
+      avatar_key: child.avatar_key as AvatarKey,
+      points: totals.get(child.id) ?? 0,
+      is_mine: child.account_id === account.id,
+    }))
+    .filter((row) => row.points > 0)
+    .sort((a, b) => b.points - a.points || a.nickname.localeCompare(b.nickname))
+    .map((row, index) => ({ ...row, rank: index + 1 }));
+
+  const rewards = [...db.rewards].filter((reward) => reward.active || account.role === "admin").sort((a, b) => b.min_points - a.min_points);
+  return {
+    account,
+    children,
+    focus,
+    packs,
+    points: focusPoints,
+    level: levelProgress(focusPoints),
+    leaderboard: ranked,
+    prizes: [...db.prizes].sort((a, b) => a.sort_order - b.sort_order),
+    unlockedReward: rewards.find((reward) => reward.active && focusPoints >= reward.min_points) ?? null,
+    nextReward: [...rewards].filter((reward) => reward.active && focusPoints < reward.min_points).sort((a, b) => a.min_points - b.min_points)[0] ?? null,
+    submissions: db.submissions.filter((row) => !focus || row.child_id === focus.id).slice(0, 3),
+    partial: null,
+  };
+}
+
+export function demoPackPage(account: AccountRecord, slug: string, modeRaw?: string, childRaw?: string) {
+  const db = demoDb();
+  const pack = db.packs.find((item) => item.slug === slug);
+  if (!pack) notFound();
+  const children = db.children
+    .filter((child) => child.account_id === account.id)
+    .sort((a, b) => a.created_at.localeCompare(b.created_at));
+  const owned = db.ownership.some((row) => row.account_id === account.id && row.pack_id === pack.id);
+  if (!owned) {
+    return {
+      account,
+      pack,
+      owned: false as const,
+      children,
+      steps: [],
+      childViews: [],
+      focus: children[0] ?? null,
+      mode: "together" as const,
+      activeStep: null,
+      video: { provider: "none" as const, src: "" },
+      nudge: null,
+      certificates: [] as string[],
+    };
+  }
+
+  const steps = db.steps.filter((step) => step.pack_id === pack.id).sort((a, b) => a.position - b.position);
+  const childViews = children.map((child) => {
+    const rows = db.progress.filter((row) => row.child_id === child.id && steps.some((step) => step.id === row.step_id));
+    const next = childNextPosition(child.id, pack.id);
+    const current = next ? steps.find((step) => step.position === next) : null;
+    return {
+      ...child,
+      started: rows.length > 0,
+      finished: next === null && steps.length > 0,
+      nextPosition: next,
+      resumeSeconds: current ? (rows.find((row) => row.step_id === current.id)?.video_position_seconds ?? 0) : 0,
+    };
+  });
+  const mode = modeRaw === "solo" ? "solo" : "together";
+  const focus = childViews.find((child) => child.id === childRaw) ?? childViews[0] ?? null;
+  const activePosition = focus ? (focus.finished ? null : (focus.nextPosition ?? steps[0]?.position ?? null)) : null;
+  const activeStep = steps.find((step) => step.position === activePosition) ?? null;
+  const nudge =
+    mode === "together" && focus
+      ? catchUpNudge(
+          focus.nextPosition ?? (focus.finished ? null : 1),
+          childViews
+            .filter((child) => child.id !== focus.id)
+            .map((child) => ({
+              nickname: child.nickname,
+              currentPosition: child.started ? child.nextPosition : null,
+              started: child.started,
+            })),
+        )
+      : null;
+  const behind = childViews.find((child) => child.nickname === nudge?.nickname) ?? null;
+  return {
+    account,
+    pack,
+    owned: true as const,
+    children,
+    steps,
+    childViews,
+    focus,
+    mode,
+    activeStep,
+    video: activeStep ? resolve(activeStep.video_url) : { provider: "none" as const, src: "" },
+    nudge: nudge && behind ? { ...nudge, childId: behind.id } : null,
+    certificates: db.certificates.filter((row) => row.pack_id === pack.id).map((row) => row.child_id),
+    progress: db.progress,
+  };
+}
+
+function resolve(url: string | null) {
+  if (!url) return { provider: "none" as const, src: "" };
+  if (url.startsWith("storage://")) return { provider: "mp4" as const, src: "/videos/guide.mp4" };
+  const provider = detectVideoProvider(url);
+  if (provider === "youtube") return { provider, src: youtubeId(url) ?? "" };
+  if (provider === "vimeo") return { provider, src: vimeoId(url) ?? "" };
+  return { provider: "mp4" as const, src: url };
+}
+
+export function demoChildren(accountId: string) {
+  return demoDb()
+    .children.filter((child) => child.account_id === accountId)
+    .sort((a, b) => a.created_at.localeCompare(b.created_at));
+}
+
+export function demoAdminCounts() {
+  const db = demoDb();
+  return {
+    packs: db.packs.length,
+    pending: db.submissions.filter((row) => row.status === "pending").length,
+    accounts: db.accounts.length,
+  };
+}
+
+export function demoPackList() {
+  return [...demoDb().packs].sort((a, b) => a.created_at.localeCompare(b.created_at));
+}
+
+export function demoPackEditor(id: string) {
+  const db = demoDb();
+  const pack = db.packs.find((item) => item.id === id);
+  if (!pack) return null;
+  return {
+    pack,
+    steps: db.steps.filter((step) => step.pack_id === id).sort((a, b) => a.position - b.position),
+  };
+}
+
+export function demoSubmissions() {
+  const db = demoDb();
+  return [...db.submissions]
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .map((row) => ({
+      ...row,
+      url: row.preview_url,
+      nickname: db.children.find((child) => child.id === row.child_id)?.nickname ?? "Nickname hidden",
+    }));
+}
+
+export function demoRewards() {
+  const db = demoDb();
+  return {
+    codes: [...db.rewards].sort((a, b) => a.min_points - b.min_points),
+    prizes: [...db.prizes].sort((a, b) => a.sort_order - b.sort_order),
+  };
+}
+
+export function demoGrants(email: string) {
+  const db = demoDb();
+  const account = email ? db.accounts.find((item) => item.email.toLowerCase() === email) ?? null : null;
+  return {
+    packs: [...db.packs].sort((a, b) => a.title.localeCompare(b.title)),
+    account,
+    owned: account ? db.ownership.filter((row) => row.account_id === account.id) : [],
+    events: [...db.events].reverse().slice(0, 12),
+  };
+}
+
+export function demoAccount(persona: "sam" | "admin"): AccountRecord {
+  const id = persona === "admin" ? "a1000000-0000-4000-8000-000000000002" : "a1000000-0000-4000-8000-000000000001";
+  const account = demoDb().accounts.find((item) => item.id === id);
+  if (!account) throw new Error("Demo family is missing.");
+  return asAccount(account);
+}
