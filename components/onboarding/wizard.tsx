@@ -432,7 +432,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           )}
           {screen === "details" && (
             <Button type="button" variant="mustard" size="lg" className="footer-cta" disabled={pending} onClick={() => void continueProfile()}>
-              {editing < count - 1 ? "Next child" : pending ? "Starting…" : "Get started"}
+              {editing < count - 1 ? "Next child" : pending ? "Starting…" : "Enter Club"}
             </Button>
           )}
         </div>
