@@ -509,7 +509,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             </div>
             <div className="avatar-modal-scroll min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6 lg:overflow-visible">
             <div className="grid items-start gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
-              <div>
+              <div className="lg:self-stretch lg:border-r lg:border-[#b9b5ad] lg:pr-5">
                 <div className="flex justify-center rounded-[24px] bg-[#f6efe2] p-3">
                   <FamilyAvatar build={avatarDraft} className="h-40 w-40" title="Avatar preview" />
                 </div>
