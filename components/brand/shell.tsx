@@ -21,7 +21,7 @@ export function AppShell({
     <div
       className={
         centered
-          ? "mx-auto w-full max-w-6xl px-3 py-4 sm:px-4 sm:py-6"
+          ? "mx-auto flex min-h-svh w-full max-w-6xl flex-col px-3 py-4 [justify-content:safe_center] sm:px-4 sm:py-6"
           : "mx-auto w-full max-w-none px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5"
       }
     >
