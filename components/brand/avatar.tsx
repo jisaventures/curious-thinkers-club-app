@@ -1,3 +1,4 @@
+import { FamilyAvatar } from "@/components/brand/family-avatar";
 import type { AvatarKey } from "@/lib/validators";
 
 const backgrounds: Record<AvatarKey, string> = {
@@ -15,13 +16,20 @@ const backgrounds: Record<AvatarKey, string> = {
 
 export function Avatar({
   avatar,
+  colour,
+  face,
   className = "size-11",
   title,
 }: {
   avatar: AvatarKey;
+  colour?: string | null;
+  face?: string | null;
   className?: string;
   title?: string;
 }) {
+  if (colour && face) {
+    return <FamilyAvatar colour={colour} face={face} className={className} title={title} />;
+  }
   return (
     <svg viewBox="0 0 64 64" className={className} role={title ? "img" : undefined} aria-label={title} aria-hidden={title ? undefined : true}>
       <circle cx="32" cy="32" r="32" fill={backgrounds[avatar]} />

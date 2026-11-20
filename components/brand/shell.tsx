@@ -4,26 +4,17 @@ import { isDemoMode } from "@/lib/demo/mode";
 import { shopUrl } from "@/lib/env";
 import type { AccountRecord } from "@/lib/auth/session";
 import { AdultAvatar, LogoMark } from "@/components/brand/logo";
-import { cn } from "@/lib/utils";
 
 export function AppShell({
   account,
   children,
-  fullWidth = false,
 }: {
   account: AccountRecord | null;
   children: React.ReactNode;
-  /** Member club uses the viewport. Login and admin stay in the narrower frame. */
-  fullWidth?: boolean;
 }) {
   const shop = shopUrl();
   return (
-    <div
-      className={cn(
-        "mx-auto w-full px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5",
-        fullWidth ? "max-w-none" : "max-w-[1180px] sm:py-6",
-      )}
-    >
+    <div className="mx-auto w-full max-w-none px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5">
       <div className="min-w-0 rounded-[28px] border border-white/80 bg-[#fffdf8] shadow-[0_24px_70px_rgba(30,77,58,0.08)]">
         <header className="flex items-center gap-3 px-3 py-3 sm:px-5 sm:py-4">
           <Link href={account ? "/club" : "/login"} className="flex min-w-0 items-center gap-2">

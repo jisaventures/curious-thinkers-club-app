@@ -39,7 +39,7 @@ export function PathMap({
         <span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-[#f0b429]" /> Here now</span>
         <span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-[#e6d3b0]" /> Still to come</span>
       </div>
-      <div className="relative mx-auto w-full max-w-[640px]" style={{ aspectRatio: `${width} / ${height}` }}>
+      <div className="relative w-full" style={{ aspectRatio: `${width} / ${height}` }}>
         <svg viewBox={`0 0 ${width} ${height}`} className="absolute inset-0 h-full w-full">
           <path d={path} fill="none" stroke="#e6d3b0" strokeWidth="28" strokeLinecap="round" />
           {top && (
@@ -105,7 +105,7 @@ export function PathMap({
                 transform: "translate(30%, 20%)",
               }}
             >
-              <Avatar avatar={child.avatar_key} title={child.nickname} className="size-7 rounded-full ring-2 ring-white" />
+              <Avatar avatar={child.avatar_key} colour={child.avatar_bg} face={child.avatar_face} title={child.nickname} className="size-7 rounded-full ring-2 ring-white" />
               {showPill && (
                 <span className="absolute top-7 left-0 whitespace-nowrap rounded-full bg-[#f0b429] px-2 py-0.5 text-[10px] font-extrabold text-[#1a3b2c]">
                   {shortName(child.nickname)} is here

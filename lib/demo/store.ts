@@ -24,6 +24,10 @@ export type DemoChild = {
   avatar_key: AvatarKey;
   age_years: number;
   created_at: string;
+  first_name?: string;
+  gender?: "boy" | "girl" | "other";
+  avatar_bg?: string;
+  avatar_face?: string;
 };
 
 export type DemoPack = {
@@ -462,6 +466,51 @@ export function markDemoSteps(accountId: string, stepId: string, childIds: strin
     certificate,
     packId: stepRow.pack_id,
   };
+}
+
+export function nicknameTaken(nickname: string) {
+  const folded = nickname.trim().toLowerCase();
+  return demoDb().children.some((child) => child.nickname.toLowerCase() === folded);
+}
+
+export function createDemoFamily(input: {
+  parentName: string;
+  children: Array<{
+    firstName: string;
+    nickname: string;
+    ageYears: number;
+    gender: "boy" | "girl" | "other";
+    avatarBg: string;
+    avatarFace: string;
+  }>;
+}) {
+  const db = demoDb();
+  const accountId = crypto.randomUUID();
+  db.accounts.push({
+    id: accountId,
+    display_name: input.parentName,
+    email: `family-${accountId.slice(0, 8)}@demo.curiousthinkersclub.test`,
+    is_adult_confirmed: true,
+    role: "member",
+    shopify_customer_id: null,
+  });
+  const childIds = input.children.map((child) => {
+    const id = crypto.randomUUID();
+    db.children.push({
+      id,
+      account_id: accountId,
+      nickname: child.nickname,
+      avatar_key: "star",
+      age_years: child.ageYears,
+      created_at: new Date().toISOString(),
+      first_name: child.firstName,
+      gender: child.gender,
+      avatar_bg: child.avatarBg,
+      avatar_face: child.avatarFace,
+    });
+    return id;
+  });
+  return { accountId, focusId: childIds[0] ?? null };
 }
 
 export function saveDemoVideo(accountId: string, stepId: string, childIds: string[], seconds: number) {

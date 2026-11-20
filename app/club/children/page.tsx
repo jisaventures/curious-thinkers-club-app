@@ -12,7 +12,7 @@ export default async function ChildrenPage() {
     : await (async () => {
         const { data, error } = await supabase
           .from("children")
-          .select("id, nickname, avatar_key, age_years")
+          .select("id, nickname, avatar_key, age_years, avatar_bg, avatar_face")
           .eq("account_id", account.id)
           .order("created_at");
         if (error) throw new Error(error.message);
@@ -21,6 +21,8 @@ export default async function ChildrenPage() {
           nickname: string;
           avatar_key: AvatarKey;
           age_years: number;
+          avatar_bg?: string | null;
+          avatar_face?: string | null;
         }>;
       })();
 
@@ -36,7 +38,7 @@ export default async function ChildrenPage() {
         {children.map((child) => (
           <section key={child.id} className="rounded-[22px] bg-white p-4">
             <div className="mb-3 flex items-center gap-3">
-              <Avatar avatar={child.avatar_key} className="size-12" />
+              <Avatar avatar={child.avatar_key} colour={child.avatar_bg} face={child.avatar_face} className="size-12" />
               <div>
                 <p className="font-extrabold">{child.nickname}</p>
                 <p className="text-xs text-[#5e7266]">Age {child.age_years}</p>

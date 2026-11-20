@@ -264,3 +264,11 @@ export function demoAccount(persona: "sam" | "admin"): AccountRecord {
   if (!account) throw new Error("Demo family is missing.");
   return asAccount(account);
 }
+
+export function demoAccountFromCookie(persona: string | undefined): AccountRecord | null {
+  if (!persona) return null;
+  if (persona === "admin") return demoAccount("admin");
+  if (persona === "sam") return demoAccount("sam");
+  const account = demoDb().accounts.find((item) => item.id === persona);
+  return account ? asAccount(account) : null;
+}

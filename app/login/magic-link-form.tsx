@@ -45,6 +45,12 @@ export function DemoLogin() {
         <DemoButton persona="guardian" label="Continue as Sam" />
         <DemoButton persona="admin" label="Continue as admin" />
       </div>
+      <form action="/api/dev/demo-login" method="post" className="mt-2">
+        <input type="hidden" name="persona" value="new" />
+        <Button type="submit" variant="outline" className="w-full">
+          Create a new account
+        </Button>
+      </form>
     </div>
   );
 }

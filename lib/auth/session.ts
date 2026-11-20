@@ -2,7 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { isDemoMode } from "@/lib/demo/mode";
-import { demoAccount } from "@/lib/demo/view";
+import { demoAccountFromCookie } from "@/lib/demo/view";
 import { createClient } from "@/lib/supabase/server";
 
 export type AccountRecord = {
@@ -20,8 +20,10 @@ export async function requireUser() {
     if (jar.get("ctc_demo_signed_out")?.value === "1") {
       return { supabase: null, user: null, account: null as AccountRecord | null };
     }
-    const persona = jar.get("ctc_demo_persona")?.value === "admin" ? "admin" : "sam";
-    const account = demoAccount(persona);
+    const account = demoAccountFromCookie(jar.get("ctc_demo_persona")?.value);
+    if (!account) {
+      return { supabase: null, user: null, account: null as AccountRecord | null };
+    }
     const unavailable = new Proxy(
       {},
       {

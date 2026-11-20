@@ -133,6 +133,8 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
                     >
                       <Avatar
                         avatar={child.avatar_key}
+                        colour={child.avatar_bg}
+                        face={child.avatar_face}
                         title={child.nickname}
                         className={`mx-auto size-14 rounded-full ${active ? "ring-4 ring-[#1e4d3a]" : ""}`}
                       />

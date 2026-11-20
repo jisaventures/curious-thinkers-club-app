@@ -215,6 +215,8 @@ function StepPanel({
       nickname: child.nickname,
       age_years: child.age_years,
       avatar_key: child.avatar_key,
+      avatar_bg: child.avatar_bg,
+      avatar_face: child.avatar_face,
       tickable: onStep,
       detail,
     };
@@ -292,7 +294,7 @@ function CertificateNote({ data }: { data: PackData }) {
 
 function LockedPack({ data }: { data: PackData }) {
   return (
-    <div className="mx-auto max-w-lg rounded-[22px] bg-white p-6 text-center">
+    <div className="w-full rounded-[22px] bg-white p-6 text-center">
       <Link href="/club" className="text-sm font-extrabold text-[#1e4d3a]">
         ← My Packs
       </Link>
