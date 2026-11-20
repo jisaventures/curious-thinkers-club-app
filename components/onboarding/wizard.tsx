@@ -213,11 +213,11 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 : "bg-[#c8c4bc] text-[#6f6b64]";
           return (
             <li key={label} className="relative flex min-w-36 shrink-0 flex-1" aria-current={current ? "step" : undefined}>
-              <span className="absolute top-0 left-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 rounded-full bg-[#d7efc8] px-2 py-0.5 text-xs font-extrabold whitespace-nowrap text-[#1e4d3a]">
-                {done && <Check className="size-3 shrink-0" strokeWidth={3} aria-hidden="true" />}
+              <span className="absolute top-0 left-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 rounded-full bg-[#d7efc8] px-3 py-1 font-display text-sm font-bold whitespace-nowrap text-[#1e4d3a] md:text-base">
+                {done && <Check className="size-4 shrink-0" strokeWidth={3} aria-hidden="true" />}
                 {done ? "Completed" : `Step ${index + 1}`}
               </span>
-              <div className={`flex min-h-16 w-full items-center justify-center rounded-2xl px-2 py-3 text-center text-sm leading-tight font-extrabold md:text-base ${tabClass}`}>
+              <div className={`flex min-h-16 w-full items-center justify-center rounded-2xl px-2 py-3 text-center font-display text-lg leading-tight font-bold md:text-xl ${tabClass}`}>
                 {label}
               </div>
             </li>
