@@ -30,7 +30,6 @@ export type AvatarHatId = (typeof AVATAR_HATS)[number];
 
 export const SKIN_COLOURS = [
   { id: "light", label: "Light", hex: "#ffdbb4" },
-  { id: "peach", label: "Peach", hex: "#fd9841" },
   { id: "warm", label: "Warm", hex: "#edb98a" },
   { id: "tan", label: "Tan", hex: "#d08b5b" },
   { id: "brown", label: "Brown", hex: "#ae5d29" },
