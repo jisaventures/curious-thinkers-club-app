@@ -21,7 +21,7 @@ export function AppShell({
     <div
       className={
         centered
-          ? "mx-auto flex min-h-svh w-full max-w-6xl flex-col px-3 py-4 sm:px-4 sm:py-6 lg:h-svh lg:overflow-hidden lg:py-3"
+          ? "mx-auto flex min-h-svh w-full max-w-6xl flex-col px-3 py-4 sm:px-4 sm:py-6"
           : "mx-auto w-full max-w-none px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5"
       }
     >
@@ -86,26 +86,38 @@ export function AppShell({
             )}
           </nav>
         </header>
-        {isDemoMode() && (
-          <div className="mx-3 mb-2 flex flex-col gap-2 rounded-2xl bg-[#fff6dc] px-3 py-2 text-sm text-[#1e4d3a] sm:mx-5 sm:flex-row sm:items-center sm:justify-between">
-            <p>
-              <span className="font-extrabold">Demo mode.</span> In-memory sample family. No Docker or Supabase. It resets when the dev server restarts.
-            </p>
-            <div className="flex gap-2">
-              <form action="/api/dev/demo-login" method="post">
-                <input type="hidden" name="persona" value="guardian" />
-                <button className="rounded-full bg-white px-3 py-1.5 text-xs font-extrabold">Sam&apos;s club</button>
-              </form>
-              <form action="/api/dev/demo-login" method="post">
-                <input type="hidden" name="persona" value="admin" />
-                <button className="rounded-full bg-[#1e4d3a] px-3 py-1.5 text-xs font-extrabold text-white">Admin</button>
-              </form>
-            </div>
-          </div>
-        )}
         <div className={`px-3 pb-6 sm:px-5 md:px-7 md:pb-8 ${centered ? "flex flex-1 flex-col lg:pb-4" : ""}`}>{children}</div>
       </div>
+      {isDemoMode() && <DemoModeMenu />}
     </div>
+  );
+}
+
+function DemoModeMenu() {
+  return (
+    <details className="fixed top-3 right-3 z-50">
+      <summary
+        className="flex cursor-pointer list-none flex-col items-center [&::-webkit-details-marker]:hidden"
+        aria-label="Demo mode"
+      >
+        <LogoMark className="size-11 drop-shadow-md" />
+        <span className="-mt-1 rounded-full bg-[#f0b429] px-1.5 text-[10px] font-extrabold text-[#1a3b2c]">Demo</span>
+      </summary>
+      <div className="absolute right-0 mt-2 w-44 rounded-2xl border border-[#efe2d0] bg-white p-2 shadow-lg">
+        <p className="px-3 py-1 text-[11px] font-extrabold tracking-wide text-[#c45b73] uppercase">Demo mode</p>
+        <form action="/api/dev/demo-login" method="post">
+          <input type="hidden" name="persona" value="guardian" />
+          <button className="w-full rounded-xl px-3 py-2 text-left text-sm font-bold hover:bg-[#f6f1e6]">Sam&apos;s club</button>
+        </form>
+        <form action="/api/dev/demo-login" method="post">
+          <input type="hidden" name="persona" value="admin" />
+          <button className="w-full rounded-xl px-3 py-2 text-left text-sm font-bold hover:bg-[#f6f1e6]">Admin</button>
+        </form>
+        <form action={signOut}>
+          <button className="w-full rounded-xl px-3 py-2 text-left text-sm font-bold hover:bg-[#f6f1e6]">Log out</button>
+        </form>
+      </div>
+    </details>
   );
 }
 

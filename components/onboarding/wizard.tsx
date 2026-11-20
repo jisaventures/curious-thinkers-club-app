@@ -35,7 +35,7 @@ type ChildDraft = {
 
 type Screen = "welcome" | "family" | "details" | "avatar";
 
-const stepCard = "mx-auto flex w-full max-w-2xl flex-col overflow-hidden rounded-[28px] bg-white p-5 shadow-sm lg:h-[33.5rem] lg:p-5";
+const stepCard = "mx-auto w-full max-w-2xl rounded-[28px] bg-white p-5 shadow-sm sm:p-7";
 
 const emptyChild = (): ChildDraft => ({
   firstName: "",
@@ -217,7 +217,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               .
             </span>
           </label>
-          <Button type="button" className="mt-auto w-full" size="lg" disabled={!terms} onClick={() => setScreen("family")}>
+          <Button type="button" className="mt-4 w-full" size="lg" disabled={!terms} onClick={() => setScreen("family")}>
             Get started
           </Button>
         </section>
@@ -243,7 +243,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               </button>
             ))}
           </div>
-          <div className="mt-auto flex gap-2 pt-4">
+          <div className="mt-5 flex gap-2">
             <Button type="button" variant="outline" className="flex-1" onClick={() => setScreen("welcome")}>
               Back
             </Button>
@@ -324,7 +324,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           </fieldset>
 
           {message && <p className="mt-4 text-sm font-bold text-[#8a4b3a]">{message}</p>}
-          <div className="mt-auto flex gap-2 pt-2">
+          <div className="mt-4 flex gap-2">
             <Button
               type="button"
               variant="outline"
@@ -386,7 +386,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           </div>
           </div>
 
-          <div className="mt-auto flex gap-2 pt-2">
+          <div className="mt-4 flex gap-2">
             <Button type="button" variant="outline" className="flex-1" onClick={() => setScreen("details")}>
               Back
             </Button>
