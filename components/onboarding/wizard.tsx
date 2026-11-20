@@ -19,7 +19,7 @@ import {
   type AvatarBuild,
 } from "@/lib/avataaars-options";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
-import { Check, ChevronLeft, ChevronRight, Mars, Venus, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Mars, Trophy, Venus, X } from "lucide-react";
 
 type Gender = "boy" | "girl" | "unspecified";
 
@@ -339,7 +339,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               <div className="space-y-2">
                 <Label htmlFor="nickname">Nickname</Label>
                 <div className="flex gap-2">
-                  <Input id="nickname" value={child.nickname} readOnly aria-readonly="true" />
+                  <Input id="nickname" value={child.nickname} disabled />
                   <Button type="button" variant="green" size="sm" className="shrink-0" onClick={regenerateNickname}>
                     Re-generate
                   </Button>
@@ -425,9 +425,15 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               {count === 1 ? "Add your child" : `Add ${count} children`}
             </Button>
           )}
-          {screen === "details" && (
+          {screen === "details" && editing < count - 1 && (
             <Button type="button" variant="mustard" size="lg" className="footer-cta" disabled={pending} onClick={() => void continueProfile()}>
-              {editing < count - 1 ? "Next child" : pending ? "Starting…" : "Enter Club"}
+              Next child
+            </Button>
+          )}
+          {screen === "details" && editing >= count - 1 && (
+            <Button type="button" variant="green" size="lg" className="footer-cta" disabled={pending} onClick={() => void continueProfile()}>
+              <Trophy className="size-6 shrink-0 text-[#e8a428]" strokeWidth={2.4} aria-hidden="true" />
+              {pending ? "Starting…" : "Enter Club"}
             </Button>
           )}
         </div>
