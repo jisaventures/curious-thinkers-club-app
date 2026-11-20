@@ -1,5 +1,8 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { markNextStep, setFocusChild } from "@/app/club/actions";
+import { markNextStepNow, setFocusChild } from "@/app/club/actions";
 import { signOut } from "@/app/login/actions";
 import { Avatar } from "@/components/brand/avatar";
 import { BookCover } from "@/components/club/book-cover";
@@ -9,15 +12,41 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { formatMonth, formatPounds, ordinal, possessive } from "@/lib/format";
 import { shopUrl } from "@/lib/env";
+import { levelProgress } from "@/lib/levels";
 import type { loadDashboard } from "@/lib/club/data";
 
 type DashboardData = Awaited<ReturnType<typeof loadDashboard>>;
 
 export function DashboardView({ data, notice }: { data: DashboardData; notice?: string }) {
-  const { focus, account } = data;
+  const { account } = data;
   const month = formatMonth();
   const shop = shopUrl();
-  const partial = [...data.packs]
+  const serverKey = JSON.stringify(data.doneByChild) + JSON.stringify(data.pointsByChild);
+  const [seenKey, setSeenKey] = useState(serverKey);
+  const [focusId, setFocusId] = useState(data.focus?.id ?? "");
+  const [doneByChild, setDoneByChild] = useState(data.doneByChild);
+  const [pointsByChild, setPointsByChild] = useState(data.pointsByChild);
+  const [localNotice, setLocalNotice] = useState<string | null>(null);
+  if (seenKey !== serverKey) {
+    setSeenKey(serverKey);
+    setDoneByChild(data.doneByChild);
+    setPointsByChild(data.pointsByChild);
+  }
+  const focus = data.children.find((child) => child.id === focusId) ?? data.focus;
+  const points = focus ? (pointsByChild[focus.id] ?? 0) : 0;
+  const level = levelProgress(points);
+  const packs = data.packs.map((pack) => ({
+    ...pack,
+    done: focus ? (doneByChild[focus.id]?.[pack.id] ?? 0) : 0,
+  }));
+  const unlockedReward =
+    [...data.rewardLadder].filter((reward) => points >= reward.min_points).sort((a, b) => b.min_points - a.min_points)[0] ??
+    null;
+  const nextReward =
+    [...data.rewardLadder].filter((reward) => points < reward.min_points).sort((a, b) => a.min_points - b.min_points)[0] ??
+    null;
+  const latestSubmission = data.submissions.find((row) => !focus || row.child_id === focus.id) ?? null;
+  const partial = [...packs]
     .filter((pack) => pack.owned && pack.total > 0 && pack.done > 0 && pack.done < pack.total)
     .sort((a, b) => b.done / b.total - a.done / a.total)[0];
   const hint = partial
@@ -25,6 +54,41 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
       ? "Finish this spy pack and share a photo to level up."
       : `Finish “${partial.title}” and share a photo to level up.`
     : "Finish a pack and share a photo to level up.";
+
+  function chooseChild(childId: string) {
+    setFocusId(childId);
+    const body = new FormData();
+    body.set("childId", childId);
+    void setFocusChild(body);
+  }
+
+  function markPack(packId: string) {
+    if (!focus) return;
+    const pack = packs.find((item) => item.id === packId);
+    if (!pack || pack.done >= pack.total) {
+      setLocalNotice("This pack is already finished.");
+      return;
+    }
+    const stepPoints = pack.stepPoints[pack.done] ?? 0;
+    const bonus = pack.done + 1 === pack.total ? pack.certificate_bonus_points : 0;
+    const previousDone = doneByChild;
+    const previousPoints = pointsByChild;
+    setDoneByChild((current) => ({
+      ...current,
+      [focus.id]: { ...current[focus.id], [packId]: pack.done + 1 },
+    }));
+    setPointsByChild((current) => ({
+      ...current,
+      [focus.id]: (current[focus.id] ?? 0) + stepPoints + bonus,
+    }));
+    setLocalNotice(bonus > 0 ? "Pack finished. Certificate and bonus points added." : "Step marked complete");
+    void markNextStepNow(packId, focus.id).then((result) => {
+      if (result.ok) return;
+      setDoneByChild(previousDone);
+      setPointsByChild(previousPoints);
+      setLocalNotice(result.message ?? "Something went wrong.");
+    });
+  }
 
   return (
     <div className="space-y-5">
@@ -60,9 +124,13 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
               {data.children.map((child) => {
                 const active = child.id === focus?.id;
                 return (
-                  <form key={child.id} action={setFocusChild}>
-                    <input type="hidden" name="childId" value={child.id} />
-                    <button className="w-[72px] text-center" aria-pressed={active}>
+                  <div key={child.id}>
+                    <button
+                      type="button"
+                      className="w-[72px] text-center active:scale-95"
+                      aria-pressed={active}
+                      onClick={() => chooseChild(child.id)}
+                    >
                       <Avatar
                         avatar={child.avatar_key}
                         title={child.nickname}
@@ -71,7 +139,7 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
                       <span className="mt-1 block truncate text-xs font-extrabold">{child.nickname.split(" ").slice(-1)}</span>
                       <span className="block text-[11px] text-[#5e7266]">Age {child.age_years}</span>
                     </button>
-                  </form>
+                  </div>
                 );
               })}
               {data.children.length < 5 && (
@@ -101,21 +169,27 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
         </div>
       </section>
 
-      {notice && (
-        <p className="rounded-2xl bg-[#e7f5e1] px-4 py-3 text-sm font-bold text-[#1e4d3a]">{notice}</p>
+      {(localNotice || notice) && (
+        <p className="rounded-2xl bg-[#e7f5e1] px-4 py-3 text-sm font-bold text-[#1e4d3a]">{localNotice || notice}</p>
       )}
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <section>
-          <div className="mb-3 flex items-end justify-between gap-3">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-5 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_340px]">
+        <section className="min-w-0">
+          <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
             <h2 className="font-display text-2xl text-[#1e4d3a]">My Packs</h2>
             {focus && <p className="text-sm font-bold text-[#5e7266]">Progress for {focus.nickname}</p>}
           </div>
-          <div className="space-y-3">
-            {data.packs.map((pack) => (
-              <PackCard key={pack.id} pack={pack} focusId={focus?.id ?? null} shop={shop} />
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+            {packs.map((pack) => (
+              <PackCard
+                key={pack.id}
+                pack={pack}
+                focusId={focus?.id ?? null}
+                shop={shop}
+                onMark={() => markPack(pack.id)}
+              />
             ))}
-            {data.packs.length === 0 && (
+            {packs.length === 0 && (
               <p className="rounded-[22px] bg-white p-5 text-sm text-[#5e7266]">
                 Packs you buy in the shop will show up here for every child on this account.
               </p>
@@ -128,15 +202,15 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
             <p className="text-sm font-bold text-[#d7eccf]">
               {focus ? `${focus.nickname.split(" ").slice(-1)}'s points` : "Points"}
             </p>
-            <p className="font-display text-5xl text-[#f5c542]">{data.points}</p>
-            <p className="text-sm">Level {data.level.current.name}</p>
-            {data.level.next && (
+            <p className="font-display text-5xl text-[#f5c542]">{points}</p>
+            <p className="text-sm">Level {level.current.name}</p>
+            {level.next && (
               <>
-                <p className="mt-2 text-xs text-[#d7eccf]">Next level: {data.level.next.name}</p>
+                <p className="mt-2 text-xs text-[#d7eccf]">Next level: {level.next.name}</p>
                 <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-[#0f2c22]">
-                  <div className="h-full rounded-full bg-[#f0b429]" style={{ width: `${Math.round(data.level.ratio * 100)}%` }} />
+                  <div className="h-full rounded-full bg-[#f0b429]" style={{ width: `${Math.round(level.ratio * 100)}%` }} />
                 </div>
-                <p className="mt-1 text-xs text-[#f5c542]">{data.level.toGo} pts to go</p>
+                <p className="mt-1 text-xs text-[#f5c542]">{level.toGo} pts to go</p>
               </>
             )}
             <p className="mt-3 text-sm leading-snug text-[#e7f5e1]">{hint}</p>
@@ -185,24 +259,24 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
           </section>
 
           <section className="rounded-[22px] border border-[#f0e0b0] bg-[#fff6dc] p-4">
-            {data.unlockedReward ? (
+            {unlockedReward ? (
               <>
                 <p className="text-xs font-extrabold tracking-wide text-[#8a6a12] uppercase">Rewards unlocked</p>
-                <h2 className="mt-1 font-display text-xl leading-tight text-[#1e4d3a]">{data.unlockedReward.headline}</h2>
-                <p className="mt-1 text-sm text-[#5e7266]">{data.unlockedReward.description}</p>
+                <h2 className="mt-1 font-display text-xl leading-tight text-[#1e4d3a]">{unlockedReward.headline}</h2>
+                <p className="mt-1 text-sm text-[#5e7266]">{unlockedReward.description}</p>
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                   <p className="rounded-xl border border-dashed border-[#e0c56a] bg-white px-3 py-2 font-display tracking-widest">
-                    {data.unlockedReward.code}
+                    {unlockedReward.code}
                   </p>
-                  <CopyCode code={data.unlockedReward.code} />
+                  <CopyCode code={unlockedReward.code} />
                 </div>
               </>
             ) : (
               <>
                 <h2 className="font-display text-xl text-[#1e4d3a]">Rewards</h2>
                 <p className="mt-1 text-sm text-[#5e7266]">
-                  {data.nextReward
-                    ? `${data.nextReward.min_points - data.points} points to go until ${data.nextReward.code}.`
+                  {nextReward
+                    ? `${nextReward.min_points - points} points to go until ${nextReward.code}.`
                     : "Shop codes will appear here when you reach a reward."}
                 </p>
               </>
@@ -214,7 +288,7 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
               childId={focus.id}
               nickname={focus.nickname.split(" ").slice(-1)[0]}
               packs={data.packs.filter((pack) => pack.owned).map((pack) => ({ id: pack.id, title: pack.title }))}
-              latest={data.submissions[0] ?? null}
+              latest={latestSubmission}
             />
           )}
         </aside>
@@ -230,14 +304,16 @@ function PackCard({
   pack,
   focusId,
   shop,
+  onMark,
 }: {
   pack: DashboardData["packs"][number];
   focusId: string | null;
   shop: string;
+  onMark: () => void;
 }) {
   const pct = pack.total ? Math.round((pack.done / pack.total) * 100) : 0;
   return (
-    <article className="rounded-[22px] border border-[#f0e6d6] bg-white p-4 shadow-[0_8px_24px_rgba(30,77,58,0.04)]">
+    <article className="min-w-0 rounded-[22px] border border-[#f0e6d6] bg-white p-4 shadow-[0_8px_24px_rgba(30,77,58,0.04)]">
       <div className="flex gap-3">
         <BookCover tone={pack.cover_tone} title={pack.title} locked={!pack.owned} />
         <div className="min-w-0 flex-1">
@@ -269,13 +345,9 @@ function PackCard({
             <Button asChild variant="outline" size="sm">
               <Link href={`/club/packs/${pack.slug}?mode=together&child=${focusId}`}>Continue</Link>
             </Button>
-            <form action={markNextStep}>
-              <input type="hidden" name="packId" value={pack.id} />
-              <input type="hidden" name="childId" value={focusId} />
-              <Button type="submit" size="sm">
-                Mark complete
-              </Button>
-            </form>
+            <Button type="button" size="sm" onClick={onMark}>
+              Mark complete
+            </Button>
           </>
         ) : (
           <Button asChild>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { markStepForChildren } from "@/app/club/actions";
 import { Avatar } from "@/components/brand/avatar";
 import { Button } from "@/components/ui/button";
@@ -23,13 +22,16 @@ export function MarkPanel({
   points,
   learners,
   defaultTicked,
+  onAdvance,
+  onRevert,
 }: {
   stepId: string;
   points: number;
   learners: MarkChild[];
   defaultTicked: string[];
+  onAdvance?: (childIds: string[]) => void;
+  onRevert?: () => void;
 }) {
-  const router = useRouter();
   const [ticked, setTicked] = useState<string[]>(defaultTicked);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -47,10 +49,13 @@ export function MarkPanel({
       setMessage("Tick the children who finished this step.");
       return;
     }
+    const childIds = chosen.map((child) => child.id);
+    onAdvance?.(childIds);
     setPending(true);
-    const result = await markStepForChildren({ stepId, childIds: chosen.map((child) => child.id) });
+    const result = await markStepForChildren({ stepId, childIds });
     setPending(false);
     if (!result.ok) {
+      onRevert?.();
       setMessage(result.message ?? "Something went wrong.");
       return;
     }
@@ -60,7 +65,6 @@ export function MarkPanel({
         ? `${names} finished the pack. Certificate and bonus points added.`
         : `${names} earned ${result.points} points.`,
     );
-    router.refresh();
   }
 
   return (

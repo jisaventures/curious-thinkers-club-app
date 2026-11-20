@@ -11,6 +11,7 @@ import {
   demoDeleteChild,
   demoMark,
   demoMarkNext,
+  demoMarkNextResult,
   demoOwnsChild,
   demoSaveVideo,
   demoUpdateChild,
@@ -103,7 +104,6 @@ export async function setFocusChild(formData: FormData) {
     if (!(await demoOwnsChild(account.id, id.data))) return;
     const jar = await cookies();
     jar.set("ctc_focus_child", id.data, { ...authCookieOptions, maxAge: 60 * 60 * 24 * 180 });
-    revalidatePath("/club");
     return;
   }
   const { supabase } = await requireAdult();
@@ -116,7 +116,6 @@ export async function setFocusChild(formData: FormData) {
   if (!data) return;
   const jar = await cookies();
   jar.set("ctc_focus_child", id.data, { ...authCookieOptions, maxAge: 60 * 60 * 24 * 180 });
-  revalidatePath("/club");
 }
 
 async function stepContext(stepId: string, childIds: string[]) {
@@ -197,6 +196,37 @@ export async function markStepForChildren(input: { stepId: string; childIds: str
     points: context.step.points,
     certificate: context.step.position === context.last,
   };
+}
+
+export async function markNextStepNow(packId: string, childId: string) {
+  const parsedPack = uuidSchema.safeParse(packId);
+  const parsedChild = uuidSchema.safeParse(childId);
+  if (!parsedPack.success || !parsedChild.success) {
+    return { ok: false as const, message: "That pack could not be updated." };
+  }
+  if (isDemoMode()) {
+    const { account } = await requireAdult();
+    return demoMarkNextResult(account.id, parsedPack.data, parsedChild.data);
+  }
+
+  const { supabase } = await requireAdult();
+  const { data: steps } = await supabase
+    .from("steps")
+    .select("id, position")
+    .eq("pack_id", parsedPack.data)
+    .order("position");
+  const { data: progress } = await supabase
+    .from("step_progress")
+    .select("step_id, status")
+    .eq("child_id", parsedChild.data);
+  const complete = (progress ?? [])
+    .filter((row) => row.status === "complete")
+    .map((row) => steps?.find((step) => step.id === row.step_id)?.position)
+    .filter((position): position is number => typeof position === "number");
+  const next = nextStepPosition((steps ?? []).map((step) => step.position), complete);
+  const step = (steps ?? []).find((item) => item.position === next);
+  if (!step) return { ok: false as const, message: "This pack is already finished." };
+  return markStepForChildren({ stepId: step.id, childIds: [parsedChild.data] });
 }
 
 export async function markNextStep(formData: FormData) {

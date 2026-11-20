@@ -1,3 +1,6 @@
+"use client";
+
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { BookCover } from "@/components/club/book-cover";
 import { MarkPanel, type MarkChild } from "@/components/club/mark-panel";
@@ -6,23 +9,80 @@ import { VideoGuide } from "@/components/club/video-guide";
 import { Button } from "@/components/ui/button";
 import { formatClock, formatPounds, shortName } from "@/lib/format";
 import { shopUrl } from "@/lib/env";
+import { catchUpNudge } from "@/lib/progress";
 import type { loadPackPage } from "@/lib/club/data";
 
 type PackData = Awaited<ReturnType<typeof loadPackPage>>;
 
 export function PackView({ data }: { data: PackData }) {
   if (!data.owned) return <LockedPack data={data} />;
-  const focus = data.focus;
-  const step = data.activeStep;
-  const mode = data.mode;
-  const childQuery = focus ? `&child=${focus.id}` : "";
+  return <LivePack data={data} />;
+}
+
+function LivePack({ data }: { data: Extract<PackData, { owned: true }> }) {
+  const serverStamp = data.childViews.map((child) => `${child.id}:${child.nextPosition}:${child.finished}`).join("|");
+  const [seenStamp, setSeenStamp] = useState(serverStamp);
+  const [mode, setMode] = useState(data.mode);
+  const [focusId, setFocusId] = useState(data.focus?.id ?? "");
+  const [childViews, setChildViews] = useState(data.childViews);
+  const viewsBeforeMark = useRef(data.childViews);
+  if (seenStamp !== serverStamp) {
+    setSeenStamp(serverStamp);
+    setChildViews(data.childViews);
+  }
+
+  const focus = childViews.find((child) => child.id === focusId) ?? childViews[0] ?? null;
+  const activePosition = focus ? (focus.finished ? null : (focus.nextPosition ?? data.steps[0]?.position ?? null)) : null;
+  const step = data.steps.find((item) => item.position === activePosition) ?? null;
+  const video = step && "video" in step ? step.video : data.video;
+  const nudgeResult =
+    mode === "together" && focus
+      ? catchUpNudge(
+          focus.nextPosition ?? (focus.finished ? null : 1),
+          childViews
+            .filter((child) => child.id !== focus.id)
+            .map((child) => ({
+              nickname: child.nickname,
+              currentPosition: child.started ? child.nextPosition : null,
+              started: child.started,
+            })),
+        )
+      : null;
+  const behind = childViews.find((child) => child.nickname === nudgeResult?.nickname) ?? null;
+  const nudge = nudgeResult && behind ? { ...nudgeResult, childId: behind.id } : null;
+  const view = { ...data, focus, mode, activeStep: step, video, nudge, childViews };
+
+  function show(nextMode: "together" | "solo", childId: string) {
+    setMode(nextMode);
+    setFocusId(childId);
+    const url = `/club/packs/${data.pack.slug}?mode=${nextMode}&child=${childId}`;
+    window.history.replaceState(null, "", url);
+  }
+
+  function advance(childIds: string[]) {
+    viewsBeforeMark.current = childViews;
+    const positions = data.steps.map((item) => item.position);
+    setChildViews((current) =>
+      current.map((child) => {
+        if (!childIds.includes(child.id) || child.nextPosition == null) return child;
+        const following = positions.find((position) => position > child.nextPosition!) ?? null;
+        return {
+          ...child,
+          started: true,
+          finished: following == null,
+          nextPosition: following,
+          resumeSeconds: 0,
+        };
+      }),
+    );
+  }
 
   return (
     <div className="space-y-4">
       <Link href="/club" className="inline-flex text-sm font-extrabold text-[#1e4d3a]">
         ← My Packs
       </Link>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2">
         <section className="rounded-[22px] border border-[#f0e6d6] bg-white p-4">
           <div className="flex gap-3">
             <BookCover tone={data.pack.cover_tone} title={data.pack.title} />
@@ -48,18 +108,20 @@ export function PackView({ data }: { data: PackData }) {
             <h2 className="font-display text-xl text-[#1e4d3a]">Who&apos;s doing this pack?</h2>
           </div>
           <div className="mt-3 grid grid-cols-2 rounded-full bg-[#f6efe2] p-1 text-center text-sm font-extrabold">
-            <Link
-              href={`/club/packs/${data.pack.slug}?mode=together${childQuery}`}
+            <button
+              type="button"
+              onClick={() => focus && show("together", focus.id)}
               className={`rounded-full px-3 py-2 ${mode === "together" ? "bg-white text-[#1e4d3a] shadow-sm" : "text-[#5e7266]"}`}
             >
               Together
-            </Link>
-            <Link
-              href={`/club/packs/${data.pack.slug}?mode=solo${childQuery}`}
+            </button>
+            <button
+              type="button"
+              onClick={() => focus && show("solo", focus.id)}
               className={`rounded-full px-3 py-2 ${mode === "solo" ? "bg-white text-[#1e4d3a] shadow-sm" : "text-[#5e7266]"}`}
             >
               Solo
-            </Link>
+            </button>
           </div>
           <p className="mt-3 text-sm text-[#5e7266]">
             {mode === "together"
@@ -67,17 +129,14 @@ export function PackView({ data }: { data: PackData }) {
               : `Viewing ${focus ? `${shortName(focus.nickname)}'s` : "a"} path. Tap another child to switch.`}
           </p>
           <ul className="mt-3 space-y-2">
-            {data.childViews.map((child) => {
-              const href =
-                mode === "together"
-                  ? `/club/packs/${data.pack.slug}?mode=solo&child=${child.id}`
-                  : `/club/packs/${data.pack.slug}?mode=solo&child=${child.id}`;
+            {childViews.map((child) => {
               const active = child.id === focus?.id;
               return (
                 <li key={child.id}>
-                  <Link
-                    href={href}
-                    className={`flex items-center gap-3 rounded-2xl px-2 py-1.5 ${active ? "bg-[#e7f5e1]" : "hover:bg-[#fbf7f1]"}`}
+                  <button
+                    type="button"
+                    onClick={() => show("solo", child.id)}
+                    className={`flex w-full items-center gap-3 rounded-2xl px-2 py-1.5 text-left ${active ? "bg-[#e7f5e1]" : "hover:bg-[#fbf7f1]"}`}
                   >
                     <span className="text-[#1e4d3a]">{active ? "●" : "○"}</span>
                     <span className="min-w-0 flex-1">
@@ -87,7 +146,7 @@ export function PackView({ data }: { data: PackData }) {
                     <span className="rounded-full bg-white px-2 py-1 text-xs font-extrabold text-[#1e4d3a]">
                       {child.finished ? "Finished" : !child.started ? "Not started" : `Step ${child.nextPosition}`}
                     </span>
-                  </Link>
+                  </button>
                 </li>
               );
             })}
@@ -99,7 +158,7 @@ export function PackView({ data }: { data: PackData }) {
           <p className="text-sm text-[#5e7266]">Each child keeps their own place. Tap a child to go solo.</p>
           <PathMap
             steps={data.steps}
-            walkers={data.childViews}
+            walkers={childViews}
             activePosition={step?.position ?? null}
             focusId={focus?.id ?? null}
           />
@@ -107,9 +166,14 @@ export function PackView({ data }: { data: PackData }) {
 
         <section id="step-panel" className="rounded-[22px] border border-[#f0e6d6] bg-white p-4">
           {focus && step ? (
-            <StepPanel data={data} />
+            <StepPanel
+              data={view}
+              onShow={show}
+              onAdvance={advance}
+              onRevert={() => setChildViews(viewsBeforeMark.current)}
+            />
           ) : (
-            <CertificateNote data={data} />
+            <CertificateNote data={view} />
           )}
         </section>
       </div>
@@ -117,7 +181,17 @@ export function PackView({ data }: { data: PackData }) {
   );
 }
 
-function StepPanel({ data }: { data: PackData }) {
+function StepPanel({
+  data,
+  onShow,
+  onAdvance,
+  onRevert,
+}: {
+  data: Extract<PackData, { owned: true }>;
+  onShow: (mode: "together" | "solo", childId: string) => void;
+  onAdvance: (childIds: string[]) => void;
+  onRevert: () => void;
+}) {
   const step = data.activeStep;
   const focus = data.focus;
   if (!step || !focus) return null;
@@ -164,19 +238,18 @@ function StepPanel({ data }: { data: PackData }) {
             {shortName(data.nudge.nickname)} is {data.nudge.gap} steps behind. Catch up together or carry on solo?
           </p>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-            <Button asChild variant="bottle" className="flex-1">
-              <Link href={`/club/packs/${data.pack.slug}?mode=together&child=${data.nudge.childId}`}>
-                Catch up together
-              </Link>
+            <Button type="button" variant="bottle" className="flex-1" onClick={() => onShow("together", data.nudge!.childId)}>
+              Catch up together
             </Button>
-            <Button asChild variant="outline" className="flex-1">
-              <Link href={`/club/packs/${data.pack.slug}?mode=solo&child=${focus.id}`}>Carry on solo</Link>
+            <Button type="button" variant="outline" className="flex-1" onClick={() => onShow("solo", focus.id)}>
+              Carry on solo
             </Button>
           </div>
         </div>
       )}
       <div className="mt-4">
         <VideoGuide
+          key={`${step.id}:${focus.id}`}
           provider={data.video.provider}
           src={data.video.src}
           minutes={step.estimated_minutes}
@@ -190,10 +263,13 @@ function StepPanel({ data }: { data: PackData }) {
         {resume > 3 ? ` ${shortName(focus.nickname)} can pick up where they left off.` : ""}
       </p>
       <MarkPanel
+        key={`${step.id}:${focus.id}:${onStepIds.join(",")}`}
         stepId={step.id}
         points={step.points}
         learners={markChildren}
         defaultTicked={onStepIds.includes(focus.id) ? [focus.id] : []}
+        onAdvance={onAdvance}
+        onRevert={onRevert}
       />
     </div>
   );

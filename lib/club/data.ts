@@ -29,6 +29,7 @@ export type ClubPack = {
   owned: boolean;
   done: number;
   total: number;
+  stepPoints: number[];
 };
 
 type StepRow = {
@@ -95,7 +96,7 @@ export async function loadDashboard() {
 
   const ownedIds = [...owned];
   const stepsRes = ownedIds.length
-    ? await supabase.from("steps").select("id, pack_id, position").in("pack_id", ownedIds)
+    ? await supabase.from("steps").select("id, pack_id, position, points").in("pack_id", ownedIds)
     : { data: [], error: null };
   const progressRes = children.length
     ? await supabase
@@ -142,6 +143,7 @@ export async function loadDashboard() {
         owned: owned.has(pack.id),
         done,
         total: pack.step_count || packSteps.length,
+        stepPoints: packSteps.sort((a, b) => a.position - b.position).map((step) => step.points),
       };
     })
     .sort((a, b) => {
@@ -149,6 +151,17 @@ export async function loadDashboard() {
       const bi = PACK_ORDER.indexOf(b.slug);
       return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
     });
+
+  const doneByChild: Record<string, Record<string, number>> = {};
+  for (const child of children) {
+    doneByChild[child.id] = {};
+    for (const pack of packs) {
+      const packSteps = steps.filter((step) => step.pack_id === pack.id);
+      doneByChild[child.id][pack.id] = packSteps.filter((step) =>
+        progress.some((row) => row.child_id === child.id && row.step_id === step.id && row.status === "complete"),
+      ).length;
+    }
+  }
 
   const focusPoints = focus ? (pointsByChild.get(focus.id) ?? 0) : 0;
   const level = levelProgress(focusPoints);
@@ -176,8 +189,18 @@ export async function loadDashboard() {
     prizes,
     unlockedReward,
     nextReward,
-    submissions: submissions.filter((row) => !focus || row.child_id === focus.id).slice(0, 3),
+    submissions: submissions.slice(0, 12),
     partial: packCards.find((pack) => pack.owned && pack.done > 0 && pack.total > 0 && pack.done < pack.total) ?? null,
+    doneByChild,
+    pointsByChild: Object.fromEntries(pointsByChild),
+    rewardLadder: rewards
+      .filter((reward) => reward.active)
+      .map((reward) => ({
+        code: reward.code as string,
+        headline: reward.headline as string,
+        description: reward.description as string,
+        min_points: reward.min_points as number,
+      })),
   };
 }
 
@@ -246,7 +269,11 @@ export async function loadPackPage(slug: string, modeRaw?: string, childRaw?: st
   if (stepError) throw new Error(stepError.message);
   if (progressError) throw new Error(progressError.message);
 
-  const steps = ((stepRows ?? []) as StepRow[]).sort((a, b) => a.position - b.position);
+  const steps = await Promise.all(
+    ((stepRows ?? []) as StepRow[])
+      .sort((a, b) => a.position - b.position)
+      .map(async (step) => ({ ...step, video: await resolveVideo(supabase, step.video_url) })),
+  );
   const progress = (progressRows ?? []) as ProgressRow[];
   const positions = steps.map((step) => step.position);
 
@@ -274,7 +301,7 @@ export async function loadPackPage(slug: string, modeRaw?: string, childRaw?: st
   const focus = childViews.find((child) => child.id === childRaw) ?? childViews[0] ?? null;
   const activePosition = focus ? (focus.finished ? null : (focus.nextPosition ?? (steps[0]?.position ?? null))) : null;
   const activeStep = steps.find((step) => step.position === activePosition) ?? null;
-  const video = activeStep ? await resolveVideo(supabase, activeStep.video_url) : { provider: "none" as const, src: "" };
+  const video = activeStep?.video ?? { provider: "none" as const, src: "" };
 
   const nudge =
     mode === "together" && focus

@@ -39,7 +39,7 @@ export function PathMap({
         <span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-[#f0b429]" /> Here now</span>
         <span className="inline-flex items-center gap-1"><i className="size-2.5 rounded-full bg-[#e6d3b0]" /> Still to come</span>
       </div>
-      <div className="relative mx-auto w-full max-w-[460px]" style={{ aspectRatio: `${width} / ${height}` }}>
+      <div className="relative mx-auto w-full max-w-[640px]" style={{ aspectRatio: `${width} / ${height}` }}>
         <svg viewBox={`0 0 ${width} ${height}`} className="absolute inset-0 h-full w-full">
           <path d={path} fill="none" stroke="#e6d3b0" strokeWidth="28" strokeLinecap="round" />
           {top && (
