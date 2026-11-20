@@ -29,9 +29,13 @@
   color: var(--ctc-green);
 }
 
+.fredoka-bold,
 .count-pick {
   font-family: var(--font-fredoka), ui-sans-serif, system-ui, sans-serif;
   font-weight: 700;
+}
+
+.count-pick {
   line-height: 1;
   font-size: clamp(2rem, 7vw, 3.25rem);
 }
