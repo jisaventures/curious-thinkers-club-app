@@ -80,7 +80,7 @@ export const GIRL_HAIR = [
   "straight01",
 ] as const satisfies readonly (typeof AVATAAARS_TOPS)[number][];
 
-export const AVATAAARS_EYES = ["happy", "side", "wink"] as const;
+export const AVATAAARS_EYES = ["default", "happy", "side", "wink"] as const;
 
 export const AVATAAARS_EYEBROWS = ["defaultNatural"] as const;
 
@@ -130,7 +130,7 @@ export function boyAvatar(): AvatarBuild {
     clothing: "shirtCrewNeck",
     clothesColor: "ffffff",
     clothingGraphic: "bear",
-    background: "7dba6a",
+    background: "8fce78",
   };
 }
 

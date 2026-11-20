@@ -1,10 +1,10 @@
 export const AVATAR_COLOURS = [
-  { id: "leaf", label: "Leaf", hex: "#7dba6a" },
-  { id: "bottle", label: "Bottle", hex: "#1e4d3a" },
-  { id: "gold", label: "Gold", hex: "#f0b429" },
-  { id: "coral", label: "Coral", hex: "#e07a5f" },
-  { id: "sea", label: "Sea", hex: "#3d8ea8" },
-  { id: "plum", label: "Plum", hex: "#7b6bb8" },
+  { id: "leaf", label: "Leaf", hex: "#8fce78" },
+  { id: "indigo", label: "Indigo", hex: "#6d5bd0" },
+  { id: "pink", label: "Pink", hex: "#f09ac4" },
+  { id: "sand", label: "Sand", hex: "#efd0a8" },
+  { id: "teal", label: "Teal", hex: "#1a9a84" },
+  { id: "violet", label: "Violet", hex: "#a35d9a" },
 ] as const;
 
 export const AVATAR_FACES = ["smile", "beam", "curious", "calm", "wink", "freckles"] as const;
@@ -92,5 +92,5 @@ export function shirtColourHex(id: string) {
 }
 
 export function avatarColourHex(id: string) {
-  return AVATAR_COLOURS.find((colour) => colour.id === id)?.hex ?? "#7dba6a";
+  return AVATAR_COLOURS.find((colour) => colour.id === id)?.hex ?? "#8fce78";
 }
