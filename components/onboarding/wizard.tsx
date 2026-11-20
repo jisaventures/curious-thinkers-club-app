@@ -169,7 +169,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   }
 
   return (
-    <div className="w-full">
+    <div className="flex w-full flex-1 flex-col">
       <ol className="mb-5 flex gap-2" aria-label="Onboarding progress">
         {["Welcome", "Terms", "Children"].map((label, index) => (
           <li key={label} className={`h-1.5 flex-1 rounded-full ${index <= progress ? "bg-[#1e4d3a]" : "bg-[#eadfce]"}`}>
@@ -177,6 +177,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           </li>
         ))}
       </ol>
+      <div className="flex flex-1 flex-col [justify-content:safe_center]">
 
       {screen === "welcome" && (
         <section className="mx-auto max-w-2xl rounded-[28px] bg-white p-5 shadow-sm sm:p-7">
@@ -410,6 +411,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           </div>
         </section>
       )}
+      </div>
     </div>
   );
 }

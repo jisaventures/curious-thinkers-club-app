@@ -21,11 +21,11 @@ export function AppShell({
     <div
       className={
         centered
-          ? "mx-auto flex min-h-svh w-full max-w-6xl flex-col px-3 py-6 [justify-content:safe_center] sm:px-4 sm:py-10"
+          ? "mx-auto flex min-h-svh w-full max-w-6xl flex-col px-3 py-4 sm:px-4 sm:py-6"
           : "mx-auto w-full max-w-none px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5"
       }
     >
-      <div className="min-w-0 rounded-[28px] border border-white/80 bg-[#fffdf8] shadow-[0_24px_70px_rgba(30,77,58,0.08)]">
+      <div className={`min-w-0 rounded-[28px] border border-white/80 bg-[#fffdf8] shadow-[0_24px_70px_rgba(30,77,58,0.08)] ${centered ? "flex flex-1 flex-col" : ""}`}>
         <header className="flex items-center gap-3 px-3 py-3 sm:px-5 sm:py-4">
           <Link href={account ? "/club" : "/login"} className="flex min-w-0 items-center gap-2">
             <LogoMark className="size-10 shrink-0" />
@@ -103,7 +103,7 @@ export function AppShell({
             </div>
           </div>
         )}
-        <div className="px-3 pb-6 sm:px-5 md:px-7 md:pb-8">{children}</div>
+        <div className={`px-3 pb-6 sm:px-5 md:px-7 md:pb-8 ${centered ? "flex flex-1 flex-col" : ""}`}>{children}</div>
       </div>
     </div>
   );
