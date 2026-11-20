@@ -18,6 +18,8 @@ import {
   optionLabel,
   type AvatarBuild,
 } from "@/lib/avataaars-options";
+import { BirthdayPicker } from "@/components/onboarding/birthday-picker";
+import { ageFromBirthday, isBirthdayAllowed } from "@/lib/birthday";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
 import { Check, ChevronLeft, ChevronRight, Mars, Trophy, Venus, X } from "lucide-react";
 
@@ -26,7 +28,7 @@ type Gender = "boy" | "girl" | "unspecified";
 type ChildDraft = {
   firstName: string;
   nickname: string;
-  ageYears: string;
+  birthday: string;
   gender: Gender | "";
   avatar: AvatarBuild;
   avatarSaved: boolean;
@@ -61,7 +63,7 @@ const CONFETTI: Array<[string, string, string, string, string]> = [
 const emptyChild = (): ChildDraft => ({
   firstName: "",
   nickname: "",
-  ageYears: "",
+  birthday: "",
   gender: "boy",
   avatar: boyAvatar(),
   avatarSaved: false,
@@ -149,11 +151,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
     if (!child) return;
     const problem = await nicknameProblem(child.nickname);
     patchChild({ nicknameMessage: problem });
-    if (problem) return;
-    if (!detailsReady({ ...child, nicknameMessage: "" })) {
-      setMessage("Add a first name, an age from 2 to 15, and a gender.");
-      return;
-    }
+    if (problem || !detailsReady({ ...child, nicknameMessage: "" })) return;
     setMessage(null);
     if (editing < count - 1) setEditing(editing + 1);
     else {
@@ -163,16 +161,11 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   }
 
   function detailsReady(item: ChildDraft) {
-    return (
-      item.firstName.trim().length > 0 &&
-      item.nickname.trim().length > 0 &&
-      !item.nicknameMessage &&
-      !isRudeNickname(item.nickname) &&
-      Number(item.ageYears) >= 2 &&
-      Number(item.ageYears) <= 15 &&
-      item.gender !== ""
-    );
+    return missingProfileHint(item) === "";
   }
+
+  const profileHint = missingProfileHint(child);
+  const profileReady = profileHint === "";
 
   useEffect(() => {
     const el = tabsRef.current;
@@ -207,9 +200,9 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
     const result = await completeOnboarding({
       adult: true,
       children: children.slice(0, count).map((item) => ({
-        firstName: item.firstName.trim(),
+        firstName: item.firstName.trim().slice(0, 15),
         nickname: item.nickname.trim(),
-        ageYears: Number(item.ageYears),
+        ageYears: ageFromBirthday(item.birthday) ?? 0,
         gender: item.gender as Gender,
         avatar: item.avatar,
       })),
@@ -361,11 +354,17 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First name only</Label>
-                  <Input id="firstName" value={child.firstName} onChange={(event) => patchChild({ firstName: event.target.value })} maxLength={40} autoComplete="off" />
+                  <Input
+                    id="firstName"
+                    value={child.firstName}
+                    onChange={(event) => patchChild({ firstName: event.target.value.slice(0, 15) })}
+                    maxLength={15}
+                    autoComplete="off"
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="age">Age</Label>
-                  <Input id="age" inputMode="numeric" value={child.ageYears} onChange={(event) => patchChild({ ageYears: event.target.value })} placeholder="2–15" />
+                  <Label htmlFor="birthday">Birthday</Label>
+                  <BirthdayPicker id="birthday" value={child.birthday} onChange={(birthday) => patchChild({ birthday })} />
                 </div>
               </div>
               <div className="space-y-2">
@@ -458,15 +457,15 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             </Button>
           )}
           {screen === "details" && editing < count - 1 && (
-            <Button type="button" variant="mustard" size="lg" className="footer-cta" disabled={pending} onClick={() => void continueProfile()}>
+            <HintedButton type="button" variant="mustard" size="lg" className="footer-cta" disabled={pending || !profileReady} hint={profileHint} onClick={() => void continueProfile()}>
               Next child
-            </Button>
+            </HintedButton>
           )}
           {screen === "details" && editing >= count - 1 && (
-            <Button type="button" variant="green" size="lg" className="footer-cta gap-2" disabled={pending} onClick={() => void continueProfile()}>
+            <HintedButton type="button" variant="green" size="lg" className="footer-cta gap-2" disabled={pending || !profileReady} hint={profileHint} onClick={() => void continueProfile()}>
               <SolidTrophy className="size-7 shrink-0 text-[#e8a428]" />
               {pending ? "Starting…" : "Enter Club"}
-            </Button>
+            </HintedButton>
           )}
         </div>
       </footer>
@@ -567,6 +566,50 @@ function ChoiceRow<T extends string>({
         ))}
       </div>
     </fieldset>
+  );
+}
+
+function missingProfileHint(item: ChildDraft | undefined) {
+  if (!item) return "Add this child's details to continue.";
+  if (item.nicknameMessage && item.nicknameMessage !== "Making a nickname…") return item.nicknameMessage;
+  if (item.nickname.trim() && isRudeNickname(item.nickname)) return "Choose a kinder nickname.";
+  const missing: string[] = [];
+  if (!item.firstName.trim()) missing.push("a first name");
+  if (!isBirthdayAllowed(item.birthday)) missing.push("a birthday for ages 2 to 15");
+  if (!item.gender) missing.push("a gender");
+  if (!item.nickname.trim()) missing.push(item.nicknameMessage === "Making a nickname…" ? "a moment for the nickname" : "a nickname");
+  if (missing.length === 0) return "";
+  const list = missing.length === 1 ? missing[0] : `${missing.slice(0, -1).join(", ")} and ${missing.at(-1)}`;
+  return `Add ${list} to continue.`;
+}
+
+function HintedButton({
+  hint,
+  disabled,
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof Button> & { hint: string }) {
+  const [open, setOpen] = useState(false);
+  const blocked = Boolean(disabled && hint);
+  const button = (
+    <Button {...props} disabled={disabled} className={blocked ? `${className ?? ""} w-full max-w-none` : className}>
+      {children}
+    </Button>
+  );
+  if (!blocked) return button;
+  return (
+    <span
+      className={`footer-cta group relative${open ? " is-open" : ""}`}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      onClick={() => setOpen(true)}
+    >
+      {button}
+      <span role="tooltip" className="footer-hint">
+        {hint}
+      </span>
+    </span>
   );
 }
 

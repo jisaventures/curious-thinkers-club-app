@@ -21,14 +21,14 @@ import { firstNameFromShopAccount } from "@/lib/auth/shopify";
 import { requireUser } from "@/lib/auth/session";
 import { demoAccountFromCookie } from "@/lib/demo/view";
 import { friendlyError } from "@/lib/utils";
-import { ageSchema, displayNameSchema, nicknameSchema } from "@/lib/validators";
+import { ageSchema, childFirstNameSchema, nicknameSchema } from "@/lib/validators";
 
 const familySchema = z.object({
   adult: z.literal(true),
   children: z
     .array(
       z.object({
-        firstName: displayNameSchema,
+        firstName: childFirstNameSchema,
         nickname: nicknameSchema,
         ageYears: ageSchema,
         gender: z.enum(["boy", "girl", "unspecified"]),

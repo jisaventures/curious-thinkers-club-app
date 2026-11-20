@@ -27,6 +27,13 @@ export const displayNameSchema = z
   .max(40)
   .regex(/^[A-Za-z][A-Za-z '\-]{0,39}$/, "Use a first name, without a surname");
 
+export const childFirstNameSchema = z
+  .string()
+  .trim()
+  .min(1, "Add a first name")
+  .max(15, "Use 15 characters or fewer")
+  .regex(/^[A-Za-z][A-Za-z '\-]{0,14}$/, "Use a first name, without a surname");
+
 export const nicknameSchema = z
   .string()
   .trim()
