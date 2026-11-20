@@ -1,5 +1,43 @@
 import { FamilyAvatar } from "@/components/brand/family-avatar";
+import { boyAvatar, girlAvatar, type AvatarBuild } from "@/lib/avataaars-options";
+import { eyeColourHex, hairColourHex, shirtColourHex, skinColourHex, avatarColourHex } from "@/lib/avatar-style";
 import type { AvatarKey } from "@/lib/validators";
+
+function legacyBuild(input: {
+  colour?: string | null;
+  face?: string | null;
+  hairStyle?: string | null;
+  hairColour?: string | null;
+  glasses?: boolean | null;
+  hat?: string | null;
+  gender?: "boy" | "girl" | null;
+  skin?: string | null;
+  eyeColour?: string | null;
+  shirt?: string | null;
+  options?: string | null;
+}): AvatarBuild | null {
+  if (input.options) {
+    try {
+      return JSON.parse(input.options) as AvatarBuild;
+    } catch {
+      return null;
+    }
+  }
+  if (!input.colour || !input.face) return null;
+  const build = input.gender === "girl" ? girlAvatar() : boyAvatar();
+  const length = input.hairStyle === "long" ? "long" : input.hairStyle === "medium" ? "medium" : "short";
+  const tops = input.gender === "girl"
+    ? { short: "bob", medium: "straightAndStrand", long: "straight01" }
+    : { short: "shortRound", medium: "shaggy", long: "shaggyMullet" };
+  build.top = input.hat === "cap" ? "hat" : input.hat === "beanie" ? "winterHat1" : (tops[length] as AvatarBuild["top"]);
+  build.background = avatarColourHex(input.colour).replace("#", "");
+  build.hairColor = hairColourHex(input.hairColour ?? "brown").replace("#", "");
+  build.skin = skinColourHex(input.skin ?? "light").replace("#", "");
+  build.eyeColor = eyeColourHex(input.eyeColour ?? "brown").replace("#", "");
+  build.clothesColor = shirtColourHex(input.shirt ?? "cream").replace("#", "");
+  build.accessory = input.glasses ? "round" : "none";
+  return build;
+}
 
 const backgrounds: Record<AvatarKey, string> = {
   pirate: "#e07a3d",
@@ -26,6 +64,7 @@ export function Avatar({
   skin,
   eyeColour,
   shirt,
+  options,
   className = "size-11",
   title,
 }: {
@@ -40,26 +79,13 @@ export function Avatar({
   skin?: string | null;
   eyeColour?: string | null;
   shirt?: string | null;
+  options?: string | null;
   className?: string;
   title?: string;
 }) {
-  if (colour && face) {
-    return (
-      <FamilyAvatar
-        colour={colour}
-        face={face}
-        hairStyle={hairStyle ?? "short"}
-        hairColour={hairColour ?? "brown"}
-        glasses={Boolean(glasses)}
-        hat={hat ?? "none"}
-        gender={gender === "girl" ? "girl" : "boy"}
-        skin={skin ?? "light"}
-        eyeColour={eyeColour ?? "brown"}
-        shirt={shirt ?? "cream"}
-        className={className}
-        title={title}
-      />
-    );
+  const build = legacyBuild({ colour, face, hairStyle, hairColour, glasses, hat, gender, skin, eyeColour, shirt, options });
+  if (build) {
+    return <FamilyAvatar build={build} className={className} title={title} />;
   }
   return (
     <svg viewBox="0 0 64 64" className={className} role={title ? "img" : undefined} aria-label={title} aria-hidden={title ? undefined : true}>

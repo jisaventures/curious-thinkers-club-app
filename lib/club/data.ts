@@ -24,6 +24,7 @@ export type ClubChild = {
   avatar_skin?: string | null;
   avatar_eyes?: string | null;
   avatar_shirt?: string | null;
+  avatar_options?: string | null;
 };
 
 export type ClubPack = {
@@ -82,7 +83,7 @@ export async function loadDashboard() {
   const { supabase } = await requireAdult();
   const [childrenRes, packsRes, ownershipRes, ledgerRes, boardRes, rewardsRes, prizesRes, submissionsRes] =
     await Promise.all([
-      supabase.from("children").select("id, nickname, avatar_key, age_years, first_name, gender, avatar_bg, avatar_face, avatar_hair_style, avatar_hair_colour, avatar_glasses, avatar_hat, avatar_skin, avatar_eyes, avatar_shirt, created_at").order("created_at"),
+      supabase.from("children").select("id, nickname, avatar_key, age_years, first_name, gender, avatar_bg, avatar_face, avatar_hair_style, avatar_hair_colour, avatar_glasses, avatar_hat, avatar_skin, avatar_eyes, avatar_shirt, avatar_options, created_at").order("created_at"),
       supabase.from("packs").select("*").eq("published", true),
       supabase.from("pack_ownership").select("pack_id").eq("account_id", account.id),
       supabase.from("points_ledger").select("child_id, amount"),
@@ -229,6 +230,7 @@ export type PackChildView = {
   avatar_skin?: string | null;
   avatar_eyes?: string | null;
   avatar_shirt?: string | null;
+  avatar_options?: string | null;
   gender?: "boy" | "girl" | "unspecified" | null;
   started: boolean;
   finished: boolean;
@@ -255,7 +257,7 @@ export async function loadPackPage(slug: string, modeRaw?: string, childRaw?: st
 
   const { data: childRows, error: childError } = await supabase
     .from("children")
-    .select("id, nickname, avatar_key, age_years, first_name, gender, avatar_bg, avatar_face, avatar_hair_style, avatar_hair_colour, avatar_glasses, avatar_hat, avatar_skin, avatar_eyes, avatar_shirt")
+    .select("id, nickname, avatar_key, age_years, first_name, gender, avatar_bg, avatar_face, avatar_hair_style, avatar_hair_colour, avatar_glasses, avatar_hat, avatar_skin, avatar_eyes, avatar_shirt, avatar_options")
     .eq("account_id", account.id)
     .order("created_at");
   if (childError) throw new Error(childError.message);

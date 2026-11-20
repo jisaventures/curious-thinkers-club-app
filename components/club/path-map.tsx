@@ -117,6 +117,7 @@ export function PathMap({
                 skin={child.avatar_skin}
                 eyeColour={child.avatar_eyes}
                 shirt={child.avatar_shirt}
+                options={child.avatar_options}
                 title={child.nickname}
                 className="h-10 w-7 ring-2 ring-white"
               />

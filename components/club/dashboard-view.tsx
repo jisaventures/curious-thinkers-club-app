@@ -143,6 +143,7 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
                         skin={child.avatar_skin}
                         eyeColour={child.avatar_eyes}
                         shirt={child.avatar_shirt}
+                        options={child.avatar_options}
                         title={child.nickname}
                         className={`mx-auto h-16 w-12 ${active ? "rounded-2xl ring-4 ring-[#1e4d3a]" : ""}`}
                       />

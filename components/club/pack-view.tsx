@@ -225,6 +225,7 @@ function StepPanel({
       avatar_skin: child.avatar_skin,
       avatar_eyes: child.avatar_eyes,
       avatar_shirt: child.avatar_shirt,
+      avatar_options: child.avatar_options,
       tickable: onStep,
       detail,
     };

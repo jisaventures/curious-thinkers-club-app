@@ -6,7 +6,22 @@ import { FamilyAvatar } from "@/components/brand/family-avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AVATAR_COLOURS, AVATAR_FACES, AVATAR_HATS, EYE_COLOURS, HAIR_COLOURS, HAIR_STYLES, SHIRT_COLOURS, SKIN_COLOURS, type AvatarFaceId, type AvatarHatId, type HairColourId, type HairStyleId } from "@/lib/avatar-style";
+import { AVATAR_COLOURS, EYE_COLOURS, HAIR_COLOURS, SHIRT_COLOURS, SKIN_COLOURS } from "@/lib/avatar-style";
+import {
+  AVATAAARS_ACCESSORIES,
+  AVATAAARS_CLOTHES,
+  AVATAAARS_EYEBROWS,
+  AVATAAARS_EYES,
+  AVATAAARS_FACIAL_HAIR,
+  AVATAAARS_GRAPHICS,
+  AVATAAARS_MOUTHS,
+  AVATAAARS_PALETTE,
+  AVATAAARS_TOPS,
+  boyAvatar,
+  girlAvatar,
+  optionLabel,
+  type AvatarBuild,
+} from "@/lib/avataaars-options";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
 
 type Gender = "boy" | "girl" | "unspecified";
@@ -17,15 +32,7 @@ type ChildDraft = {
   nicknameTouched: boolean;
   ageYears: string;
   gender: Gender | "";
-  avatarBg: string;
-  avatarFace: AvatarFaceId;
-  hairStyle: HairStyleId;
-  hairColour: HairColourId;
-  glasses: boolean;
-  hat: AvatarHatId;
-  skin: string;
-  eyeColour: string;
-  shirt: string;
+  avatar: AvatarBuild;
   nicknameMessage: string;
 };
 
@@ -35,15 +42,7 @@ const emptyChild = (): ChildDraft => ({
   nicknameTouched: false,
   ageYears: "",
   gender: "",
-  avatarBg: AVATAR_COLOURS[0].id,
-  avatarFace: AVATAR_FACES[0],
-  hairStyle: "short",
-  hairColour: "brown",
-  glasses: false,
-  hat: "none",
-  skin: "light",
-  eyeColour: "brown",
-  shirt: "cream",
+  avatar: boyAvatar(),
   nicknameMessage: "",
 });
 
@@ -126,15 +125,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
         nickname: item.nickname.trim(),
         ageYears: Number(item.ageYears),
         gender: item.gender as Gender,
-        avatarBg: item.avatarBg,
-        avatarFace: item.avatarFace,
-        hairStyle: item.hairStyle,
-        hairColour: item.hairColour,
-        glasses: item.glasses,
-        hat: item.hat,
-        skin: item.skin,
-        eyeColour: item.eyeColour,
-        shirt: item.shirt,
+        avatar: item.avatar,
       })),
     }).catch((error: { digest?: string; message?: string }) => {
       if (typeof error?.digest === "string" && error.digest.startsWith("NEXT_REDIRECT")) throw error;
@@ -275,7 +266,13 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                   key={gender}
                   type="button"
                   aria-pressed={child.gender === gender}
-                  onClick={() => patchChild({ gender })}
+                  onClick={() => {
+                    const base = gender === "girl" ? girlAvatar() : boyAvatar();
+                    patchChild({
+                      gender,
+                      avatar: { ...child.avatar, top: base.top, eyes: base.eyes, eyebrows: base.eyebrows, clothing: base.clothing },
+                    });
+                  }}
                   className={`h-12 rounded-2xl px-2 text-sm font-extrabold ${gender === "unspecified" ? "col-span-2" : ""} ${child.gender === gender ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
                 >
                   {label}
@@ -284,164 +281,25 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             </div>
           </fieldset>
 
-          <fieldset className="mt-5">
-            <legend className="text-sm font-extrabold text-[#1e4d3a]">Skin</legend>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {SKIN_COLOURS.map((colour) => (
-                <button
-                  key={colour.id}
-                  type="button"
-                  aria-label={colour.label}
-                  aria-pressed={child.skin === colour.id}
-                  onClick={() => patchChild({ skin: colour.id })}
-                  className={`size-11 rounded-full border-2 ${child.skin === colour.id ? "border-[#173528]" : "border-white"}`}
-                  style={{ background: colour.hex }}
-                />
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset className="mt-5">
-            <legend className="text-sm font-extrabold text-[#1e4d3a]">Eyes</legend>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {EYE_COLOURS.map((colour) => (
-                <button
-                  key={colour.id}
-                  type="button"
-                  aria-label={colour.label}
-                  aria-pressed={child.eyeColour === colour.id}
-                  onClick={() => patchChild({ eyeColour: colour.id })}
-                  className={`size-11 rounded-full border-2 ${child.eyeColour === colour.id ? "border-[#173528]" : "border-white"}`}
-                  style={{ background: colour.hex }}
-                />
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset className="mt-5">
-            <legend className="text-sm font-extrabold text-[#1e4d3a]">Shirt</legend>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {SHIRT_COLOURS.map((colour) => (
-                <button
-                  key={colour.id}
-                  type="button"
-                  aria-label={colour.label}
-                  aria-pressed={child.shirt === colour.id}
-                  onClick={() => patchChild({ shirt: colour.id })}
-                  className={`size-11 rounded-full border-2 ${child.shirt === colour.id ? "border-[#173528]" : "border-white"}`}
-                  style={{ background: colour.hex }}
-                />
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset className="mt-5">
-            <legend className="text-sm font-extrabold text-[#1e4d3a]">Background colour</legend>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {AVATAR_COLOURS.map((colour) => (
-                <button
-                  key={colour.id}
-                  type="button"
-                  aria-label={colour.label}
-                  aria-pressed={child.avatarBg === colour.id}
-                  onClick={() => patchChild({ avatarBg: colour.id })}
-                  className={`size-11 rounded-full border-2 ${child.avatarBg === colour.id ? "border-[#173528]" : "border-white"}`}
-                  style={{ background: colour.hex }}
-                />
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset className="mt-5">
-            <legend className="text-sm font-extrabold text-[#1e4d3a]">Face</legend>
-            <p className="mt-1 text-xs text-[#5e7266]">
-              {child.gender === "girl" ? "Girl faces." : child.gender ? "Boy faces." : "Choose boy or girl first."} Head and shoulders for now. Packs will unlock outfits later.
-            </p>
-            {child.gender && (
-            <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-6">
-              {AVATAR_FACES.map((face) => (
-                <button
-                  key={face}
-                  type="button"
-                  aria-label={face}
-                  aria-pressed={child.avatarFace === face}
-                  onClick={() => patchChild({ avatarFace: face })}
-                  className={`rounded-2xl border p-1 ${child.avatarFace === face ? "border-[#1e4d3a] bg-[#e7f5e1]" : "border-[#eadfce] bg-white"}`}
-                >
-                  <FamilyAvatar
-                    colour={child.avatarBg}
-                    face={face}
-                    hairStyle={child.hairStyle}
-                    hairColour={child.hairColour}
-                    glasses={child.glasses}
-                    hat={child.hat}
-                    gender={child.gender === "girl" ? "girl" : "boy"}
-                    skin={child.skin}
-                    eyeColour={child.eyeColour}
-                    shirt={child.shirt}
-                    className="mx-auto h-24 w-full"
-                  />
-                </button>
-              ))}
-            </div>
-            )}
-          </fieldset>
-
-          <fieldset className="mt-5">
-            <legend className="text-sm font-extrabold text-[#1e4d3a]">Hair</legend>
-            <div className="mt-2 grid grid-cols-3 gap-2">
-              {HAIR_STYLES.map((style) => (
-                <button
-                  key={style}
-                  type="button"
-                  aria-pressed={child.hairStyle === style}
-                  onClick={() => patchChild({ hairStyle: style })}
-                  className={`h-11 rounded-2xl text-sm font-extrabold capitalize ${child.hairStyle === style ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
-                >
-                  {style}
-                </button>
-              ))}
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {HAIR_COLOURS.map((colour) => (
-                <button
-                  key={colour.id}
-                  type="button"
-                  aria-label={colour.label}
-                  aria-pressed={child.hairColour === colour.id}
-                  onClick={() => patchChild({ hairColour: colour.id })}
-                  className={`size-11 rounded-full border-2 ${child.hairColour === colour.id ? "border-[#173528]" : "border-white"}`}
-                  style={{ background: colour.hex }}
-                />
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset className="mt-5">
-            <legend className="text-sm font-extrabold text-[#1e4d3a]">Extras</legend>
-            <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
-              <button
-                type="button"
-                aria-pressed={child.glasses}
-                onClick={() => patchChild({ glasses: !child.glasses })}
-                className={`h-11 rounded-2xl text-sm font-extrabold ${child.glasses ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
-              >
-                Glasses
-              </button>
-              {AVATAR_HATS.filter((hat) => hat !== "none").map((hat) => (
-                <button
-                  key={hat}
-                  type="button"
-                  aria-pressed={child.hat === hat}
-                  onClick={() => patchChild({ hat: child.hat === hat ? "none" : hat })}
-                  className={`h-11 rounded-2xl text-sm font-extrabold capitalize ${child.hat === hat ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
-                >
-                  {hat}
-                </button>
-              ))}
-            </div>
-            <p className="mt-2 text-xs text-[#5e7266]">The cap and the beanie have a yellow light bulb on the front.</p>
-          </fieldset>
+          <div className="mt-5 flex justify-center rounded-[24px] bg-[#f6efe2] p-3">
+            <FamilyAvatar build={child.avatar} className="h-40 w-40" title="Avatar preview" />
+          </div>
+          <ChoiceRow legend="Hair and hats" value={child.avatar.top} options={AVATAAARS_TOPS} onChange={(top) => patchChild({ avatar: { ...child.avatar, top } })} />
+          <ColourRow legend="Hair colour" value={child.avatar.hairColor} colours={HAIR_COLOURS} onChange={(hairColor) => patchChild({ avatar: { ...child.avatar, hairColor: hairColor.replace("#", "") } })} />
+          <HexRow legend="Hat colour" value={child.avatar.hatColor} onChange={(hatColor) => patchChild({ avatar: { ...child.avatar, hatColor } })} />
+          <ColourRow legend="Skin" value={child.avatar.skin} colours={SKIN_COLOURS} onChange={(skin) => patchChild({ avatar: { ...child.avatar, skin: skin.replace("#", "") } })} />
+          <ChoiceRow legend="Eyes" value={child.avatar.eyes} options={AVATAAARS_EYES} onChange={(eyes) => patchChild({ avatar: { ...child.avatar, eyes } })} />
+          <ColourRow legend="Eye colour" value={child.avatar.eyeColor} colours={EYE_COLOURS} onChange={(eyeColor) => patchChild({ avatar: { ...child.avatar, eyeColor: eyeColor.replace("#", "") } })} />
+          <ChoiceRow legend="Eyebrows" value={child.avatar.eyebrows} options={AVATAAARS_EYEBROWS} onChange={(eyebrows) => patchChild({ avatar: { ...child.avatar, eyebrows } })} />
+          <ChoiceRow legend="Mouth" value={child.avatar.mouth} options={AVATAAARS_MOUTHS} onChange={(mouth) => patchChild({ avatar: { ...child.avatar, mouth } })} />
+          <ChoiceRow legend="Facial hair" value={child.avatar.facialHair} options={AVATAAARS_FACIAL_HAIR} onChange={(facialHair) => patchChild({ avatar: { ...child.avatar, facialHair } })} />
+          <HexRow legend="Facial hair colour" value={child.avatar.facialHairColor} onChange={(facialHairColor) => patchChild({ avatar: { ...child.avatar, facialHairColor } })} />
+          <ChoiceRow legend="Glasses and accessories" value={child.avatar.accessory} options={AVATAAARS_ACCESSORIES} onChange={(accessory) => patchChild({ avatar: { ...child.avatar, accessory } })} />
+          <HexRow legend="Accessory colour" value={child.avatar.accessoryColor} onChange={(accessoryColor) => patchChild({ avatar: { ...child.avatar, accessoryColor } })} />
+          <ChoiceRow legend="Clothes" value={child.avatar.clothing} options={AVATAAARS_CLOTHES} onChange={(clothing) => patchChild({ avatar: { ...child.avatar, clothing } })} />
+          <ColourRow legend="Clothes colour" value={child.avatar.clothesColor} colours={SHIRT_COLOURS} onChange={(clothesColor) => patchChild({ avatar: { ...child.avatar, clothesColor: clothesColor.replace("#", "") } })} />
+          <ChoiceRow legend="Shirt graphic" hint="Shows on the graphic shirt." value={child.avatar.clothingGraphic} options={AVATAAARS_GRAPHICS} onChange={(clothingGraphic) => patchChild({ avatar: { ...child.avatar, clothingGraphic } })} />
+          <ColourRow legend="Background" value={child.avatar.background} colours={AVATAR_COLOURS} onChange={(background) => patchChild({ avatar: { ...child.avatar, background: background.replace("#", "") } })} />
 
           {message && <p className="mt-4 text-sm font-bold text-[#8a4b3a]">{message}</p>}
           <div className="mt-6 flex gap-2">
@@ -461,5 +319,94 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
         </section>
       )}
     </div>
+  );
+}
+
+function ChoiceRow<T extends string>({
+  legend,
+  hint,
+  options,
+  value,
+  onChange,
+}: {
+  legend: string;
+  hint?: string;
+  options: readonly T[];
+  value: T;
+  onChange: (value: T) => void;
+}) {
+  return (
+    <fieldset className="mt-5">
+      <legend className="text-sm font-extrabold text-[#1e4d3a]">{legend}</legend>
+      {hint && <p className="mt-1 text-xs text-[#5e7266]">{hint}</p>}
+      <div className="mt-2 flex max-h-40 flex-wrap gap-2 overflow-y-auto">
+        {options.map((option) => (
+          <button
+            key={option}
+            type="button"
+            aria-pressed={value === option}
+            onClick={() => onChange(option)}
+            className={`rounded-full px-3 py-2 text-xs font-extrabold ${value === option ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
+          >
+            {option === "none" ? "None" : optionLabel(option)}
+          </button>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+function ColourRow({
+  legend,
+  colours,
+  value,
+  onChange,
+}: {
+  legend: string;
+  colours: readonly { id: string; label: string; hex: string }[];
+  value: string;
+  onChange: (hex: string) => void;
+}) {
+  return (
+    <fieldset className="mt-5">
+      <legend className="text-sm font-extrabold text-[#1e4d3a]">{legend}</legend>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {colours.map((colour) => {
+          const hex = colour.hex.replace("#", "");
+          return (
+            <button
+              key={colour.id}
+              type="button"
+              aria-label={colour.label}
+              aria-pressed={value.toLowerCase() === hex.toLowerCase()}
+              onClick={() => onChange(hex)}
+              className={`size-11 rounded-full border-2 ${value.toLowerCase() === hex.toLowerCase() ? "border-[#173528]" : "border-white"}`}
+              style={{ background: colour.hex }}
+            />
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
+function HexRow({ legend, value, onChange }: { legend: string; value: string; onChange: (hex: string) => void }) {
+  return (
+    <fieldset className="mt-5">
+      <legend className="text-sm font-extrabold text-[#1e4d3a]">{legend}</legend>
+      <div className="mt-2 flex max-h-28 flex-wrap gap-2 overflow-y-auto">
+        {AVATAAARS_PALETTE.map((hex) => (
+          <button
+            key={hex}
+            type="button"
+            aria-label={hex}
+            aria-pressed={value.toLowerCase() === hex.toLowerCase()}
+            onClick={() => onChange(hex)}
+            className={`size-8 rounded-full border-2 ${value.toLowerCase() === hex.toLowerCase() ? "border-[#173528]" : "border-white"}`}
+            style={{ background: `#${hex}` }}
+          />
+        ))}
+      </div>
+    </fieldset>
   );
 }

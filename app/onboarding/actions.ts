@@ -3,7 +3,16 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { AVATAR_COLOURS, AVATAR_FACES, AVATAR_HATS, EYE_COLOURS, HAIR_COLOURS, HAIR_STYLES, SHIRT_COLOURS, SKIN_COLOURS } from "@/lib/avatar-style";
+import {
+  AVATAAARS_ACCESSORIES,
+  AVATAAARS_CLOTHES,
+  AVATAAARS_EYEBROWS,
+  AVATAAARS_EYES,
+  AVATAAARS_FACIAL_HAIR,
+  AVATAAARS_GRAPHICS,
+  AVATAAARS_MOUTHS,
+  AVATAAARS_TOPS,
+} from "@/lib/avataaars-options";
 import { authCookieOptions } from "@/lib/env";
 import { isDemoMode } from "@/lib/demo/mode";
 import { createDemoFamily, demoDb, nicknameTaken } from "@/lib/demo/store";
@@ -23,15 +32,24 @@ const familySchema = z.object({
         nickname: nicknameSchema,
         ageYears: ageSchema,
         gender: z.enum(["boy", "girl", "unspecified"]),
-        avatarBg: z.enum(AVATAR_COLOURS.map((colour) => colour.id) as [string, ...string[]]),
-        avatarFace: z.enum(AVATAR_FACES),
-        hairStyle: z.enum(HAIR_STYLES),
-        hairColour: z.enum(HAIR_COLOURS.map((colour) => colour.id) as [string, ...string[]]),
-        glasses: z.boolean(),
-        hat: z.enum(AVATAR_HATS),
-        skin: z.enum(SKIN_COLOURS.map((colour) => colour.id) as [string, ...string[]]),
-        eyeColour: z.enum(EYE_COLOURS.map((colour) => colour.id) as [string, ...string[]]),
-        shirt: z.enum(SHIRT_COLOURS.map((colour) => colour.id) as [string, ...string[]]),
+        avatar: z.object({
+          top: z.enum(AVATAAARS_TOPS),
+          hairColor: z.string().regex(/^[0-9a-fA-F]{6}$/),
+          hatColor: z.string().regex(/^[0-9a-fA-F]{6}$/),
+          skin: z.string().regex(/^[0-9a-fA-F]{6}$/),
+          eyes: z.enum(AVATAAARS_EYES),
+          eyeColor: z.string().regex(/^[0-9a-fA-F]{6}$/),
+          eyebrows: z.enum(AVATAAARS_EYEBROWS),
+          mouth: z.enum(AVATAAARS_MOUTHS),
+          facialHair: z.enum(AVATAAARS_FACIAL_HAIR),
+          facialHairColor: z.string().regex(/^[0-9a-fA-F]{6}$/),
+          accessory: z.enum(AVATAAARS_ACCESSORIES),
+          accessoryColor: z.string().regex(/^[0-9a-fA-F]{6}$/),
+          clothing: z.enum(AVATAAARS_CLOTHES),
+          clothesColor: z.string().regex(/^[0-9a-fA-F]{6}$/),
+          clothingGraphic: z.enum(AVATAAARS_GRAPHICS),
+          background: z.string().regex(/^[0-9a-fA-F]{6}$/),
+        }),
       }),
     )
     .min(1)
@@ -136,15 +154,9 @@ export async function completeOnboarding(input: z.infer<typeof familySchema>) {
       avatar_key: "star",
       first_name: child.firstName,
       gender: child.gender,
-      avatar_bg: child.avatarBg,
-      avatar_face: child.avatarFace,
-      avatar_hair_style: child.hairStyle,
-      avatar_hair_colour: child.hairColour,
-      avatar_glasses: child.glasses,
-      avatar_hat: child.hat,
-      avatar_skin: child.skin,
-      avatar_eyes: child.eyeColour,
-      avatar_shirt: child.shirt,
+      avatar_bg: "leaf",
+      avatar_face: "smile",
+      avatar_options: JSON.stringify(child.avatar),
     })),
   );
   if (error) return { ok: false as const, message: friendlyError(error.message) };

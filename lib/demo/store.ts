@@ -35,6 +35,7 @@ export type DemoChild = {
   avatar_skin?: string;
   avatar_eyes?: string;
   avatar_shirt?: string;
+  avatar_options?: string;
 };
 
 export type DemoPack = {
@@ -487,15 +488,24 @@ export function createDemoFamily(input: {
     nickname: string;
     ageYears: number;
     gender: "boy" | "girl" | "unspecified";
-    avatarBg: string;
-    avatarFace: string;
-    hairStyle: string;
-    hairColour: string;
-    glasses: boolean;
-    hat: string;
-    skin: string;
-    eyeColour: string;
-    shirt: string;
+    avatar: {
+      top: string;
+      hairColor: string;
+      hatColor: string;
+      skin: string;
+      eyes: string;
+      eyeColor: string;
+      eyebrows: string;
+      mouth: string;
+      facialHair: string;
+      facialHairColor: string;
+      accessory: string;
+      accessoryColor: string;
+      clothing: string;
+      clothesColor: string;
+      clothingGraphic: string;
+      background: string;
+    };
   }>;
 }) {
   const db = demoDb();
@@ -519,15 +529,7 @@ export function createDemoFamily(input: {
       created_at: new Date().toISOString(),
       first_name: child.firstName,
       gender: child.gender,
-      avatar_bg: child.avatarBg,
-      avatar_face: child.avatarFace,
-      avatar_hair_style: child.hairStyle,
-      avatar_hair_colour: child.hairColour,
-      avatar_glasses: child.glasses,
-      avatar_hat: child.hat,
-      avatar_skin: child.skin,
-      avatar_eyes: child.eyeColour,
-      avatar_shirt: child.shirt,
+      avatar_options: JSON.stringify(child.avatar),
     });
     return id;
   });
