@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export default async function ClubLayout({ children }: { children: React.ReactNode }) {
   const { account } = await requireAdult();
   return (
-    <AppShell account={account} fullWidth>
+    <AppShell account={account}>
       {children}
     </AppShell>
   );

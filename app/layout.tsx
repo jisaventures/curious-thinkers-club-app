@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fredoka, Nunito } from "next/font/google";
+import { PlayBackdrop } from "@/components/brand/play-backdrop";
 import "./globals.css";
 
 const nunito = Nunito({
@@ -22,7 +23,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en-GB">
-      <body className={`${nunito.variable} ${fredoka.variable} font-sans antialiased`}>
+      <body className={`${nunito.variable} ${fredoka.variable} isolate font-sans antialiased`}>
+        <PlayBackdrop />
         {children}
       </body>
     </html>

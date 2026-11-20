@@ -7,7 +7,7 @@ export default function LoginPage() {
   const demo = isDemoMode();
   return (
     <AppShell account={null}>
-      <div className="mx-auto max-w-lg py-6 sm:py-10">
+      <div className="w-full py-4 sm:py-6">
         <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">Members&apos; club</p>
         <h1 className="mt-2 font-display text-4xl text-[#1e4d3a] sm:text-5xl">Curious Thinkers Club</h1>
         <p className="mt-3 text-base leading-relaxed text-[#3d5348]">
@@ -17,7 +17,7 @@ export default function LoginPage() {
           <h2 className="font-display text-2xl text-[#1e4d3a]">Sign in</h2>
           <p className="mt-1 mb-4 text-sm text-[#5e7266]">
             {demo
-              ? "Demo mode is on, so you are signed in as the sample family without email or a database."
+              ? "Demo mode is on. Continue as the sample family, or create a new account and walk through onboarding."
               : "We email you a one-time link. There is no password to remember or to lose."}
           </p>
           {!demo && <MagicLinkForm showShop />}

@@ -215,6 +215,17 @@ function StepPanel({
       nickname: child.nickname,
       age_years: child.age_years,
       avatar_key: child.avatar_key,
+      avatar_bg: child.avatar_bg,
+      avatar_face: child.avatar_face,
+      avatar_hair_style: child.avatar_hair_style,
+      avatar_hair_colour: child.avatar_hair_colour,
+      avatar_glasses: child.avatar_glasses,
+      avatar_hat: child.avatar_hat,
+      gender: child.gender === "girl" || child.gender === "boy" || child.gender === "unspecified" ? child.gender : null,
+      avatar_skin: child.avatar_skin,
+      avatar_eyes: child.avatar_eyes,
+      avatar_shirt: child.avatar_shirt,
+      avatar_options: child.avatar_options,
       tickable: onStep,
       detail,
     };
@@ -292,7 +303,7 @@ function CertificateNote({ data }: { data: PackData }) {
 
 function LockedPack({ data }: { data: PackData }) {
   return (
-    <div className="mx-auto max-w-lg rounded-[22px] bg-white p-6 text-center">
+    <div className="w-full rounded-[22px] bg-white p-6 text-center">
       <Link href="/club" className="text-sm font-extrabold text-[#1e4d3a]">
         ← My Packs
       </Link>

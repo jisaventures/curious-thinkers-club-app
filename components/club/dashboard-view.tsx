@@ -133,8 +133,19 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
                     >
                       <Avatar
                         avatar={child.avatar_key}
+                        colour={child.avatar_bg}
+                        face={child.avatar_face}
+                        hairStyle={child.avatar_hair_style}
+                        hairColour={child.avatar_hair_colour}
+                        glasses={child.avatar_glasses}
+                        hat={child.avatar_hat}
+                        gender={child.gender === "girl" ? "girl" : "boy"}
+                        skin={child.avatar_skin}
+                        eyeColour={child.avatar_eyes}
+                        shirt={child.avatar_shirt}
+                        options={child.avatar_options}
                         title={child.nickname}
-                        className={`mx-auto size-14 rounded-full ${active ? "ring-4 ring-[#1e4d3a]" : ""}`}
+                        className={`mx-auto h-16 w-12 ${active ? "rounded-2xl ring-4 ring-[#1e4d3a]" : ""}`}
                       />
                       <span className="mt-1 block truncate text-xs font-extrabold">{child.nickname.split(" ").slice(-1)}</span>
                       <span className="block text-[11px] text-[#5e7266]">Age {child.age_years}</span>

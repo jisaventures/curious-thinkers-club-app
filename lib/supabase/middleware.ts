@@ -15,26 +15,29 @@ function demoSession(request: NextRequest) {
   const signedOut = request.cookies.get("ctc_demo_signed_out")?.value === "1";
   const needsAdult = path.startsWith("/club") || path.startsWith("/admin") || path.startsWith("/onboarding");
 
-  if (needsAdult && (signedOut || !persona)) {
-    if (!signedOut && !persona) {
-      const redirectUrl = request.nextUrl.clone();
-      const response = NextResponse.redirect(redirectUrl);
-      response.cookies.set("ctc_demo_persona", "sam", demoCookie);
-      return response;
-    }
+  const fresh = !persona && !signedOut;
+  if (fresh && (path.startsWith("/onboarding") || path === "/terms" || path.startsWith("/api/"))) {
+    return NextResponse.next({ request });
+  }
+  if (fresh) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/onboarding";
+    redirectUrl.search = "";
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  if (signedOut && needsAdult) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
     redirectUrl.search = "";
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (!signedOut && (path === "/" || path === "/login")) {
+  if (!signedOut && persona && (path === "/" || path === "/login")) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = persona === "admin" ? "/admin" : "/club";
     redirectUrl.search = "";
-    const response = NextResponse.redirect(redirectUrl);
-    if (!persona) response.cookies.set("ctc_demo_persona", "sam", demoCookie);
-    return response;
+    return NextResponse.redirect(redirectUrl);
   }
 
   if (persona !== "admin" && path.startsWith("/admin")) {

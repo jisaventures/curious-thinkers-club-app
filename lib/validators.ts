@@ -27,6 +27,13 @@ export const displayNameSchema = z
   .max(40)
   .regex(/^[A-Za-z][A-Za-z '\-]{0,39}$/, "Use a first name, without a surname");
 
+export const childFirstNameSchema = z
+  .string()
+  .trim()
+  .min(1, "Add a first name")
+  .max(15, "Use 15 characters or fewer")
+  .regex(/^[A-Za-z][A-Za-z '\-]{0,14}$/, "Use a first name, without a surname");
+
 export const nicknameSchema = z
   .string()
   .trim()
@@ -38,7 +45,7 @@ export const nicknameSchema = z
   )
   .refine((value) => value.split(/\s+/).length <= 3, "Keep the nickname short");
 
-export const ageSchema = z.coerce.number().int().min(2).max(12);
+export const ageSchema = z.coerce.number().int().min(2).max(15);
 
 export const avatarSchema = z.enum(AVATARS);
 

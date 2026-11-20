@@ -24,6 +24,18 @@ export type DemoChild = {
   avatar_key: AvatarKey;
   age_years: number;
   created_at: string;
+  first_name?: string;
+  gender?: "boy" | "girl" | "unspecified";
+  avatar_bg?: string;
+  avatar_face?: string;
+  avatar_hair_style?: string;
+  avatar_hair_colour?: string;
+  avatar_glasses?: boolean;
+  avatar_hat?: string;
+  avatar_skin?: string;
+  avatar_eyes?: string;
+  avatar_shirt?: string;
+  avatar_options?: string;
 };
 
 export type DemoPack = {
@@ -462,6 +474,66 @@ export function markDemoSteps(accountId: string, stepId: string, childIds: strin
     certificate,
     packId: stepRow.pack_id,
   };
+}
+
+export function nicknameTaken(nickname: string) {
+  const folded = nickname.trim().toLowerCase();
+  return demoDb().children.some((child) => child.nickname.toLowerCase() === folded);
+}
+
+export function createDemoFamily(input: {
+  parentName: string;
+  children: Array<{
+    firstName: string;
+    nickname: string;
+    ageYears: number;
+    gender: "boy" | "girl" | "unspecified";
+    avatar: {
+      top: string;
+      hairColor: string;
+      hatColor: string;
+      skin: string;
+      eyes: string;
+      eyeColor: string;
+      eyebrows: string;
+      mouth: string;
+      facialHair: string;
+      facialHairColor: string;
+      accessory: string;
+      accessoryColor: string;
+      clothing: string;
+      clothesColor: string;
+      clothingGraphic: string;
+      background: string;
+    };
+  }>;
+}) {
+  const db = demoDb();
+  const accountId = crypto.randomUUID();
+  db.accounts.push({
+    id: accountId,
+    display_name: input.parentName,
+    email: `family-${accountId.slice(0, 8)}@demo.curiousthinkersclub.test`,
+    is_adult_confirmed: true,
+    role: "member",
+    shopify_customer_id: null,
+  });
+  const childIds = input.children.map((child) => {
+    const id = crypto.randomUUID();
+    db.children.push({
+      id,
+      account_id: accountId,
+      nickname: child.nickname,
+      avatar_key: "star",
+      age_years: child.ageYears,
+      created_at: new Date().toISOString(),
+      first_name: child.firstName,
+      gender: child.gender,
+      avatar_options: JSON.stringify(child.avatar),
+    });
+    return id;
+  });
+  return { accountId, focusId: childIds[0] ?? null };
 }
 
 export function saveDemoVideo(accountId: string, stepId: string, childIds: string[], seconds: number) {
