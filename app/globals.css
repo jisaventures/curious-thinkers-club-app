@@ -51,6 +51,12 @@ select {
   font: inherit;
 }
 
+.footer-action {
+  font-family: var(--font-fredoka), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  color: #fff;
+}
+
 ::selection {
   background: #f0b429;
   color: #173528;

@@ -342,8 +342,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           {screen !== "welcome" && (
             <Button
               type="button"
-              variant="outline"
-              className="h-14 min-w-36 px-8 text-base"
+              variant="bottle"
+              className="footer-action h-14 min-w-80 px-12 text-lg"
               onClick={() => {
                 setMessage(null);
                 if (screen === "family") setScreen("welcome");
@@ -355,14 +355,14 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             </Button>
           )}
           {screen === "welcome" && (
-            <Button type="button" className="h-14 min-w-48 px-10 text-base" size="lg" disabled={!terms} onClick={() => setScreen("family")}>
+            <Button type="button" className="footer-action h-14 min-w-80 bg-mustard px-12 text-lg hover:bg-[#d39320]" size="lg" disabled={!terms} onClick={() => setScreen("family")}>
               Get started
             </Button>
           )}
           {screen === "family" && (
             <Button
               type="button"
-              className="h-14 min-w-48 px-10 text-base"
+              className="footer-action h-14 min-w-80 bg-mustard px-12 text-lg hover:bg-[#d39320]"
               size="lg"
               onClick={() => {
                 setEditing(0);
@@ -374,7 +374,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             </Button>
           )}
           {screen === "details" && (
-            <Button type="button" className="h-14 min-w-48 px-10 text-base" size="lg" disabled={pending} onClick={() => void continueProfile()}>
+            <Button type="button" className="footer-action h-14 min-w-80 bg-mustard px-12 text-lg hover:bg-[#d39320]" size="lg" disabled={pending} onClick={() => void continueProfile()}>
               {editing < count - 1 ? "Next child" : pending ? "Starting…" : "Get started"}
             </Button>
           )}
