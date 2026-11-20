@@ -212,9 +212,13 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 ? "bg-mustard text-white"
                 : "bg-[#c8c4bc] text-[#6f6b64]";
           return (
-            <li key={label} className="relative flex min-w-36 shrink-0 flex-1" aria-current={current ? "step" : undefined}>
-              <span className="absolute top-0 left-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 rounded-full bg-[#d7efc8] px-3 py-1 font-display text-sm font-bold whitespace-nowrap text-[#1e4d3a] md:text-base">
-                {done && <Check className="size-4 shrink-0" strokeWidth={3} aria-hidden="true" />}
+            <li key={label} className="relative flex min-w-36 shrink-0 flex-1 flex-col items-center" aria-current={current ? "step" : undefined}>
+              <span
+                className="ctc-button pointer-events-none relative z-10 -mb-3"
+                data-variant={done ? "green" : current ? "mustard" : "grey"}
+                data-size="sm"
+              >
+                {done && <Check className="mr-1 size-3.5 shrink-0" strokeWidth={3} aria-hidden="true" />}
                 {done ? "Completed" : `Step ${index + 1}`}
               </span>
               <div className={`flex min-h-16 w-full items-center justify-center rounded-2xl px-2 py-3 text-center font-display text-lg leading-tight font-bold md:text-xl ${tabClass}`}>
@@ -231,7 +235,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             type="button"
             variant="mustard"
             size="sm"
-            className="absolute top-[calc(0.5rem_+_2rem)] left-1 z-10 -translate-y-1/2"
+            className="absolute bottom-8 left-1 z-10 -translate-y-1/2"
             aria-label="Show previous steps"
             onClick={() => tabsRef.current?.scrollBy({ left: -200, behavior: "smooth" })}
           >
@@ -246,7 +250,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             type="button"
             variant="mustard"
             size="sm"
-            className="absolute top-[calc(0.5rem_+_2rem)] right-1 z-10 -translate-y-1/2"
+            className="absolute right-1 bottom-8 z-10 -translate-y-1/2"
             aria-label="Show more steps"
             onClick={() => tabsRef.current?.scrollBy({ left: 200, behavior: "smooth" })}
           >
@@ -259,8 +263,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
       {screen === "welcome" && (
         <section className={stepCard}>
-          <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">Welcome</p>
-          <h1 className="mt-2 font-display text-4xl leading-tight text-[#1e4d3a] sm:text-5xl">
+          <h1 className="step-title text-4xl leading-tight sm:text-5xl">
             Welcome{shopFirstName ? ` ${shopFirstName}` : ""}
           </h1>
           <p className="mt-3 text-base leading-relaxed text-[#3d5348] lg:text-xl">
@@ -286,8 +289,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
       {screen === "family" && (
         <section className={stepCard}>
-          <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">Your family</p>
-          <h1 className="mt-2 font-display text-4xl text-[#1e4d3a]">How many children are in the family?</h1>
+          <h1 className="step-title text-4xl">How many children are in the family?</h1>
           <p className="mt-3 text-base leading-relaxed text-[#5e7266] lg:text-xl">
             You can add up to 5 children on this account. You don&apos;t have to add everyone now. More can be added later, still up to 5.
           </p>
@@ -309,12 +311,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
       {screen === "details" && child && (
         <section className={stepCard}>
-          <div className="flex flex-wrap items-baseline gap-x-3">
-            <h1 className="font-display text-4xl text-[#1e4d3a] lg:text-3xl">{child.firstName.trim() || `Child ${editing + 1}`}</h1>
-            <p className="text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">
-              Child {editing + 1} of {count}
-            </p>
-          </div>
+          <h1 className="step-title text-4xl lg:text-3xl">{child.firstName.trim() || `Child ${editing + 1}`}</h1>
           <div className="mt-5 flex items-start gap-4 lg:mt-3">
             <button
               type="button"
@@ -461,7 +458,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             >
               <X className="size-5" />
             </button>
-            <h2 id="avatar-editor-title" className="pr-10 font-display text-3xl text-[#1e4d3a]">
+            <h2 id="avatar-editor-title" className="step-title pr-10 text-3xl">
               Edit avatar
             </h2>
             <div className="mt-4 flex justify-center rounded-[24px] bg-[#f6efe2] p-3">
