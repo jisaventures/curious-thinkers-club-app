@@ -37,6 +37,27 @@ type Screen = "welcome" | "family" | "details";
 
 const stepCard = "mx-auto w-full rounded-[28px] bg-white p-5 shadow-sm sm:p-7";
 
+const CONFETTI: Array<[string, string, string, string, string]> = [
+  ["4%", "#e8a428", "-0.8s", "2.8s", "24px"],
+  ["12%", "#306a51", "-0.4s", "3s", "-18px"],
+  ["20%", "#f0b429", "0s", "2.6s", "30px"],
+  ["28%", "#c48614", "-1.1s", "3.1s", "-10px"],
+  ["36%", "#e8a428", "-0.2s", "2.7s", "16px"],
+  ["44%", "#1e4d3a", "0.1s", "3s", "-26px"],
+  ["52%", "#f0b429", "-0.6s", "2.8s", "12px"],
+  ["60%", "#e7a0b0", "0s", "2.6s", "-20px"],
+  ["68%", "#e8a428", "-0.9s", "3.1s", "22px"],
+  ["76%", "#306a51", "0.15s", "2.7s", "-14px"],
+  ["84%", "#f0b429", "-0.3s", "2.9s", "18px"],
+  ["92%", "#e8a428", "-1s", "2.6s", "-28px"],
+  ["8%", "#d4567a", "0.05s", "3s", "10px"],
+  ["24%", "#e7a0b0", "-0.7s", "2.8s", "-16px"],
+  ["48%", "#306a51", "0.2s", "3.1s", "26px"],
+  ["72%", "#e8a428", "-0.5s", "2.7s", "-8px"],
+  ["88%", "#1e4d3a", "-0.15s", "3s", "14px"],
+  ["16%", "#f0b429", "0.25s", "2.6s", "-22px"],
+];
+
 const emptyChild = (): ChildDraft => ({
   firstName: "",
   nickname: "",
@@ -55,6 +76,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   const [editing, setEditing] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [celebrating, setCelebrating] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [avatarDraft, setAvatarDraft] = useState<AvatarBuild | null>(null);
   const tabsRef = useRef<HTMLOListElement>(null);
@@ -134,7 +156,10 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
     }
     setMessage(null);
     if (editing < count - 1) setEditing(editing + 1);
-    else void finish();
+    else {
+      setCelebrating(true);
+      await finish();
+    }
   }
 
   function detailsReady(item: ChildDraft) {
@@ -195,6 +220,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
     if (result && !result.ok) {
       setMessage(result.message);
       setPending(false);
+      setCelebrating(false);
     }
   }
 
@@ -300,7 +326,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 type="button"
                 aria-pressed={count === value}
                 onClick={() => resize(value)}
-                className={`h-14 rounded-2xl font-display text-2xl ${count === value ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
+                className={`count-pick flex h-16 items-center justify-center rounded-2xl sm:h-24 ${count === value ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
               >
                 {value}
               </button>
@@ -439,6 +465,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
         </div>
       </footer>
 
+      {celebrating && <ClubCelebration names={children.slice(0, count).map((item) => item.firstName.trim()).filter(Boolean)} />}
+
       {avatarOpen && avatarDraft && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
@@ -533,6 +561,39 @@ function ChoiceRow<T extends string>({
         ))}
       </div>
     </fieldset>
+  );
+}
+
+function ClubCelebration({ names }: { names: string[] }) {
+  const line =
+    names.length === 0
+      ? "Time to explore."
+      : names.length === 1
+        ? `${names[0]} is ready to explore.`
+        : `${names.slice(0, -1).join(", ")} and ${names.at(-1)} are ready to explore.`;
+  return (
+    <div className="celebrate" role="status" aria-live="polite">
+      {CONFETTI.map(([left, color, delay, duration, drift]) => (
+        <span
+          key={`${left}-${delay}`}
+          className="confetti"
+          style={{
+            left,
+            background: color,
+            width: "16px",
+            height: "22px",
+            animationDelay: delay,
+            animationDuration: duration,
+            ["--drift" as string]: drift,
+          }}
+        />
+      ))}
+      <div className="celebrate-card">
+        <Trophy className="celebrate-trophy" strokeWidth={2.2} aria-hidden="true" />
+        <p className="celebrate-title">You&apos;re in the club!</p>
+        <p className="celebrate-copy">{line}</p>
+      </div>
+    </div>
   );
 }
 

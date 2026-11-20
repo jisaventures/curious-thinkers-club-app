@@ -29,6 +29,101 @@
   color: var(--ctc-green);
 }
 
+.count-pick {
+  font-family: var(--font-fredoka), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  line-height: 1;
+  font-size: clamp(2rem, 7vw, 3.25rem);
+}
+
+.celebrate {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #fbf6ee;
+}
+
+.celebrate-card {
+  position: relative;
+  z-index: 2;
+  max-width: 36rem;
+  padding: 1.5rem;
+  text-align: center;
+  animation: celebrate-pop 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.celebrate-trophy {
+  width: 5.5rem;
+  height: 5.5rem;
+  margin-inline: auto;
+  color: var(--ctc-mustard);
+  filter: drop-shadow(0 6px 0 #c48614);
+}
+
+.celebrate-title {
+  margin-top: 1rem;
+  font-family: var(--font-fredoka), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--ctc-green);
+  font-size: clamp(2.4rem, 7vw, 4.25rem);
+}
+
+.celebrate-copy {
+  margin-top: 0.75rem;
+  font-family: var(--font-fredoka), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  font-size: clamp(1.15rem, 3vw, 1.6rem);
+  color: #5e7266;
+}
+
+.confetti {
+  position: absolute;
+  top: -1.25rem;
+  border-radius: 3px;
+  animation: confetti-fall linear both;
+}
+
+@keyframes celebrate-pop {
+  from {
+    transform: scale(0.72);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translate3d(0, -12vh, 0) rotate(0deg);
+    opacity: 0;
+  }
+  14% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--drift), 115vh, 0) rotate(520deg);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .celebrate-card,
+  .confetti {
+    animation: none;
+  }
+
+  .confetti {
+    display: none;
+  }
+}
+
 .wordmark {
   font-family: var(--font-fredoka), ui-sans-serif, system-ui, sans-serif;
   font-weight: 600;
