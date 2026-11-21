@@ -32,8 +32,8 @@ const SAFE = [
   "Imani", "Amara", "Kiara", "Naomi", "Esther", "Ruth", "Deborah", "Martha", "Lydia", "Priscilla",
   "Tabitha", "Magdalene", "Jesus", "Mary", "Anna", "Ann", "Anne", "Emma", "Ellie", "Luna", "Angel",
   "Heaven", "Summer", "Sky", "River", "Ocean", "Daisy", "Cherry", "Sherry", "Gay", "Galen",
-  "Gabrielle",   "Poole", "Farthing", "Cucumber", "Classic", "Passion", "Methuselah", "Therapist", "Sexton",
-  "Sextus", "Peacock", "Compass",
+  "Gabrielle", "Poole", "Farthing", "Cucumber", "Classic", "Passion", "Methuselah", "Therapist", "Sexton",
+  "Sextus", "Peacock", "Compass", "Brigitte", "Noble", "Nobody",
 ];
 
 const BLOCKED = [
@@ -54,6 +54,10 @@ const BLOCKED = [
   "stinky", "gross", "dumb", "hate", "hater", "suck", "sucks", "bomb", "bomber", "gun", "queer",
   "homo", "demon", "devil", "rapists", "shite", "bollocks", "skank", "hooker", "douche", "fetish",
   "orgasm", "erotic", "sperm", "isis", "kkk", "lsd", "xxx", "nasty",
+  "nobhead", "Nobhead", "n0bhead", "nobend", "knobhead", "knobend", "twathead", "bellend",
+  "wazzock", "pillock", "plonker", "numpty", "minger", "munter", "pikey", "cockwomble",
+  "fannyflaps", "gaylord", "shagging", "tosspot", "arsewipe", "bint", "slag", "slapper",
+  "gitface", "yid", "sodding",
 ];
 
 test("ordinary given names are allowed", () => {
