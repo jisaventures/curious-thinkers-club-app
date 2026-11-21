@@ -346,6 +346,23 @@ select {
   font-size: 0.95rem;
 }
 
+.step-tabs > .tab-nudge.ctc-button {
+  position: absolute;
+  top: 50%;
+  z-index: 20;
+  transform: translateY(-50%);
+}
+
+.step-tabs > .tab-nudge-left.ctc-button {
+  left: 0.25rem;
+  right: auto;
+}
+
+.step-tabs > .tab-nudge-right.ctc-button {
+  right: 0.25rem;
+  left: auto;
+}
+
 @media (max-width: 1023px) {
   .step-tabs .step-pill.ctc-button {
     padding: 0.32rem 0.65rem;
