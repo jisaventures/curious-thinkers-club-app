@@ -21,7 +21,7 @@ import {
 import { BirthdayPicker } from "@/components/onboarding/birthday-picker";
 import { ageFromBirthday, isBirthdayAllowed } from "@/lib/birthday";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
-import { Check, ChevronLeft, ChevronRight, Mars, Rocket, Trophy, Venus, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Info, Mars, Rocket, Trophy, Venus, X } from "lucide-react";
 
 type Gender = "boy" | "girl" | "unspecified";
 
@@ -360,11 +360,11 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       {screen === "details" && child && (
         <section className={stepCard}>
           <h1 className="step-title text-4xl lg:text-3xl">{child.firstName.trim() || `Child ${editing + 1}`}</h1>
-          <div className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 sm:gap-x-4 lg:mt-3 lg:grid-cols-[auto_auto_minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-4">
+          <div className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 sm:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] sm:gap-x-4 lg:mt-3 lg:grid-cols-[auto_auto_minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-4">
             <button
               type="button"
               onClick={openAvatarModal}
-              className="group relative row-span-2 size-36 shrink-0 self-center overflow-hidden rounded-[28px] bg-[#f6efe2] justify-self-center sm:size-44 lg:size-36"
+              className="group relative row-span-2 size-40 shrink-0 self-center overflow-hidden rounded-[28px] bg-[#f6efe2] justify-self-center sm:size-44 lg:size-36"
               aria-label="Edit avatar"
             >
               <FamilyAvatar build={child.avatar} className="size-full" title="Child avatar" />
@@ -373,8 +373,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 Edit
               </span>
             </button>
-            <fieldset className="space-y-2 justify-self-start lg:col-start-2 lg:row-start-1 lg:self-end">
-              <legend className="text-sm font-extrabold text-[#1e4d3a]">Gender</legend>
+            <fieldset className="col-start-2 row-start-1 space-y-2 justify-self-start self-end">
+              <legend className="text-sm font-extrabold text-[#1e4d3a]">Gender<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></legend>
               <div className="flex gap-2">
                 {(
                   [
@@ -404,31 +404,38 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 ))}
               </div>
             </fieldset>
-            <div className="min-w-0 max-w-32 space-y-2 sm:max-w-40 lg:max-w-none lg:col-start-3 lg:row-start-1">
-              <Label htmlFor="firstName">First name only</Label>
+            <div className="col-start-2 row-start-2 min-w-0 max-w-32 space-y-2 sm:col-start-3 sm:row-start-1 sm:max-w-40 lg:max-w-none">
+              <Label htmlFor="firstName">First name only<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
               <Input
                 id="firstName"
                 value={child.firstName}
-                onChange={(event) => patchChild({ firstName: event.target.value.slice(0, 15) })}
+                onChange={(event) => patchChild({ firstName: event.target.value.replace(/\s+/g, "").slice(0, 15) })}
                 maxLength={15}
                 autoComplete="off"
               />
             </div>
-            <div className="col-span-2 min-w-0 space-y-2 lg:col-span-1 lg:col-start-4 lg:row-start-1">
-              <Label htmlFor="birthday">Birthday</Label>
+            <div className="col-span-2 min-w-0 space-y-2 sm:col-span-1 sm:col-start-2 sm:row-start-2 lg:col-start-4 lg:row-start-1">
+              <Label htmlFor="birthday">Birthday<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
               <BirthdayPicker id="birthday" value={child.birthday} onChange={(birthday) => patchChild({ birthday })} />
             </div>
-            <div className="col-span-2 space-y-2 lg:col-span-3 lg:col-start-2 lg:row-start-2">
-              <Label htmlFor="nickname">Username</Label>
+            <div className="col-span-2 space-y-2 sm:col-span-1 sm:col-start-3 sm:row-start-2 lg:col-span-3 lg:col-start-2">
+              <div className="flex items-center gap-1.5">
+                <Label htmlFor="nickname">Username<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
+                <span className="group relative inline-flex">
+                  <button type="button" className="inline-flex size-4 items-center justify-center rounded-full text-[#306a51]" aria-label="About usernames">
+                    <Info className="size-4" strokeWidth={2.4} aria-hidden="true" />
+                  </button>
+                  <span role="tooltip" className="pointer-events-none absolute bottom-[calc(100%+0.45rem)] left-0 z-20 hidden w-56 rounded-xl bg-[#1e4d3a] px-3 py-2 text-left text-xs leading-snug font-semibold text-white group-hover:block group-focus-within:block">
+                    A playful nickname is made for them. Re-generate it if you want a different one.
+                  </span>
+                </span>
+              </div>
               <div className="flex gap-2">
                 <Input id="nickname" value={child.nickname} disabled />
                 <Button type="button" variant="green" size="sm" className="shrink-0" onClick={regenerateNickname}>
                   Re-generate
                 </Button>
               </div>
-              <p className="text-sm leading-relaxed text-[#5e7266]">
-                A playful nickname is made for them. Re-generate it if you want a different one.
-              </p>
               {child.nicknameMessage && <p className="text-sm font-bold text-[#8a4b3a]">{child.nicknameMessage}</p>}
             </div>
           </div>
