@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Avatar } from "@/components/brand/avatar";
+import { BirthdayPicker } from "@/components/onboarding/birthday-picker";
+import { Button } from "@/components/ui/button";
 import { formatWhen, shortName } from "@/lib/format";
 import { colourForChild, memberColour } from "@/lib/member-colour";
 import type { loadDashboard } from "@/lib/club/data";
@@ -79,16 +81,26 @@ export function GroupView({ data }: { data: DashboardData }) {
         <section id="activity" className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="font-display text-3xl text-[#306A51]">Activity log</h1>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="activity-filters flex flex-wrap items-center gap-2">
               <label className="sr-only" htmlFor="activity-name">Filter by name</label>
-              <select id="activity-name" className="rounded-full border border-[#eadfce] bg-white px-3 py-2 font-display text-sm text-[#306A51]" value={nameFilter} onChange={(event) => setNameFilter(event.target.value)}>
+              <select id="activity-name" className="birthday-year h-11 px-4" value={nameFilter} onChange={(event) => setNameFilter(event.target.value)}>
                 <option value="all">All names</option>
                 {data.children.map((child) => (
                   <option key={child.id} value={child.id}>{memberName(child)}</option>
                 ))}
               </select>
-              <label className="sr-only" htmlFor="activity-date">Filter by date</label>
-              <input id="activity-date" type="date" className="rounded-full border border-[#eadfce] bg-white px-3 py-2 font-display text-sm text-[#306A51]" value={dateFilter} onChange={(event) => setDateFilter(event.target.value)} />
+              <BirthdayPicker
+                id="activity-date"
+                value={dateFilter}
+                onChange={setDateFilter}
+                range={activityRange(data.activities)}
+                placeholder="Any date"
+                note=""
+                label="Filter by date"
+              />
+              <Button type="button" variant="grey" size="sm" disabled={nameFilter === "all" && !dateFilter} onClick={() => { setNameFilter("all"); setDateFilter(""); }}>
+                Clear filters
+              </Button>
             </div>
           </div>
           <ul className="space-y-2">
@@ -157,6 +169,15 @@ function Stat({ label, value }: { label: string; value: string }) {
       <p className="font-display text-3xl text-[#17352A]">{value}</p>
     </div>
   );
+}
+
+function activityRange(activities: DashboardData["activities"]) {
+  const stamps = activities.map((item) => new Date(item.at)).filter((date) => !Number.isNaN(date.getTime()));
+  const earliest = stamps.length ? new Date(Math.min(...stamps.map((date) => date.getTime()))) : new Date();
+  earliest.setHours(0, 0, 0, 0);
+  const latest = new Date();
+  latest.setHours(23, 59, 59, 999);
+  return { earliest, latest };
 }
 
 function filteredActivities(data: DashboardData, nameFilter: string, dateFilter: string) {

@@ -544,9 +544,15 @@ select {
   background: #f6efe2;
   color: #1e4d3a;
   padding: 0.35rem 0.55rem;
+  font-family: var(--font-fredoka), ui-sans-serif, system-ui, sans-serif;
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
+}
+
+.activity-filters .birthday-trigger {
+  width: 11rem;
+  height: 2.75rem;
 }
 
 .birthday-nav {
