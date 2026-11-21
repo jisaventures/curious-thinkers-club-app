@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { setFocusChild } from "@/app/club/actions";
@@ -22,6 +22,7 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
   const [focusId, setFocusId] = useState(data.focus?.id ?? "");
   const [bookId, setBookId] = useState<string | null>(null);
   const [logOpen, setLogOpen] = useState(false);
+  const closeLogTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const focus = data.children.find((child) => child.id === focusId) ?? data.focus;
   const owned = data.packs.filter((pack) => pack.owned);
   const spotlight = focus ? pickSpotlight(owned, data.doneByChild[focus.id] ?? {}) : null;
@@ -32,6 +33,12 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
       : "Add a child to start a pack together.";
   const recent = data.activities.slice(0, 3);
 
+  useEffect(() => {
+    return () => {
+      if (closeLogTimer.current) clearTimeout(closeLogTimer.current);
+    };
+  }, []);
+
   function chooseChild(childId: string) {
     setFocusId(childId);
     const body = new FormData();
@@ -39,52 +46,69 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
     void setFocusChild(body);
   }
 
+  function showLog() {
+    if (closeLogTimer.current) clearTimeout(closeLogTimer.current);
+    setLogOpen(true);
+  }
+
+  function hideLogSoon() {
+    if (closeLogTimer.current) clearTimeout(closeLogTimer.current);
+    closeLogTimer.current = setTimeout(() => setLogOpen(false), 220);
+  }
+
+  function closeLog() {
+    if (closeLogTimer.current) clearTimeout(closeLogTimer.current);
+    setLogOpen(false);
+  }
+
   return (
     <div className="space-y-8 sm:space-y-10">
-      <section className="flex items-center justify-between gap-4">
-        <div className="relative min-w-0">
-          <h1 className="font-display text-3xl leading-tight text-[#306A51] sm:text-4xl">
+      <section className="flex flex-col items-center gap-6 xl:flex-row xl:items-center xl:justify-between xl:gap-8">
+        <div className="w-full min-w-0 text-center xl:w-auto xl:flex-1 xl:text-left">
+          <h1 className="text-balance font-display text-3xl leading-tight text-[#306A51] sm:text-4xl">
             Welcome back, <span className="text-[#e8a428]">{account.display_name}</span>
           </h1>
-          <div className="relative mt-2" onMouseEnter={() => setLogOpen(true)} onMouseLeave={() => setLogOpen(false)}>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-display text-base text-[#306A51] sm:text-lg">Activity log</span>
-              <button type="button" className="inline-flex items-center gap-1 rounded-full border border-[#eadfce] bg-white px-3 py-1 text-left font-display text-sm text-[#306A51] shadow-sm" aria-expanded={logOpen} onClick={() => setLogOpen((open) => !open)}>
-                {welcome}
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-2 xl:justify-start">
+            <span className="font-display text-base text-[#306A51] sm:text-lg">Activity log</span>
+            <div className="relative max-w-full" onMouseEnter={showLog} onMouseLeave={hideLogSoon}>
+              <button type="button" className="inline-flex max-w-full items-center gap-1 rounded-full border border-[#eadfce] bg-white px-3 py-1 text-left font-display text-sm text-[#306A51] shadow-sm" aria-expanded={logOpen} onClick={() => (logOpen ? closeLog() : showLog())}>
+                <span className="min-w-0">{welcome}</span>
                 <ChevronDown className={`size-4 shrink-0 transition ${logOpen ? "rotate-180" : ""}`} aria-hidden="true" />
               </button>
+              {logOpen && (
+                <div className="absolute top-full left-1/2 z-20 min-w-full max-w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 pt-2 text-left xl:left-0 xl:translate-x-0">
+                  <div className="rounded-2xl border border-[#eadfce] bg-white p-2 shadow-[0_16px_40px_rgba(23,53,42,0.08)]">
+                    {recent.length === 0 ? (
+                      <p className="px-2 py-1 text-xs text-[#5e7266]">Nothing has been logged yet.</p>
+                    ) : (
+                      <ul className="space-y-1">
+                        {recent.map((item) => {
+                          const colour = colourForChild(item.childId, data.children);
+                          return (
+                            <li key={item.id} className="flex items-baseline justify-between gap-2 rounded-lg px-2 py-1 text-xs font-bold" style={{ background: colour.wash, color: colour.ink }}>
+                              <span className="min-w-0">
+                                <span className="mr-1.5 inline-block size-2 rounded-full align-middle" style={{ background: colour.dot }} />
+                                {item.summary}
+                              </span>
+                              {item.at && <time className="shrink-0 text-[10px] font-extrabold">{formatWhen(item.at)}</time>}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                    <Link href="/club/group#activity" className="mt-1 block rounded-lg px-2 py-1.5 text-xs font-extrabold text-[#306A51] underline hover:bg-[#f6efe2]">
+                      View full activity log
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
-            {logOpen && (
-              <div className="absolute z-20 mt-1.5 w-[min(100%,20rem)] rounded-2xl border border-[#eadfce] bg-white p-2 shadow-[0_16px_40px_rgba(23,53,42,0.08)]">
-                {recent.length === 0 ? (
-                  <p className="px-2 py-1 text-xs text-[#5e7266]">Nothing has been logged yet.</p>
-                ) : (
-                  <ul className="space-y-1">
-                    {recent.map((item) => {
-                      const colour = colourForChild(item.childId, data.children);
-                      return (
-                        <li key={item.id} className="flex items-baseline justify-between gap-2 rounded-lg px-2 py-1 text-xs font-bold" style={{ background: colour.wash, color: colour.ink }}>
-                          <span className="min-w-0">
-                            <span className="mr-1.5 inline-block size-2 rounded-full align-middle" style={{ background: colour.dot }} />
-                            {item.summary}
-                          </span>
-                          {item.at && <time className="shrink-0 text-[10px] font-extrabold">{formatWhen(item.at)}</time>}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-                <Link href="/club/group#activity" className="mt-1.5 inline-block px-2 text-xs font-extrabold text-[#306A51] underline">
-                  View full activity log
-                </Link>
-              </div>
-            )}
           </div>
         </div>
         {data.children.length > 0 && (
-          <div className="shrink-0">
+          <div className="w-full xl:w-auto xl:shrink-0">
             <p className="text-center font-display text-sm text-[#306A51]">Group Members</p>
-            <div className="mt-2 flex flex-wrap items-start justify-end gap-x-4 gap-y-3">
+            <div className="mt-2 flex flex-wrap items-start justify-center gap-x-4 gap-y-3 xl:justify-end">
               {data.children.map((child) => {
                 const name = memberName(child);
                 return (
