@@ -40,17 +40,16 @@ export function GroupView({ data }: { data: DashboardData }) {
 
   return (
     <div className="grid items-start gap-4 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-x-6">
-      <div className="flex flex-col gap-3">
-        <Button asChild variant="mustard" size="md" className="w-full gap-3">
-          <Link href="/club">
-            <ArrowLeft className="size-5 shrink-0" aria-hidden="true" />
-            Dashboard
-          </Link>
-        </Button>
+      <div className="flex flex-col">
+        <Link href="/club" data-variant="mustard" data-size="md" className="ctc-button w-full gap-3">
+          <ArrowLeft className="size-5 shrink-0" aria-hidden="true" />
+          Dashboard
+        </Link>
+        <hr className="my-3 h-px border-0 bg-[#306A51]/30" />
         <nav className="group-nav flex flex-col gap-2" aria-label="My Group">
           <Button type="button" variant={section === "users" ? "green" : "white"} size="md" onClick={() => choose("users")}>
             <Users className="size-5 shrink-0" aria-hidden="true" />
-            Users
+            Members
           </Button>
           <Button type="button" variant={section === "activity" ? "green" : "white"} size="md" onClick={() => choose("activity")}>
             <ClipboardList className="size-5 shrink-0" aria-hidden="true" />
