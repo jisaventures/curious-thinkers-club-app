@@ -61,7 +61,9 @@ export function isBirthdayAllowed(value: string, today = new Date()) {
 export function formatBirthday(value: string) {
   const date = parseIsoDate(value);
   if (!date) return "";
-  return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${day}/${month}/${date.getFullYear()}`;
 }
 
 export function monthLabel(date: Date) {

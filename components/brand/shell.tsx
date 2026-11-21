@@ -24,7 +24,7 @@ export function AppShell({
     ? `mx-auto flex w-full max-w-6xl flex-1 flex-col px-3 [justify-content:safe_center] sm:px-4 ${onboarding ? "pt-4 pb-28 sm:pt-6" : "py-4 sm:py-6"}`
     : "mx-auto w-full max-w-none px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5";
   return (
-    <div className="flex min-h-svh flex-col">
+    <div className={`flex min-h-svh flex-col ${onboarding ? "onboarding-zoom" : ""}`}>
       <SiteHeader account={account} shop={shop} centered={centered} onboarding={onboarding} />
       <div className={frame}>
         <div className="min-w-0 rounded-[28px] border border-white/80 bg-[#fffdf8] shadow-[0_24px_70px_rgba(30,77,58,0.08)]">
@@ -49,10 +49,10 @@ function SiteHeader({
 }) {
   const row = centered ? "mx-auto w-full max-w-6xl px-3 sm:px-4" : "w-full px-3 sm:px-4 lg:px-6";
   return (
-    <header className="w-full border-b border-dashed border-club/25 bg-header">
-      <div className={`flex items-center gap-3 py-2.5 ${row} ${onboarding ? "justify-center" : ""} ${!onboarding && isDemoMode() ? "pr-16 sm:pr-20" : ""}`}>
+    <header className="sticky top-0 z-50 w-full border-b border-dashed border-club/25 bg-header">
+      <div className={`flex items-center gap-2 py-1.5 ${row} ${onboarding ? "justify-center" : ""} ${!onboarding && isDemoMode() ? "pr-16 sm:pr-20" : ""}`}>
         <Link href={account ? "/club" : "/"} className="flex min-w-0 items-center gap-2">
-          <img src="/brand/bulb.png" alt="" className="h-14 w-auto shrink-0 bg-transparent" />
+          <img src="/brand/bulb.png" alt="" className="h-10 w-auto shrink-0 bg-transparent" />
           <span className="wordmark">Curious Thinkers Club</span>
         </Link>
         {!onboarding && (

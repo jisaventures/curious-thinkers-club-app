@@ -21,7 +21,8 @@ import {
 import { BirthdayPicker } from "@/components/onboarding/birthday-picker";
 import { ageFromBirthday, isBirthdayAllowed } from "@/lib/birthday";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
-import { Check, ChevronLeft, ChevronRight, Mars, Rocket, Trophy, Venus, X } from "lucide-react";
+import { childFirstNameProblem, isUnsafeChildName } from "@/lib/unsafe-language";
+import { Check, ChevronLeft, ChevronRight, Info, Mars, RefreshCw, Rocket, Trophy, Venus, X } from "lucide-react";
 
 type Gender = "boy" | "girl" | "unspecified";
 
@@ -224,7 +225,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
   return (
     <div className="w-full">
-      <div className="relative mb-5">
+      <div className="step-tabs relative mb-5 max-lg:sticky max-lg:top-[var(--site-header-h)] max-lg:z-30 max-lg:-mx-3 max-lg:bg-[#fffdf8] max-lg:px-3 max-lg:pb-3 sm:max-lg:-mx-5 sm:max-lg:px-5 md:max-lg:-mx-7 md:max-lg:px-7">
       <ol ref={tabsRef} className="tab-scroll flex gap-2 overflow-x-auto px-1 pt-2" aria-label="Onboarding progress">
         {progressLabels.map((label, index) => {
           const done = index < progress;
@@ -238,14 +239,14 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           return (
             <li key={label} className="relative flex min-w-36 shrink-0 flex-1 flex-col items-center" aria-current={current ? "step" : undefined}>
               <span
-                className="ctc-button pointer-events-none relative z-10 -mb-3"
+                className="step-pill ctc-button pointer-events-none relative z-10 -mb-3"
                 data-variant={done ? "green" : current ? "mustard" : "grey"}
                 data-size="sm"
               >
                 {done && <Check className="mr-1 size-3.5 shrink-0" strokeWidth={3} aria-hidden="true" />}
                 {done ? "Completed" : `Step ${index + 1}`}
               </span>
-              <div className={`flex min-h-16 w-full items-center justify-center rounded-2xl px-2 py-3 text-center font-display text-lg leading-tight font-bold md:text-xl ${tabClass}`}>
+              <div className={`step-tab flex min-h-14 w-full items-center justify-center rounded-2xl px-2 pt-5 pb-2 text-center font-display text-base leading-tight font-bold lg:min-h-16 lg:px-2 lg:py-3 lg:text-xl ${tabClass}`}>
                 {label}
               </div>
             </li>
@@ -288,15 +289,10 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       {screen === "welcome" && (
         <section className={stepCard}>
           <h1 className="step-title text-4xl leading-tight sm:text-5xl">
-            Welcome{shopFirstName ? ` ${shopFirstName}` : ""}
+            {shopFirstName ? `Welcome ${shopFirstName}` : "Welcome Curious Thinker!"}
           </h1>
-          <p className="mt-3 text-base leading-relaxed text-[#3d5348] lg:text-xl">
-            {shopFirstName
-              ? "Your first name comes from your Curious Thinkers shop account."
-              : "Your first name will come from your Curious Thinkers shop account when that account is created."}
-          </p>
           <p className="mt-3 text-base leading-relaxed text-[#5e7266] lg:text-xl">
-            This club must be managed by a parent or guardian. Children do not get their own login. The full terms will be published later.
+            This club must be managed by a parent or guardian. Children do not get their own login.
           </p>
           <label className="mt-4 flex items-start gap-3 rounded-2xl bg-[#f6efe2] p-3 text-base leading-snug lg:text-lg">
             <input
@@ -321,7 +317,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
         <section className={stepCard}>
           <h1 className="step-title text-4xl">How many children are in the family?</h1>
           <p className="mt-3 text-base leading-relaxed text-[#5e7266] lg:text-xl">
-            You can add up to 5 children on this account. You don&apos;t have to add everyone now. More can be added later, still up to 5.
+            You can add up to 5 children on this account. You don&apos;t have to add everyone now. More can be added later.
           </p>
           <div className="mt-5 grid grid-cols-5 gap-2">
             {[1, 2, 3, 4, 5].map((value) => (
@@ -341,12 +337,13 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
       {screen === "details" && child && (
         <section className={stepCard}>
-          <h1 className="step-title text-4xl lg:text-3xl">{child.firstName.trim() || `Child ${editing + 1}`}</h1>
-          <div className="mt-5 flex items-start gap-4 lg:mt-3">
+          <h1 className="step-title text-4xl lg:text-3xl">{child.firstName.trim() && !isUnsafeChildName(child.firstName) ? child.firstName.trim() : `Child ${editing + 1}`}</h1>
+          <div className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] items-stretch gap-x-3 gap-y-3 sm:grid-cols-[auto_auto_minmax(0,1fr)] sm:gap-x-3 lg:mt-3 lg:grid-cols-[auto_auto_minmax(0,1fr)_minmax(0,1fr)] lg:items-stretch lg:gap-4">
+            <div className="col-span-2 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 sm:contents">
             <button
               type="button"
               onClick={openAvatarModal}
-              className="group relative size-45 shrink-0 overflow-hidden rounded-[28px] bg-[#f6efe2]"
+              className="group relative size-40 shrink-0 self-center overflow-hidden rounded-[28px] bg-[#f6efe2] justify-self-center sm:row-span-2 sm:size-44 lg:size-50"
               aria-label="Edit avatar"
             >
               <FamilyAvatar build={child.avatar} className="size-full" title="Child avatar" />
@@ -355,69 +352,83 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 Edit
               </span>
             </button>
-            <div className="min-w-0 flex-1 space-y-3">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First name only</Label>
-                  <Input
-                    id="firstName"
-                    value={child.firstName}
-                    onChange={(event) => patchChild({ firstName: event.target.value.slice(0, 15) })}
-                    maxLength={15}
-                    autoComplete="off"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="birthday">Birthday</Label>
-                  <BirthdayPicker id="birthday" value={child.birthday} onChange={(birthday) => patchChild({ birthday })} />
-                </div>
+            <div className="flex min-w-0 flex-col gap-3 sm:contents">
+            <fieldset className="col-start-2 row-start-1 flex flex-col self-start justify-self-start">
+              <legend className="m-0 mb-2 flex h-5 items-center text-sm font-extrabold text-[#1e4d3a]">Gender<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></legend>
+              <div className="flex gap-2">
+                {(
+                  [
+                    ["boy", "Boy"],
+                    ["girl", "Girl"],
+                    ["unspecified", "Prefer not to say"],
+                  ] as const
+                ).map(([gender, label]) => (
+                  <button
+                    key={gender}
+                    type="button"
+                    aria-label={label}
+                    aria-pressed={child.gender === gender}
+                    onClick={() => {
+                      const base = gender === "girl" ? girlAvatar() : boyAvatar();
+                      patchChild({
+                        gender,
+                        avatar: { ...child.avatar, top: base.top, clothing: base.clothing, eyebrows: "defaultNatural", facialHair: "none" },
+                      });
+                    }}
+                    className={`inline-flex size-10 items-center justify-center rounded-2xl border-2 sm:size-12 lg:size-14 ${child.gender === gender ? `border-[#306A51] ${gender === "boy" ? "bg-[#3d6fbf] text-white" : gender === "girl" ? "bg-[#e36aa2] text-white" : "bg-[#1e4d3a] text-white"}` : "border-transparent bg-[#f6efe2] text-[#1e4d3a]"}`}
+                  >
+                    {gender === "boy" && <Mars className="size-5 sm:size-6 lg:size-7" strokeWidth={3} aria-hidden="true" />}
+                    {gender === "girl" && <Venus className="size-5 sm:size-6 lg:size-7" strokeWidth={3} aria-hidden="true" />}
+                    {gender === "unspecified" && <X className="size-5 sm:size-6 lg:size-7" strokeWidth={3} aria-hidden="true" />}
+                  </button>
+                ))}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="nickname">Nickname</Label>
-                <div className="flex gap-2">
-                  <Input id="nickname" value={child.nickname} disabled />
-                  <Button type="button" variant="green" size="sm" className="shrink-0" onClick={regenerateNickname}>
-                    Re-generate
+            </fieldset>
+            <div className="flex min-w-0 flex-col sm:col-span-1 sm:col-start-3 sm:row-start-2 lg:col-span-3 lg:col-start-2">
+              <div className="mb-2 flex h-5 items-center gap-1.5">
+                <Label htmlFor="nickname">Username<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
+                <span className="group relative inline-flex">
+                  <button type="button" className="inline-flex size-4 items-center justify-center rounded-full text-[#306a51]" aria-label="About usernames">
+                    <Info className="size-4" strokeWidth={2.4} aria-hidden="true" />
+                  </button>
+                  <span role="tooltip" className="pointer-events-none absolute bottom-[calc(100%+0.45rem)] left-0 z-20 hidden w-56 max-w-[calc(100vw-2rem)] rounded-xl bg-[#1e4d3a] px-3 py-2 text-left text-xs leading-snug font-semibold text-white group-hover:block group-focus-within:block sm:right-0 sm:left-auto lg:right-auto lg:left-0">
+                    A playful nickname is made for them. Re-generate it if you want a different one.
+                  </span>
+                </span>
+              </div>
+              <div className="flex w-full items-center gap-2">
+                <Input id="nickname" value={child.nickname} disabled className="min-w-0 flex-1 max-sm:h-10 max-sm:px-1.5 max-sm:text-xs" />
+                <span className="inline-flex pb-[5px]">
+                  <Button type="button" variant="green" size="sm" className="regen-button shrink-0" aria-label="Re-generate" onClick={regenerateNickname}>
+                    <RefreshCw className="size-5 sm:size-6 lg:hidden" strokeWidth={3} aria-hidden="true" />
+                    <span className="hidden lg:inline">Re-generate</span>
                   </Button>
-                </div>
-                <p className="text-sm leading-relaxed text-[#5e7266] lg:text-lg">
-                  A playful nickname is made for them. Re-generate it if you want a different one.
-                </p>
-                {child.nicknameMessage && <p className="text-sm font-bold text-[#8a4b3a]">{child.nicknameMessage}</p>}
+                </span>
+              </div>
+              {child.nicknameMessage && <p className="text-sm font-bold text-[#8a4b3a]">{child.nicknameMessage}</p>}
+            </div>
+            </div>
+            </div>
+            <div className="col-span-2 grid grid-cols-[minmax(0,1fr)_7.55rem] items-start gap-3 sm:contents">
+              <div className="flex min-w-0 flex-col sm:col-start-3 sm:row-start-1">
+                <Label htmlFor="firstName" className="mb-2 flex h-5 items-center whitespace-nowrap max-sm:!text-[12px]">First name only<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
+                <Input
+                  id="firstName"
+                  value={child.firstName}
+                  onChange={(event) => patchChild({ firstName: event.target.value.replace(/\s+/g, "").slice(0, 15) })}
+                  maxLength={15}
+                  autoComplete="off"
+                  aria-invalid={Boolean(childFirstNameProblem(child.firstName))}
+                  className="lg:h-14"
+                />
+                {childFirstNameProblem(child.firstName) && <p className="mt-1 text-sm font-bold text-[#8a4b3a]">{childFirstNameProblem(child.firstName)}</p>}
+              </div>
+              <div className="birthday-compact flex min-w-0 flex-col sm:col-start-2 sm:row-start-2 sm:w-[10rem] lg:col-start-4 lg:row-start-1 lg:w-auto">
+                <Label htmlFor="birthday" className="mb-2 flex h-5 items-center whitespace-nowrap max-sm:!text-[12px]">Birthday<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
+                <BirthdayPicker id="birthday" value={child.birthday} onChange={(birthday) => patchChild({ birthday })} />
               </div>
             </div>
           </div>
-
-          <fieldset className="mt-5 lg:mt-2">
-            <legend className="text-sm font-extrabold text-[#1e4d3a]">Gender</legend>
-            <div className="gender-row mt-2">
-              {(
-                [
-                  ["boy", "Boy"],
-                  ["girl", "Girl"],
-                  ["unspecified", "Prefer not to say"],
-                ] as const
-              ).map(([gender, label]) => (
-                <button
-                  key={gender}
-                  type="button"
-                  aria-pressed={child.gender === gender}
-                  onClick={() => {
-                    const base = gender === "girl" ? girlAvatar() : boyAvatar();
-                    patchChild({
-                      gender,
-                      avatar: { ...child.avatar, top: base.top, clothing: base.clothing, eyebrows: "defaultNatural", facialHair: "none" },
-                    });
-                  }}
-                  className={`fredoka-bold inline-flex h-11 items-center justify-center rounded-2xl border-2 leading-none whitespace-nowrap ${child.gender === gender ? `border-[#306A51] ${gender === "boy" ? "bg-[#3d6fbf] text-white" : gender === "girl" ? "bg-[#e36aa2] text-white" : "bg-[#1e4d3a] text-white"}` : "border-transparent bg-[#f6efe2] text-[#1e4d3a]"}`}
-                >
-                  {gender === "boy" && <Mars className="gender-icon shrink-0" aria-hidden="true" />}
-                  {gender === "girl" && <Venus className="gender-icon shrink-0" aria-hidden="true" />}
-                  {label}
-                </button>
-              ))}
-            </div>
-          </fieldset>
 
           {message && <p className="mt-4 text-sm font-bold text-[#8a4b3a]">{message}</p>}
         </section>
@@ -430,7 +441,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               type="button"
               variant="grey"
               size="lg"
-              className="footer-cta"
+              className="footer-cta footer-back"
               onClick={() => {
                 setMessage(null);
                 if (screen === "family") setScreen("welcome");
@@ -539,7 +550,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                   <ChoiceRow legend="Mouth" value={avatarDraft.mouth} options={AVATAAARS_MOUTHS} onChange={(mouth) => setAvatarDraft({ ...avatarDraft, mouth })} className="mt-3" />
                   <ChoiceRow legend="Glasses" value={avatarDraft.accessory} options={AVATAAARS_ACCESSORIES} onChange={(accessory) => setAvatarDraft({ ...avatarDraft, accessory })} className="mt-3" />
                   {avatarDraft.accessory !== "none" && (
-                    <ColourRow legend="Glasses colour" value={avatarDraft.accessoryColor} colours={ACCESSORY_COLOURS} onChange={(accessoryColor) => setAvatarDraft({ ...avatarDraft, accessoryColor })} className="mt-3" />
+                    <ColourRow legend={avatarDraft.accessory === "eyepatch" ? "Eye patch colour" : "Glasses colour"} value={avatarDraft.accessoryColor} colours={ACCESSORY_COLOURS} onChange={(accessoryColor) => setAvatarDraft({ ...avatarDraft, accessoryColor })} className="mt-3" />
                   )}
                   <ColourRow legend="Clothes colour" value={avatarDraft.clothesColor} colours={CLOTHES_COLOURS} onChange={(clothesColor) => setAvatarDraft({ ...avatarDraft, clothesColor })} className="mt-3" />
                 </div>
@@ -599,6 +610,8 @@ function ChoiceRow<T extends string>({
 
 function missingProfileHint(item: ChildDraft | undefined) {
   if (!item) return "Add this child's details to continue.";
+  const nameProblem = childFirstNameProblem(item.firstName);
+  if (nameProblem) return nameProblem;
   if (item.nicknameMessage && item.nicknameMessage !== "Making a nickname…") return item.nicknameMessage;
   if (item.nickname.trim() && isRudeNickname(item.nickname)) return "Choose a kinder nickname.";
   const missing: string[] = [];
@@ -718,7 +731,7 @@ function ColourRow({
     <fieldset className={`${compact ? "mt-1 flex flex-wrap items-center gap-x-2" : ""} ${className}`}>
       <legend className={`${compact ? "text-[11px]" : "text-sm"} font-extrabold text-[#1e4d3a]`}>{legend}</legend>
       {hint && <p className="basis-full text-[10px] leading-tight text-[#5e7266]">{hint}</p>}
-      <div className={`${compact ? "flex-nowrap gap-1" : "mt-2 flex-wrap gap-2"} flex`}>
+      <div className={`${compact ? "flex-nowrap gap-1" : "mt-2 flex-wrap gap-1 sm:gap-2"} flex`}>
         {colours.map((colour) => {
           const hex = colour.hex.replace("#", "");
           return (
@@ -728,7 +741,7 @@ function ColourRow({
               aria-label={colour.label}
               aria-pressed={value.toLowerCase() === hex.toLowerCase()}
               onClick={() => onChange(hex)}
-              className={`${compact ? "size-5 shrink-0" : "size-11"} rounded-full border-2 ${value.toLowerCase() === hex.toLowerCase() ? "border-[#173528]" : "border-white"}`}
+              className={`${compact ? "size-5 shrink-0" : "size-8 shrink-0 sm:size-11"} rounded-full border-2 ${value.toLowerCase() === hex.toLowerCase() ? "border-[#173528]" : "border-white"}`}
               style={{ background: colour.hex }}
             />
           );

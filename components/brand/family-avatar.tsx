@@ -40,6 +40,9 @@ export function FamilyAvatar({
   }).toString();
   svg = svg.replace("<svg ", '<svg width="100%" height="100%" ');
   svg = paintEyes(svg, build.eyeColor.replace("#", ""));
+  if (build.accessory === "eyepatch") {
+    svg = svg.replaceAll('fill="#28354B"', `fill="#${build.accessoryColor.replace("#", "")}"`);
+  }
   return (
     <span
       className={`inline-block ${className}`}

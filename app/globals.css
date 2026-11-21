@@ -201,7 +201,7 @@
   line-height: 1;
   white-space: nowrap;
   color: var(--color-club);
-  font-size: clamp(22px, calc(22px + (100vw - 390px) * 0.095833), 45px);
+  font-size: clamp(16px, calc(16px + (100vw - 390px) * 0.068), 32px);
 }
 
 * {
@@ -210,6 +210,7 @@
 
 html {
   scroll-behavior: smooth;
+  --site-header-h: calc(3.25rem + 1px);
 }
 
 body {
@@ -277,6 +278,13 @@ select {
 .ctc-button[data-size="sm"] {
   padding: 0.55rem 0.95rem;
   font-size: 0.95rem;
+}
+
+@media (max-width: 1023px) {
+  .step-tabs .step-pill.ctc-button {
+    padding: 0.32rem 0.65rem;
+    font-size: 0.78rem;
+  }
 }
 
 .ctc-button[data-size="md"] {
@@ -410,6 +418,20 @@ select {
   cursor: pointer;
 }
 
+@media (min-width: 1024px) {
+  .birthday-trigger {
+    height: 3.5rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .birthday-compact .birthday-trigger {
+    padding-inline: 0.55rem;
+    gap: 0.25rem;
+    font-size: 0.92rem;
+  }
+}
+
 .birthday-trigger:focus-visible,
 .birthday-year:focus-visible,
 .birthday-day:focus-visible,
@@ -431,12 +453,12 @@ select {
   box-shadow: 0 16px 40px rgba(30, 77, 58, 0.14);
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1023px) {
   .birthday-panel {
     position: fixed;
     top: auto;
     right: auto;
-    bottom: 5.6rem;
+    bottom: 6.25rem;
     left: 50%;
     translate: -50% 0;
   }
@@ -535,11 +557,47 @@ select {
   text-transform: uppercase;
 }
 
+.ctc-button.regen-button {
+  align-self: center;
+}
+
+@media (max-width: 639px) {
+  .onboarding-zoom {
+    zoom: 0.9;
+    min-height: 111.111svh;
+  }
+}
+
+@media (max-width: 1023px) {
+  .ctc-button.regen-button {
+    width: 3rem;
+    min-width: 3rem;
+    height: 3rem;
+    padding: 0;
+  }
+}
+
+@media (max-width: 639px) {
+  .ctc-button.regen-button {
+    width: 2.5rem;
+    min-width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
 @media (max-width: 639px) {
   .footer-cta {
     max-width: none;
     font-size: 0.95rem;
     padding-inline: 0.7rem;
+    white-space: nowrap;
+  }
+
+  .footer-cta.footer-back {
+    flex: 0 0 5.25rem;
+    width: 5.25rem;
+    max-width: 5.25rem;
+    padding-inline: 0.4rem;
   }
 }
 
