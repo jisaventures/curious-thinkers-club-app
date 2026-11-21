@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Avatar } from "@/components/brand/avatar";
-import { shortName } from "@/lib/format";
+import { formatWhen, shortName } from "@/lib/format";
+import { colourForChild, memberColour } from "@/lib/member-colour";
 import type { loadDashboard } from "@/lib/club/data";
 
 type DashboardData = Awaited<ReturnType<typeof loadDashboard>>;
@@ -48,13 +49,17 @@ export function GroupView({ data }: { data: DashboardData }) {
         <section id="users" className="space-y-3">
           <h1 className="font-display text-3xl text-[#306A51]">Users</h1>
           <ul className="space-y-3">
-            {data.children.map((child) => {
+            {data.children.map((child, index) => {
               const goal = recommendedGoal(child, owned, data.doneByChild[child.id] ?? {});
+              const colour = memberColour(index);
               return (
                 <li key={child.id} className="flex items-center gap-4 rounded-[22px] bg-white p-4">
                   <Avatar avatar={child.avatar_key} options={child.avatar_options} gender={child.gender === "girl" ? "girl" : "boy"} title={memberName(child)} className="size-14 shrink-0 rounded-full" />
                   <div className="min-w-0">
-                    <p className="font-display text-xl text-[#17352A]">{memberName(child)}</p>
+                    <p className="flex items-center gap-2 font-display text-xl text-[#17352A]">
+                      <span className="size-2.5 rounded-full" style={{ background: colour.dot }} />
+                      {memberName(child)}
+                    </p>
                     <p className="text-sm font-extrabold text-[#5e7266]">@{child.nickname}</p>
                     <p className="mt-1 text-sm text-[#3d5348]">{goal.text}</p>
                     <Link href={goal.href} className="text-sm font-extrabold text-[#306A51] underline">
@@ -71,14 +76,20 @@ export function GroupView({ data }: { data: DashboardData }) {
       {section === "activity" && (
         <section id="activity" className="space-y-3">
           <h1 className="font-display text-3xl text-[#306A51]">Activity log</h1>
-          <ul className="divide-y divide-[#eadfce] rounded-[22px] bg-white">
-            {data.activities.length === 0 && <li className="p-4 text-sm text-[#5e7266]">Nothing has been logged yet.</li>}
-            {data.activities.map((item) => (
-              <li key={item.id} className="flex items-start justify-between gap-3 p-4">
-                <p className="text-sm font-bold text-[#17352A]">{item.summary}</p>
-                {item.at && <time className="shrink-0 text-xs text-[#5e7266]">{formatWhen(item.at)}</time>}
-              </li>
-            ))}
+          <ul className="space-y-2">
+            {data.activities.length === 0 && <li className="rounded-2xl bg-white p-4 text-sm text-[#5e7266]">Nothing has been logged yet.</li>}
+            {data.activities.map((item) => {
+              const colour = colourForChild(item.childId, data.children);
+              return (
+                <li key={item.id} className="flex items-start justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-bold" style={{ background: colour.wash, color: colour.ink }}>
+                  <p>
+                    <span className="mr-2 inline-block size-2.5 rounded-full align-middle" style={{ background: colour.dot }} />
+                    {item.summary}
+                  </p>
+                  {item.at && <time className="shrink-0 text-xs font-extrabold">{formatWhen(item.at)}</time>}
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}
@@ -160,8 +171,3 @@ function recommendedGoal(child: DashboardData["children"][number], packs: Dashbo
   return { text: `Finish ${next.pack.title}. ${next.done} of ${next.total} steps are done.`, action: "Continue the pack", href };
 }
 
-function formatWhen(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(date);
-}

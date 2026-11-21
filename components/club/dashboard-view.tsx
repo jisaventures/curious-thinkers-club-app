@@ -9,7 +9,8 @@ import { ChildForm } from "@/components/club/child-form";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Scrapbook } from "@/components/club/scrapbook";
-import { shortName } from "@/lib/format";
+import { formatWhen, shortName } from "@/lib/format";
+import { colourForChild, memberColour } from "@/lib/member-colour";
 import type { CoverTone } from "@/lib/validators";
 import type { loadDashboard } from "@/lib/club/data";
 
@@ -45,22 +46,29 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
           <h1 className="font-display text-3xl leading-tight text-[#306A51] sm:text-4xl">
             Welcome back, <span className="text-[#e8a428]">{account.display_name}</span>
           </h1>
-          <button type="button" className="mt-2 inline-flex items-center gap-1 text-left font-display text-base text-[#306A51] sm:text-lg" aria-expanded={logOpen} onClick={() => setLogOpen((open) => !open)}>
-            {welcome}
-            <ChevronDown className={`size-5 shrink-0 transition ${logOpen ? "rotate-180" : ""}`} aria-hidden="true" />
-          </button>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <span className="font-display text-base text-[#306A51] sm:text-lg">Activity log</span>
+            <button type="button" className="inline-flex items-center gap-1 rounded-full bg-[#f6efe2] px-3 py-1.5 text-left font-display text-base text-[#306A51]" aria-expanded={logOpen} onClick={() => setLogOpen((open) => !open)}>
+              {welcome}
+              <ChevronDown className={`size-5 shrink-0 transition ${logOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+            </button>
+          </div>
           {logOpen && (
-            <div className="absolute z-20 mt-2 w-[min(100%,24rem)] rounded-2xl border border-[#eadfce] bg-white p-3 shadow-[0_5px_0_#c9b89a]">
+            <div className="absolute z-20 mt-2 w-[min(100%,28rem)] rounded-2xl bg-[#f6efe2] p-3">
               {recent.length === 0 ? (
                 <p className="text-sm text-[#5e7266]">Nothing has been logged yet.</p>
               ) : (
                 <ul className="space-y-2">
-                  {recent.map((item) => (
-                    <li key={item.id} className="text-sm text-[#17352A]">
-                      <span className="block font-bold">{item.summary}</span>
-                      {item.at && <span className="text-xs text-[#5e7266]">{formatWhen(item.at)}</span>}
-                    </li>
-                  ))}
+                  {recent.map((item) => {
+                    const colour = colourForChild(item.childId, data.children);
+                    return (
+                      <li key={item.id} className="rounded-xl px-3 py-2 text-sm font-bold" style={{ background: colour.wash, color: colour.ink }}>
+                        <span className="mr-2 inline-block size-2.5 rounded-full align-middle" style={{ background: colour.dot }} />
+                        {item.summary}
+                        {item.at && <span className="mt-0.5 block text-xs font-extrabold">{formatWhen(item.at)}</span>}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
               <Link href="/club/group#activity" className="mt-3 inline-block text-sm font-extrabold text-[#306A51] underline">
@@ -95,7 +103,10 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
                         className="size-14"
                       />
                     </span>
-                    <span className="mt-1 block whitespace-nowrap font-display text-sm leading-tight text-[#17352A]">{name}</span>
+                    <span className="mt-1 flex items-center justify-center gap-1 whitespace-nowrap font-display text-sm leading-tight text-[#17352A]">
+                      <span className="size-2 shrink-0 rounded-full" style={{ background: memberColour(data.children.indexOf(child)).dot }} />
+                      {name}
+                    </span>
                     <span className="block whitespace-nowrap text-[11px] font-extrabold text-[#5e7266]">@{child.nickname}</span>
                   </button>
                 );
@@ -292,12 +303,6 @@ function statusWord(done: number, total: number) {
   if (ratio >= 0.75) return "Almost done";
   if (ratio >= 0.34) return "In progress";
   return "Started";
-}
-
-function formatWhen(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(date);
 }
 
 function activityLine(name: string, title: string, done: number, total: number) {
