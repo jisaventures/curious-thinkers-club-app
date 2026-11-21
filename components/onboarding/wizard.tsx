@@ -224,7 +224,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
   return (
     <div className="w-full">
-      <div className="relative mb-5 max-lg:sticky max-lg:top-0 max-lg:z-30 max-lg:-mx-3 max-lg:bg-[#fffdf8] max-lg:px-3 max-lg:pt-2 max-lg:pb-3 sm:max-lg:-mx-5 sm:max-lg:px-5 md:max-lg:-mx-7 md:max-lg:px-7">
+      <div className="relative mb-5 max-lg:sticky max-lg:top-[calc(4.75rem+1px)] max-lg:z-30 max-lg:-mx-3 max-lg:bg-[#fffdf8] max-lg:px-3 max-lg:pb-3 sm:max-lg:-mx-5 sm:max-lg:px-5 md:max-lg:-mx-7 md:max-lg:px-7">
       <ol ref={tabsRef} className="tab-scroll flex gap-2 overflow-x-auto px-1 pt-2" aria-label="Onboarding progress">
         {progressLabels.map((label, index) => {
           const done = index < progress;
@@ -288,15 +288,10 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       {screen === "welcome" && (
         <section className={stepCard}>
           <h1 className="step-title text-4xl leading-tight sm:text-5xl">
-            Welcome{shopFirstName ? ` ${shopFirstName}` : ""}
+            {shopFirstName ? `Welcome ${shopFirstName}` : "Welcome Curious Thinker!"}
           </h1>
-          <p className="mt-3 text-base leading-relaxed text-[#3d5348] lg:text-xl">
-            {shopFirstName
-              ? "Your first name comes from your Curious Thinkers shop account."
-              : "Your first name will come from your Curious Thinkers shop account when that account is created."}
-          </p>
           <p className="mt-3 text-base leading-relaxed text-[#5e7266] lg:text-xl">
-            This club must be managed by a parent or guardian. Children do not get their own login. The full terms will be published later.
+            This club must be managed by a parent or guardian. Children do not get their own login.
           </p>
           <label className="mt-4 flex items-start gap-3 rounded-2xl bg-[#f6efe2] p-3 text-base leading-snug lg:text-lg">
             <input
@@ -321,7 +316,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
         <section className={stepCard}>
           <h1 className="step-title text-4xl">How many children are in the family?</h1>
           <p className="mt-3 text-base leading-relaxed text-[#5e7266] lg:text-xl">
-            You can add up to 5 children on this account. You don&apos;t have to add everyone now. More can be added later, still up to 5.
+            You can add up to 5 children on this account. You don&apos;t have to add everyone now. More can be added later.
           </p>
           <div className="mt-5 grid grid-cols-5 gap-2">
             {[1, 2, 3, 4, 5].map((value) => (
@@ -342,11 +337,11 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       {screen === "details" && child && (
         <section className={stepCard}>
           <h1 className="step-title text-4xl lg:text-3xl">{child.firstName.trim() || `Child ${editing + 1}`}</h1>
-          <div className="mt-4 flex flex-col items-stretch gap-4 lg:mt-3 lg:flex-row lg:items-start">
+          <div className="mt-4 flex flex-col items-stretch gap-4 lg:mt-3 lg:flex-row lg:items-center">
             <button
               type="button"
               onClick={openAvatarModal}
-              className="group relative mx-auto size-40 shrink-0 overflow-hidden rounded-[28px] bg-[#f6efe2] lg:mx-0 lg:size-36"
+              className="group relative mx-auto size-40 shrink-0 overflow-hidden rounded-[28px] bg-[#f6efe2] lg:mx-0 lg:size-36 lg:translate-y-4"
               aria-label="Edit avatar"
             >
               <FamilyAvatar build={child.avatar} className="size-full" title="Child avatar" />
@@ -393,30 +388,30 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                             avatar: { ...child.avatar, top: base.top, clothing: base.clothing, eyebrows: "defaultNatural", facialHair: "none" },
                           });
                         }}
-                        className={`inline-flex size-12 items-center justify-center rounded-2xl border-2 ${child.gender === gender ? `border-[#306A51] ${gender === "boy" ? "bg-[#3d6fbf] text-white" : gender === "girl" ? "bg-[#e36aa2] text-white" : "bg-[#1e4d3a] text-white"}` : "border-transparent bg-[#f6efe2] text-[#1e4d3a]"}`}
+                        className={`inline-flex size-14 items-center justify-center rounded-2xl border-2 ${child.gender === gender ? `border-[#306A51] ${gender === "boy" ? "bg-[#3d6fbf] text-white" : gender === "girl" ? "bg-[#e36aa2] text-white" : "bg-[#1e4d3a] text-white"}` : "border-transparent bg-[#f6efe2] text-[#1e4d3a]"}`}
                       >
-                        {gender === "boy" && <Mars className="size-5" aria-hidden="true" />}
-                        {gender === "girl" && <Venus className="size-5" aria-hidden="true" />}
-                        {gender === "unspecified" && <X className="size-5" strokeWidth={2.6} aria-hidden="true" />}
+                        {gender === "boy" && <Mars className="size-7" strokeWidth={3} aria-hidden="true" />}
+                        {gender === "girl" && <Venus className="size-7" strokeWidth={3} aria-hidden="true" />}
+                        {gender === "unspecified" && <X className="size-7" strokeWidth={3} aria-hidden="true" />}
                       </button>
                     ))}
                   </div>
                 </fieldset>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="nickname">Nickname</Label>
-                <div className="flex gap-2">
-                  <Input id="nickname" value={child.nickname} disabled />
-                  <Button type="button" variant="green" size="sm" className="shrink-0" onClick={regenerateNickname}>
-                    Re-generate
-                  </Button>
-                </div>
-                <p className="text-sm leading-relaxed text-[#5e7266]">
-                  A playful nickname is made for them. Re-generate it if you want a different one.
-                </p>
-                {child.nicknameMessage && <p className="text-sm font-bold text-[#8a4b3a]">{child.nicknameMessage}</p>}
-              </div>
             </div>
+          </div>
+          <div className="mt-3 space-y-2 lg:ml-[calc(9rem+1rem)]">
+            <Label htmlFor="nickname">Nickname</Label>
+            <div className="flex gap-2">
+              <Input id="nickname" value={child.nickname} disabled />
+              <Button type="button" variant="green" size="sm" className="shrink-0" onClick={regenerateNickname}>
+                Re-generate
+              </Button>
+            </div>
+            <p className="text-sm leading-relaxed text-[#5e7266]">
+              A playful nickname is made for them. Re-generate it if you want a different one.
+            </p>
+            {child.nicknameMessage && <p className="text-sm font-bold text-[#8a4b3a]">{child.nicknameMessage}</p>}
           </div>
 
           {message && <p className="mt-4 text-sm font-bold text-[#8a4b3a]">{message}</p>}
