@@ -30,7 +30,7 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
     : focus
       ? `${memberName(focus)} is ready for a new pack.`
       : "Add a child to start a pack together.";
-  const recent = data.activities.slice(0, 5);
+  const recent = data.activities.slice(0, 3);
 
   function chooseChild(childId: string) {
     setFocusId(childId);
@@ -46,36 +46,40 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
           <h1 className="font-display text-3xl leading-tight text-[#306A51] sm:text-4xl">
             Welcome back, <span className="text-[#e8a428]">{account.display_name}</span>
           </h1>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <span className="font-display text-base text-[#306A51] sm:text-lg">Activity log</span>
-            <button type="button" className="inline-flex items-center gap-1 rounded-full border border-[#eadfce] bg-white px-3 py-1.5 text-left font-display text-base text-[#306A51] shadow-sm" aria-expanded={logOpen} onClick={() => setLogOpen((open) => !open)}>
-              {welcome}
-              <ChevronDown className={`size-5 shrink-0 transition ${logOpen ? "rotate-180" : ""}`} aria-hidden="true" />
-            </button>
-          </div>
-          {logOpen && (
-            <div className="absolute z-20 mt-2 w-[min(100%,28rem)] rounded-2xl border border-[#eadfce] bg-white p-3 shadow-[0_16px_40px_rgba(23,53,42,0.08)]">
-              {recent.length === 0 ? (
-                <p className="text-sm text-[#5e7266]">Nothing has been logged yet.</p>
-              ) : (
-                <ul className="space-y-2">
-                  {recent.map((item) => {
-                    const colour = colourForChild(item.childId, data.children);
-                    return (
-                      <li key={item.id} className="rounded-xl px-3 py-2 text-sm font-bold" style={{ background: colour.wash, color: colour.ink }}>
-                        <span className="mr-2 inline-block size-2.5 rounded-full align-middle" style={{ background: colour.dot }} />
-                        {item.summary}
-                        {item.at && <span className="mt-0.5 block text-xs font-extrabold">{formatWhen(item.at)}</span>}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-              <Link href="/club/group#activity" className="mt-3 inline-block text-sm font-extrabold text-[#306A51] underline">
-                View full activity log
-              </Link>
+          <div className="relative mt-2" onMouseEnter={() => setLogOpen(true)} onMouseLeave={() => setLogOpen(false)}>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-display text-base text-[#306A51] sm:text-lg">Activity log</span>
+              <button type="button" className="inline-flex items-center gap-1 rounded-full border border-[#eadfce] bg-white px-3 py-1 text-left font-display text-sm text-[#306A51] shadow-sm" aria-expanded={logOpen} onClick={() => setLogOpen((open) => !open)}>
+                {welcome}
+                <ChevronDown className={`size-4 shrink-0 transition ${logOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+              </button>
             </div>
-          )}
+            {logOpen && (
+              <div className="absolute z-20 mt-1.5 w-[min(100%,20rem)] rounded-2xl border border-[#eadfce] bg-white p-2 shadow-[0_16px_40px_rgba(23,53,42,0.08)]">
+                {recent.length === 0 ? (
+                  <p className="px-2 py-1 text-xs text-[#5e7266]">Nothing has been logged yet.</p>
+                ) : (
+                  <ul className="space-y-1">
+                    {recent.map((item) => {
+                      const colour = colourForChild(item.childId, data.children);
+                      return (
+                        <li key={item.id} className="flex items-baseline justify-between gap-2 rounded-lg px-2 py-1 text-xs font-bold" style={{ background: colour.wash, color: colour.ink }}>
+                          <span className="min-w-0">
+                            <span className="mr-1.5 inline-block size-2 rounded-full align-middle" style={{ background: colour.dot }} />
+                            {item.summary}
+                          </span>
+                          {item.at && <time className="shrink-0 text-[10px] font-extrabold">{formatWhen(item.at)}</time>}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+                <Link href="/club/group#activity" className="mt-1.5 inline-block px-2 text-xs font-extrabold text-[#306A51] underline">
+                  View full activity log
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
         {data.children.length > 0 && (
           <div className="shrink-0">
