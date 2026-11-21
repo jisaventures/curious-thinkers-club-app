@@ -5,6 +5,8 @@ import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { setFocusChild } from "@/app/club/actions";
 import { Avatar } from "@/components/brand/avatar";
+import { CountryFlag } from "@/components/brand/country-flag";
+import { GROUP_ICONS, GroupIcon, type GroupIconId } from "@/components/brand/group-icon";
 import { ChildForm } from "@/components/club/child-form";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -63,9 +65,24 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
     <div className="space-y-8 sm:space-y-10">
       <section className="flex flex-col items-center gap-6 text-center xl:flex-row xl:items-center xl:justify-between xl:gap-8 xl:text-left">
         <div className="w-full min-w-0 xl:w-auto xl:flex-1">
-          <h1 className="text-balance font-display text-3xl leading-tight text-[#306A51] sm:text-4xl">
-            Welcome back, <span className="text-[#e8a428]">{account.display_name}</span>
-          </h1>
+          <div className="flex items-center justify-center gap-3 xl:justify-start">
+            {isGroupIcon(account.group_icon) && (
+              <GroupIcon
+                icon={account.group_icon}
+                background={account.group_bg || "2f9a4a"}
+                colour={account.group_icon_colour || "fff4dc"}
+                className="size-16 shrink-0 rounded-[22px] sm:size-20"
+                title={account.group_name || "Group icon"}
+              />
+            )}
+            <div className="min-w-0 text-left">
+              <p className="text-xs font-extrabold text-[#5e7266] sm:text-sm">Group Leader: {account.display_name}</p>
+              <h1 className="mt-0.5 flex items-center gap-2 font-display text-3xl leading-tight text-[#306A51] sm:text-4xl">
+                <span className="text-[#e8a428]">{account.group_name || account.display_name}</span>
+                {account.group_location && <CountryFlag country={account.group_location} className="h-3.5 w-5 sm:h-4 sm:w-6" />}
+              </h1>
+            </div>
+          </div>
           <div className="mt-2 flex flex-wrap items-center justify-center gap-2 xl:justify-start">
             <span className="font-display text-base text-[#306A51] sm:text-lg">Activity log</span>
             <div className="relative max-w-full" onMouseEnter={showLog} onMouseLeave={hideLogSoon}>
@@ -359,6 +376,10 @@ function packLabel(title: string) {
   if (value.includes("knight")) return "Knight pack";
   if (value.includes("space")) return "Space pack";
   return title;
+}
+
+function isGroupIcon(value: string | null | undefined): value is GroupIconId {
+  return !!value && (GROUP_ICONS as readonly string[]).includes(value);
 }
 
 function Progress({ value, total, className = "" }: { value: number; total: number; className?: string }) {

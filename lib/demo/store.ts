@@ -430,7 +430,21 @@ export function createSeed(): DemoDb {
 
   return {
     accounts: [
-      { id: SAM_ID, display_name: "Sam", email: "sam@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "Europe" },
+      {
+        id: SAM_ID,
+        display_name: "Sam",
+        email: "sam@demo.curiousthinkersclub.test",
+        is_adult_confirmed: true,
+        role: "member",
+        shopify_customer_id: null,
+        region: "Europe",
+        group_name: "Sam's Club",
+        group_type: "Family",
+        group_location: "United Kingdom",
+        group_icon: "star",
+        group_icon_colour: "fff4dc",
+        group_bg: "2f9a4a",
+      },
       { id: ADMIN_ID, display_name: "Ada", email: "admin@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "admin", shopify_customer_id: null, region: "Europe" },
       { id: "a1000000-0000-4000-8000-000000000003", display_name: "Star", email: "star@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "North America" },
       { id: "a1000000-0000-4000-8000-000000000004", display_name: "Dex", email: "dex@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "Asia" },
@@ -491,7 +505,7 @@ export function createSeed(): DemoDb {
   };
 }
 
-const SEED_VERSION = 6;
+const SEED_VERSION = 7;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {
