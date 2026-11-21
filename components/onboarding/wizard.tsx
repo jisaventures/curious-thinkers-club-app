@@ -90,7 +90,7 @@ export function OnboardingWizard({ shopFirstName, shopLocation }: { shopFirstNam
   const [groupName, setGroupName] = useState("");
   const [groupType, setGroupType] = useState<GroupType | "">("");
   const [leaderName, setLeaderName] = useState(shopFirstName ?? "");
-  const [groupIcon, setGroupIcon] = useState<GroupIconDraft>({ icon: "star", background: "1e4d3a", colour: "fff4dc" });
+  const [groupIcon, setGroupIcon] = useState<GroupIconDraft>({ icon: "star", background: "2f9a4a", colour: "fff4dc" });
   const [groupAvatarOpen, setGroupAvatarOpen] = useState(false);
   const [groupAvatarDraft, setGroupAvatarDraft] = useState<GroupIconDraft | null>(null);
   const tabsRef = useRef<HTMLOListElement>(null);
@@ -610,7 +610,7 @@ export function OnboardingWizard({ shopFirstName, shopLocation }: { shopFirstNam
                 </div>
                 <fieldset>
                   <legend className="text-sm font-extrabold text-[#1e4d3a]">Icon</legend>
-                  <div className="mt-2 grid max-h-[46vh] grid-cols-4 gap-2 overflow-y-auto pr-1 sm:grid-cols-6 lg:grid-cols-8">
+                  <div className="mt-2 grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8">
                     {GROUP_ICONS.map((icon) => (
                       <button
                         key={icon}
@@ -618,7 +618,7 @@ export function OnboardingWizard({ shopFirstName, shopLocation }: { shopFirstNam
                         aria-label={icon}
                         aria-pressed={groupAvatarDraft.icon === icon}
                         onClick={() => setGroupAvatarDraft({ ...groupAvatarDraft, icon })}
-                        className={`size-12 overflow-hidden rounded-2xl sm:size-14 ${groupAvatarDraft.icon === icon ? "ring-2 ring-[#173528]" : ""}`}
+                        className={`aspect-square w-full overflow-hidden rounded-2xl ${groupAvatarDraft.icon === icon ? "ring-2 ring-[#173528]" : ""}`}
                       >
                         <GroupIcon icon={icon} background={groupAvatarDraft.background} colour={groupAvatarDraft.colour} className="size-full" />
                       </button>

@@ -58,14 +58,14 @@ export const ACCESSORY_COLOURS = [
 ] as const;
 
 export const GROUP_BACKGROUND_COLOURS = [
-  { id: "forest", label: "Forest", hex: "#1e4d3a" },
-  { id: "pine", label: "Pine", hex: "#143528" },
-  { id: "navy", label: "Navy", hex: "#1a365d" },
-  { id: "indigo", label: "Indigo", hex: "#2a2466" },
-  { id: "plum", label: "Plum", hex: "#4a2044" },
-  { id: "teal", label: "Teal", hex: "#0e4f4a" },
-  { id: "cocoa", label: "Cocoa", hex: "#4a2c18" },
-  { id: "slate", label: "Slate", hex: "#243038" },
+  { id: "green", label: "Green", hex: "#2f9a4a" },
+  { id: "blue", label: "Blue", hex: "#3a6fe0" },
+  { id: "violet", label: "Violet", hex: "#8a45d4" },
+  { id: "rose", label: "Rose", hex: "#d45384" },
+  { id: "teal", label: "Teal", hex: "#1aa39a" },
+  { id: "orange", label: "Orange", hex: "#e07a22" },
+  { id: "red", label: "Red", hex: "#d6453d" },
+  { id: "brown", label: "Brown", hex: "#a56b32" },
 ] as const;
 
 export const GROUP_ICON_COLOURS = [
