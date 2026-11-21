@@ -21,6 +21,7 @@ import {
 import { authCookieOptions } from "@/lib/env";
 import { nextStepPosition } from "@/lib/progress";
 import { friendlyError } from "@/lib/utils";
+import { GROUP_ICONS } from "@/components/brand/group-icon";
 import { groupNameProblem, childFirstNameProblem } from "@/lib/unsafe-language";
 import { childInputSchema, uuidSchema } from "@/lib/validators";
 
@@ -39,16 +40,29 @@ export async function updateGroupProfile(formData: FormData) {
   if (!leaderName || childFirstNameProblem(leaderName)) {
     return { error: childFirstNameProblem(leaderName) || "Add the group leader's first name." };
   }
-  if (isDemoMode()) return demoUpdateGroupProfile(account.id, groupName, leaderName);
+  const icon = text(formData, "icon");
+  const background = text(formData, "background").replace("#", "");
+  const colour = text(formData, "colour").replace("#", "");
+  if (!(GROUP_ICONS as readonly string[]).includes(icon) || !/^[0-9a-fA-F]{6}$/.test(background) || !/^[0-9a-fA-F]{6}$/.test(colour)) {
+    return { error: "Choose a group icon." };
+  }
+  const groupIcon = { icon, background, colour };
+  if (isDemoMode()) return demoUpdateGroupProfile(account.id, groupName, leaderName, groupIcon);
   const { supabase } = await requireAdult();
   const { error } = await supabase
     .from("accounts")
-    .update({ group_name: groupName, display_name: leaderName })
+    .update({
+      group_name: groupName,
+      display_name: leaderName,
+      group_icon: icon,
+      group_bg: background,
+      group_icon_colour: colour,
+    })
     .eq("id", account.id);
   if (error) return { error: friendlyError(error.message) };
   revalidatePath("/club");
   revalidatePath("/club/group");
-  return { ok: true as const, groupName, leaderName };
+  return { ok: true as const, groupName, leaderName, icon: groupIcon };
 }
 
 export async function addChild(formData: FormData) {

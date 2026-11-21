@@ -16,14 +16,22 @@ function fail(path: string, message: string): never {
   redirect(`${path}?error=${encodeURIComponent(message)}`);
 }
 
-export async function demoUpdateGroupProfile(accountId: string, groupName: string, leaderName: string) {
+export async function demoUpdateGroupProfile(
+  accountId: string,
+  groupName: string,
+  leaderName: string,
+  icon: { icon: string; background: string; colour: string },
+) {
   const account = demoDb().accounts.find((item) => item.id === accountId);
   if (!account) return { error: "Unknown account." };
   account.group_name = groupName;
   account.display_name = leaderName;
+  account.group_icon = icon.icon;
+  account.group_bg = icon.background;
+  account.group_icon_colour = icon.colour;
   revalidatePath("/club");
   revalidatePath("/club/group");
-  return { ok: true as const, groupName, leaderName };
+  return { ok: true as const, groupName, leaderName, icon };
 }
 
 export async function demoAddChild(accountId: string, formData: FormData) {

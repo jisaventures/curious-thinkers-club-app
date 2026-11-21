@@ -2,10 +2,12 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, BarChart3, ClipboardList, Lock, ShoppingBag, UserRound, Users } from "lucide-react";
+import { ArrowLeft, BarChart3, ClipboardList, Lock, ShoppingBag, UserRound, Users, X } from "lucide-react";
 import Link from "next/link";
 import { updateGroupProfile } from "@/app/club/actions";
 import { Avatar } from "@/components/brand/avatar";
+import { GROUP_ICONS, GroupIcon, type GroupIconId } from "@/components/brand/group-icon";
+import { GROUP_BACKGROUND_COLOURS, GROUP_ICON_COLOURS } from "@/lib/avatar-style";
 import { BirthdayPicker } from "@/components/onboarding/birthday-picker";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -194,24 +196,52 @@ export function GroupView({ data }: { data: DashboardData }) {
   );
 }
 
+type GroupIconDraft = { icon: GroupIconId; background: string; colour: string };
+
+function isGroupIcon(value: string | null | undefined): value is GroupIconId {
+  return !!value && (GROUP_ICONS as readonly string[]).includes(value);
+}
+
 function ProfileSection({ data }: { data: DashboardData }) {
   const router = useRouter();
   const { account } = data;
   const [groupName, setGroupName] = useState(account.group_name || "");
   const [leaderName, setLeaderName] = useState(account.display_name);
+  const [icon, setIcon] = useState<GroupIconDraft>({
+    icon: isGroupIcon(account.group_icon) ? account.group_icon : "star",
+    background: account.group_bg || "2f9a4a",
+    colour: account.group_icon_colour || "fff4dc",
+  });
+  const [draft, setDraft] = useState<GroupIconDraft | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    if (!draft) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setDraft(null);
+    };
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
+  }, [draft]);
+
+  async function persist(nextIcon: GroupIconDraft) {
+    const body = new FormData();
+    body.set("groupName", groupName);
+    body.set("leaderName", leaderName);
+    body.set("icon", nextIcon.icon);
+    body.set("background", nextIcon.background);
+    body.set("colour", nextIcon.colour);
+    return updateGroupProfile(body);
+  }
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPending(true);
     setMessage(null);
     setError(null);
-    const body = new FormData();
-    body.set("groupName", groupName);
-    body.set("leaderName", leaderName);
-    const result = await updateGroupProfile(body);
+    const result = await persist(icon);
     setPending(false);
     if ("error" in result && result.error) {
       setError(result.error);
@@ -225,9 +255,40 @@ function ProfileSection({ data }: { data: DashboardData }) {
     }
   }
 
+  async function saveIcon() {
+    if (!draft) return;
+    setPending(true);
+    setMessage(null);
+    setError(null);
+    const result = await persist(draft);
+    setPending(false);
+    if ("error" in result && result.error) {
+      setError(result.error);
+      return;
+    }
+    if (result.ok) {
+      setIcon(draft);
+      setDraft(null);
+      setMessage("Saved");
+      router.refresh();
+    }
+  }
+
   return (
     <section id="profile" className="rounded-[22px] bg-white p-5 sm:p-6">
       <form className="space-y-4" onSubmit={save}>
+        <button
+          type="button"
+          onClick={() => setDraft(icon)}
+          className="group relative size-28 overflow-hidden rounded-[28px] sm:size-32"
+          aria-label="Edit group icon"
+        >
+          <GroupIcon icon={icon.icon} background={icon.background} colour={icon.colour} className="size-full" title="Group icon" />
+          <span className="pointer-events-none absolute inset-0 bg-black/0 transition group-hover:bg-black/45" />
+          <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent pt-6 pb-2 text-center text-sm font-extrabold text-white">
+            Edit
+          </span>
+        </button>
         <div>
           <Label htmlFor="groupName">Group name</Label>
           <Input id="groupName" className="mt-1" value={groupName} onChange={(event) => setGroupName(event.target.value.replace(/\s+/g, " ").slice(0, 32))} maxLength={32} autoComplete="off" />
@@ -250,7 +311,94 @@ function ProfileSection({ data }: { data: DashboardData }) {
           {pending ? "Saving…" : "Save profile"}
         </Button>
       </form>
+      {draft && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setDraft(null);
+          }}
+        >
+          <div role="dialog" aria-modal="true" aria-labelledby="group-avatar-title" className="relative flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-[28px] bg-white shadow-xl">
+            <div className="flex items-center justify-between gap-3 border-b border-[#eadfce] bg-white px-5 py-4 sm:px-6">
+              <h2 id="group-avatar-title" className="step-title text-3xl">Edit group icon</h2>
+              <button type="button" onClick={() => setDraft(null)} className="rounded-full p-2 text-[#1e4d3a] hover:bg-[#f6efe2]" aria-label="Close">
+                <X className="size-5" />
+              </button>
+            </div>
+            <div className="avatar-modal-scroll min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6">
+              <div className="grid items-start gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+                <div className="lg:self-stretch lg:border-r lg:border-[#b9b5ad] lg:pr-5">
+                  <div className="flex justify-center rounded-[24px] bg-[#f6efe2] p-3">
+                    <GroupIcon icon={draft.icon} background={draft.background} colour={draft.colour} className="h-40 w-40 rounded-[24px]" title="Group icon preview" />
+                  </div>
+                  <ColourRow legend="Background" value={draft.background} colours={GROUP_BACKGROUND_COLOURS} onChange={(background) => setDraft({ ...draft, background })} className="mt-3" />
+                  <ColourRow legend="Icon colour" value={draft.colour} colours={GROUP_ICON_COLOURS} onChange={(colour) => setDraft({ ...draft, colour })} className="mt-3" />
+                </div>
+                <fieldset>
+                  <legend className="text-sm font-extrabold text-[#1e4d3a]">Icon</legend>
+                  <div className="mt-2 grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8">
+                    {GROUP_ICONS.map((item) => (
+                      <button
+                        key={item}
+                        type="button"
+                        aria-label={item}
+                        aria-pressed={draft.icon === item}
+                        onClick={() => setDraft({ ...draft, icon: item })}
+                        className={`aspect-square w-full overflow-hidden rounded-2xl ${draft.icon === item ? "ring-2 ring-[#173528]" : ""}`}
+                      >
+                        <GroupIcon icon={item} background={draft.background} colour={draft.colour} className="size-full" />
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+            <div className="border-t border-[#eadfce] bg-white px-5 py-4 sm:px-6">
+              <Button type="button" variant="mustard" size="lg" className="w-full" disabled={pending} onClick={() => void saveIcon()}>
+                {pending ? "Saving…" : "Save"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
+  );
+}
+
+function ColourRow({
+  legend,
+  colours,
+  value,
+  onChange,
+  className = "",
+}: {
+  legend: string;
+  colours: readonly { id: string; label: string; hex: string }[];
+  value: string;
+  onChange: (hex: string) => void;
+  className?: string;
+}) {
+  return (
+    <fieldset className={className}>
+      <legend className="text-sm font-extrabold text-[#1e4d3a]">{legend}</legend>
+      <div className="mt-2 flex flex-wrap gap-1 sm:gap-2">
+        {colours.map((colour) => {
+          const hex = colour.hex.replace("#", "");
+          return (
+            <button
+              key={colour.id}
+              type="button"
+              aria-label={colour.label}
+              aria-pressed={value.toLowerCase() === hex.toLowerCase()}
+              onClick={() => onChange(hex)}
+              className={`size-8 shrink-0 rounded-full border-2 sm:size-11 ${value.toLowerCase() === hex.toLowerCase() ? "border-[#173528]" : "border-[#eadfce]"}`}
+              style={{ background: colour.hex }}
+            />
+          );
+        })}
+      </div>
+    </fieldset>
   );
 }
 
