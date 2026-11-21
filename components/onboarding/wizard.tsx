@@ -368,10 +368,11 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
         <section className={stepCard}>
           <h1 className="step-title text-4xl lg:text-3xl">{child.firstName.trim() && !isUnsafeChildName(child.firstName) ? child.firstName.trim() : `Child ${editing + 1}`}</h1>
           <div className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] items-stretch gap-x-3 gap-y-3 sm:grid-cols-[auto_auto_minmax(0,1fr)] sm:gap-x-3 lg:mt-3 lg:grid-cols-[auto_auto_minmax(0,1fr)_minmax(0,1fr)] lg:items-stretch lg:gap-4">
+            <div className="col-span-2 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 sm:contents">
             <button
               type="button"
               onClick={openAvatarModal}
-              className="group relative size-40 shrink-0 self-center overflow-hidden rounded-[28px] bg-[#f6efe2] justify-self-center sm:row-span-2 sm:size-44 lg:size-36"
+              className="group relative size-28 shrink-0 self-center overflow-hidden rounded-[28px] bg-[#f6efe2] justify-self-center sm:row-span-2 sm:size-44 lg:size-36"
               aria-label="Edit avatar"
             >
               <FamilyAvatar build={child.avatar} className="size-full" title="Child avatar" />
@@ -380,7 +381,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 Edit
               </span>
             </button>
-            <fieldset className="col-start-2 row-start-1 flex flex-col justify-end justify-self-start sm:justify-start">
+            <div className="flex min-w-0 flex-col gap-3 sm:contents">
+            <fieldset className="col-start-2 row-start-1 flex flex-col self-start justify-self-start">
               <legend className="m-0 mb-2 flex h-5 items-center text-sm font-extrabold text-[#1e4d3a]">Gender<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></legend>
               <div className="flex gap-2">
                 {(
@@ -411,7 +413,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 ))}
               </div>
             </fieldset>
-            <div className="col-span-2 row-start-2 flex min-w-0 flex-col sm:col-span-1 sm:col-start-3 sm:row-start-2 lg:col-span-3 lg:col-start-2">
+            <div className="flex min-w-0 flex-col sm:col-span-1 sm:col-start-3 sm:row-start-2 lg:col-span-3 lg:col-start-2">
               <div className="mb-2 flex h-5 items-center gap-1.5">
                 <Label htmlFor="nickname">Username<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
                 <span className="group relative inline-flex">
@@ -424,17 +426,19 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <Input id="nickname" value={child.nickname} disabled />
+                <Input id="nickname" value={child.nickname} disabled className="max-sm:h-10 max-sm:px-1.5 max-sm:text-xs max-sm:tracking-tight" />
                 <span className="inline-flex pb-[5px]">
                   <Button type="button" variant="green" size="sm" className="regen-button shrink-0" aria-label="Re-generate" onClick={regenerateNickname}>
-                    <RefreshCw className="size-6 lg:hidden" strokeWidth={3} aria-hidden="true" />
+                    <RefreshCw className="size-5 sm:size-6 lg:hidden" strokeWidth={3} aria-hidden="true" />
                     <span className="hidden lg:inline">Re-generate</span>
                   </Button>
                 </span>
               </div>
               {child.nicknameMessage && <p className="text-sm font-bold text-[#8a4b3a]">{child.nicknameMessage}</p>}
             </div>
-            <div className="col-span-2 row-start-3 grid grid-cols-[minmax(0,1fr)_7.55rem] items-start gap-3 sm:contents">
+            </div>
+            </div>
+            <div className="col-span-2 grid grid-cols-[minmax(0,1fr)_7.55rem] items-start gap-3 sm:contents">
               <div className="flex min-w-0 flex-col sm:col-start-3 sm:row-start-1">
                 <Label htmlFor="firstName" className="mb-2 flex h-5 items-center whitespace-nowrap max-sm:!text-[12px]">First name only<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
                 <Input
