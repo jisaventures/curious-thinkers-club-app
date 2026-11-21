@@ -241,6 +241,18 @@
   }
 }
 
+.member-avatar {
+  border: 2px solid transparent;
+  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.member-chip:hover .member-avatar,
+.member-chip:focus-visible .member-avatar {
+  transform: translateY(-4px);
+  border-color: #306a51;
+  box-shadow: 0 4px 0 #c9b89a;
+}
+
 .wordmark {
   font-family: var(--font-fredoka), ui-sans-serif, system-ui, sans-serif;
   font-weight: 600;

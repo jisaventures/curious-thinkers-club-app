@@ -45,29 +45,31 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
         {data.children.length > 0 && (
           <div className="shrink-0">
             <p className="text-center font-display text-sm text-[#306A51]">Group Members</p>
-            <div className="mt-2 flex items-start justify-end gap-3">
+            <div className="mt-2 flex flex-wrap items-start justify-end gap-x-4 gap-y-3">
               {data.children.map((child) => {
                 const name = memberName(child);
                 return (
-                  <button key={child.id} type="button" className="w-16 text-center" onClick={() => setBookId(child.id)}>
-                    <Avatar
-                      avatar={child.avatar_key}
-                      colour={child.avatar_bg}
-                      face={child.avatar_face}
-                      hairStyle={child.avatar_hair_style}
-                      hairColour={child.avatar_hair_colour}
-                      glasses={child.avatar_glasses}
-                      hat={child.avatar_hat}
-                      gender={child.gender === "girl" ? "girl" : "boy"}
-                      skin={child.avatar_skin}
-                      eyeColour={child.avatar_eyes}
-                      shirt={child.avatar_shirt}
-                      options={child.avatar_options}
-                      title={name}
-                      className="mx-auto size-14 rounded-full"
-                    />
-                    <span className="mt-1 block truncate font-display text-sm leading-tight text-[#17352A]">{name}</span>
-                    <span className="block truncate text-[11px] font-extrabold text-[#5e7266]">@{child.nickname}</span>
+                  <button key={child.id} type="button" className="member-chip w-max text-center" onClick={() => setBookId(child.id)}>
+                    <span className="member-avatar mx-auto block size-14 overflow-hidden rounded-full bg-white">
+                      <Avatar
+                        avatar={child.avatar_key}
+                        colour={child.avatar_bg}
+                        face={child.avatar_face}
+                        hairStyle={child.avatar_hair_style}
+                        hairColour={child.avatar_hair_colour}
+                        glasses={child.avatar_glasses}
+                        hat={child.avatar_hat}
+                        gender={child.gender === "girl" ? "girl" : "boy"}
+                        skin={child.avatar_skin}
+                        eyeColour={child.avatar_eyes}
+                        shirt={child.avatar_shirt}
+                        options={child.avatar_options}
+                        title={name}
+                        className="size-14"
+                      />
+                    </span>
+                    <span className="mt-1 block whitespace-nowrap font-display text-sm leading-tight text-[#17352A]">{name}</span>
+                    <span className="block whitespace-nowrap text-[11px] font-extrabold text-[#5e7266]">@{child.nickname}</span>
                   </button>
                 );
               })}
@@ -148,7 +150,22 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
                 className={`rounded-[22px] bg-white p-4 text-left shadow-[0_10px_30px_rgba(23,53,42,0.05)] ${active ? "ring-2 ring-[#306A51]" : "ring-1 ring-transparent"}`}
               >
                 <div className="flex items-center gap-3">
-                  <Avatar avatar={child.avatar_key} title={child.nickname} className="size-12 shrink-0" />
+                  <Avatar
+                    avatar={child.avatar_key}
+                    colour={child.avatar_bg}
+                    face={child.avatar_face}
+                    hairStyle={child.avatar_hair_style}
+                    hairColour={child.avatar_hair_colour}
+                    glasses={child.avatar_glasses}
+                    hat={child.avatar_hat}
+                    gender={child.gender === "girl" ? "girl" : "boy"}
+                    skin={child.avatar_skin}
+                    eyeColour={child.avatar_eyes}
+                    shirt={child.avatar_shirt}
+                    options={child.avatar_options}
+                    title={child.nickname}
+                    className="size-12 shrink-0 rounded-full"
+                  />
                   <div className="min-w-0">
                     <p className="truncate font-display text-lg text-[#17352A]">{shortName(child.nickname)}</p>
                     <p className="text-sm text-[#5e7266]">{child.age_years} years old</p>

@@ -1,3 +1,4 @@
+import { boyAvatar, girlAvatar, type AvatarBuild } from "@/lib/avataaars-options";
 import { nextStepPosition } from "@/lib/progress";
 import type { AvatarKey, CoverTone } from "@/lib/validators";
 
@@ -148,6 +149,10 @@ const SAMPLE_WORK =
   encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="420"><rect width="100%" height="100%" fill="#fff6e4"/><text x="36" y="200" font-family="Georgia" font-size="32" fill="#1e4d3a">Pip's treasure map — no faces</text></svg>`,
   );
+
+function portrait(build: AvatarBuild) {
+  return JSON.stringify(build);
+}
 
 function step(
   packId: string,
@@ -334,11 +339,11 @@ export function createSeed(): DemoDb {
       { id: "a1000000-0000-4000-8000-000000000005", display_name: "Bea", email: "bea@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null },
     ],
     children: [
-      { id: LOU_ID, account_id: SAM_ID, first_name: "Lou", nickname: "wigglyfrog44", avatar_key: "captain", age_years: 4, created_at: "2026-01-15T00:00:00.000Z" },
-      { id: MO_ID, account_id: SAM_ID, first_name: "Mo", nickname: "zestyowl21", avatar_key: "owl", age_years: 5, created_at: "2026-04-11T00:00:00.000Z" },
-      { id: ARIA_ID, account_id: SAM_ID, first_name: "Aria", nickname: "sparklybee18", avatar_key: "astronaut", age_years: 9, created_at: "2026-05-20T00:00:00.000Z" },
-      { id: NOAH_ID, account_id: SAM_ID, first_name: "Noah", nickname: "zippykiwi10", avatar_key: "dino", age_years: 6, created_at: "2026-06-08T00:00:00.000Z" },
-      { id: PIP_ID, account_id: SAM_ID, first_name: "Pip", nickname: "sunnycomet12", avatar_key: "explorer", age_years: 7, created_at: "2026-02-01T00:00:00.000Z" },
+      { id: LOU_ID, account_id: SAM_ID, first_name: "Lou", nickname: "wigglyfrog44", avatar_key: "explorer", gender: "boy", age_years: 4, created_at: "2026-01-15T00:00:00.000Z", avatar_options: portrait({ ...boyAvatar(), top: "theCaesar", hairColor: "2c1b18", eyes: "wink", clothesColor: "e8a428", background: "b5e8f0", skin: "edb98a" }) },
+      { id: MO_ID, account_id: SAM_ID, first_name: "Mo", nickname: "zestyowl21", avatar_key: "explorer", gender: "girl", age_years: 5, created_at: "2026-04-11T00:00:00.000Z", avatar_options: portrait({ ...girlAvatar(), top: "bob", hairColor: "4a312c", eyes: "default", clothesColor: "e36aa2", background: "f6d6a8" }) },
+      { id: ARIA_ID, account_id: SAM_ID, first_name: "Aria", nickname: "sparklybee18", avatar_key: "explorer", gender: "girl", age_years: 9, created_at: "2026-05-20T00:00:00.000Z", avatar_options: portrait({ ...girlAvatar(), top: "curly", hairColor: "2c1b18", eyes: "happy", accessory: "round", accessoryColor: "262e33", clothesColor: "65c9ff", background: "c7b6ea" }) },
+      { id: NOAH_ID, account_id: SAM_ID, first_name: "Noah", nickname: "zippykiwi10", avatar_key: "explorer", gender: "boy", age_years: 6, created_at: "2026-06-08T00:00:00.000Z", avatar_options: portrait({ ...boyAvatar(), top: "dreads01", hairColor: "6b4423", eyes: "side", clothesColor: "1e4d3a", background: "ffd5dc", skin: "ae5d29" }) },
+      { id: PIP_ID, account_id: SAM_ID, first_name: "Pip", nickname: "sunnycomet12", avatar_key: "explorer", gender: "boy", age_years: 7, created_at: "2026-02-01T00:00:00.000Z", avatar_options: portrait({ ...boyAvatar(), top: "shortRound", eyes: "happy", clothesColor: "306a51", background: "8fce78" }) },
       { id: "c1000000-0000-4000-8000-000000000004", account_id: "a1000000-0000-4000-8000-000000000003", nickname: "Star Scout", avatar_key: "star", age_years: 8, created_at: "2026-11-10T00:00:00.000Z" },
       { id: "c1000000-0000-4000-8000-000000000005", account_id: "a1000000-0000-4000-8000-000000000004", nickname: "Dino Dex", avatar_key: "dino", age_years: 6, created_at: "2026-11-11T00:00:00.000Z" },
       { id: "c1000000-0000-4000-8000-000000000006", account_id: "a1000000-0000-4000-8000-000000000005", nickname: "Cosmic Bea", avatar_key: "astronaut", age_years: 5, created_at: "2026-11-12T00:00:00.000Z" },
@@ -386,7 +391,7 @@ export function createSeed(): DemoDb {
   };
 }
 
-const SEED_VERSION = 2;
+const SEED_VERSION = 3;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {
