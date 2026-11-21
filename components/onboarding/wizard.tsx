@@ -488,7 +488,15 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
         </div>
       </footer>
 
-      {celebrating && <ClubCelebration names={children.slice(0, count).map((item) => item.firstName.trim()).filter(Boolean)} />}
+      {celebrating && (
+        <ClubCelebration
+          members={children.slice(0, count).map((item) => ({
+            firstName: item.firstName.trim(),
+            nickname: item.nickname.trim(),
+            avatar: item.avatar,
+          }))}
+        />
+      )}
 
       {avatarOpen && avatarDraft && (
         <div
@@ -677,7 +685,8 @@ function SolidTrophy({ className }: { className?: string }) {
   );
 }
 
-function ClubCelebration({ names }: { names: string[] }) {
+function ClubCelebration({ members }: { members: Array<{ firstName: string; nickname: string; avatar: AvatarBuild }> }) {
+  const names = members.map((member) => member.firstName).filter(Boolean);
   const line =
     names.length === 0
       ? "Time to explore."
@@ -705,6 +714,17 @@ function ClubCelebration({ names }: { names: string[] }) {
         <Trophy className="celebrate-trophy" strokeWidth={2.2} aria-hidden="true" />
         <p className="celebrate-title">You&apos;re in the club!</p>
         <p className="celebrate-copy">{line}</p>
+        {members.length > 0 && (
+          <ul className="celebrate-kids">
+            {members.map((member) => (
+              <li key={`${member.firstName}-${member.nickname}`}>
+                <FamilyAvatar build={member.avatar} className="celebrate-avatar" title={member.firstName || "Child"} />
+                <p className="celebrate-name">{member.firstName || "Child"}</p>
+                {member.nickname && <p className="celebrate-user">@{member.nickname}</p>}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
