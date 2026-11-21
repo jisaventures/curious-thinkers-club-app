@@ -1,3 +1,4 @@
+import { Backpack, ShoppingCart, Star } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "@/app/login/actions";
 import { isDemoMode } from "@/lib/demo/mode";
@@ -54,7 +55,7 @@ function ParentHeader({ account }: { account: AccountRecord | null }) {
   return (
     <header className="sticky top-0 z-40 bg-[#f6f1e6]">
       <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 sm:px-6">
-        <Link href="/club" className="flex min-w-0 items-center gap-2">
+        <Link href="/club" className="flex shrink-0 items-center gap-2">
           <img
             src="/brand/bulb.png"
             alt=""
@@ -65,14 +66,22 @@ function ParentHeader({ account }: { account: AccountRecord | null }) {
             decoding="sync"
             className="h-9 w-auto shrink-0 bg-transparent sm:h-10"
           />
-          <span className="wordmark min-w-0 text-[#306A51] max-sm:!text-[13px]">Curious Thinkers Club</span>
+          <span className="wordmark min-w-0 text-[#306A51] max-sm:hidden">Curious Thinkers Club</span>
         </Link>
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          <Link href="/club" data-variant="green" data-size="sm" className="header-pill">
+            <Backpack className="size-4 shrink-0" aria-hidden="true" />
+            My Packs
+          </Link>
           <Link href="/club/leaderboard" className="leaderboard-link">
+            <Star className="size-4 shrink-0" aria-hidden="true" />
             Leaderboards
           </Link>
-          <Button asChild variant="mustard" size="sm" className="px-3 sm:px-4">
-            <Link href="/club/shop">Shop packs</Link>
+          <Button asChild variant="mustard" size="sm" className="header-shop gap-1.5 px-3 sm:px-4">
+            <Link href="/club/shop">
+              <ShoppingCart className="size-4 shrink-0" aria-hidden="true" />
+              Club shop
+            </Link>
           </Button>
           <details className="relative">
             <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-[#eadfce] bg-white py-1 pr-2 pl-1 shadow-sm sm:pr-3 [&::-webkit-details-marker]:hidden">

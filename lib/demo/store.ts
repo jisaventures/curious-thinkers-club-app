@@ -28,6 +28,7 @@ export type DemoChild = {
   avatar_key: AvatarKey;
   age_years: number;
   created_at: string;
+  region?: string;
   first_name?: string;
   gender?: "boy" | "girl" | "unspecified";
   avatar_bg?: string;
@@ -210,6 +211,85 @@ function pack(
   };
 }
 
+const CROWD_ID = "a1000000-0000-4000-8000-000000000099";
+
+function crowdClub(): { account: DemoAccount; children: DemoChild[]; ledger: DemoLedger[] } {
+  const names: Array<[string, string, "girl" | "boy"]> = [
+    ["Amira", "brightotter7", "girl"],
+    ["Jonah", "swiftfox19", "boy"],
+    ["Priya", "calmheron3", "girl"],
+    ["Mateo", "boldlynx12", "boy"],
+    ["Hana", "quietrobin8", "girl"],
+    ["Leo", "wildbadger4", "boy"],
+    ["Noor", "kindwhale21", "girl"],
+    ["Felix", "bravehawk6", "boy"],
+    ["Aya", "softpanda15", "girl"],
+    ["Omar", "quickseal9", "boy"],
+    ["Freya", "merryfinch2", "girl"],
+    ["Kai", "steadywolf18", "boy"],
+    ["Zuri", "goldfinch11", "girl"],
+    ["Hugo", "clevertren5", "boy"],
+    ["Lila", "warmkoala14", "girl"],
+    ["Nico", "trueotter16", "boy"],
+    ["Sana", "littlecrane1", "girl"],
+    ["Eli", "openbadger20", "boy"],
+    ["Maya", "fairrobin13", "girl"],
+    ["Theo", "gentlegull8", "boy"],
+    ["Ines", "brighthare17", "girl"],
+    ["Rafi", "calmlynx10", "boy"],
+    ["Esme", "kindheron22", "girl"],
+    ["Jonas", "boldseal23", "boy"],
+  ];
+  const hairBoy = ["shortRound", "theCaesar", "dreads", "fro", "shaggy", "curly", "shortFlat", "bun"] as const;
+  const hairGirl = ["bob", "curly", "longButNotTooLong", "straight01", "froBand", "bun", "frida", "curvy"] as const;
+  const skins = ["ffdbb4", "edb98a", "ae5d29", "614335", "f8d25c"];
+  const clothes = ["e8a428", "306a51", "65c9ff", "e36aa2", "1e4d3a", "c45b4a"];
+  const backgrounds = ["b5e8f0", "f6d6a8", "c7b6ea", "8fce78", "ffd5dc", "d4e7c5"];
+  const eyes = ["happy", "default", "wink", "side"] as const;
+  const hairColours = ["2c1b18", "4a312c", "e8c070", "6b4423", "b58143"];
+  const regions = ["Europe", "Asia", "Africa", "North America", "South America", "Oceania", "Middle East"];
+  const children: DemoChild[] = [];
+  const ledger: DemoLedger[] = [];
+  names.forEach(([first, nickname, gender], index) => {
+    const id = `c3000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`;
+    const girl = gender === "girl";
+    children.push({
+      id,
+      account_id: CROWD_ID,
+      first_name: first,
+      nickname,
+      avatar_key: "explorer",
+      gender,
+      age_years: 4 + (index % 8),
+      region: regions[index % regions.length],
+      created_at: "2026-03-01T00:00:00.000Z",
+      avatar_options: portrait({
+        ...boyAvatar(),
+        top: girl ? hairGirl[index % hairGirl.length] : hairBoy[index % hairBoy.length],
+        skin: skins[index % skins.length],
+        clothesColor: clothes[index % clothes.length],
+        background: backgrounds[index % backgrounds.length],
+        eyes: eyes[index % eyes.length],
+        hairColor: hairColours[index % hairColours.length],
+        clothing: girl ? "shirtVNeck" : "shirtCrewNeck",
+      }),
+    });
+    ledger.push({
+      child_id: id,
+      account_id: CROWD_ID,
+      amount: 740 - index * 22,
+      reason: "opening_balance",
+      ref_id: id,
+      created_at: index % 3 === 0 ? "2026-11-18T12:00:00.000Z" : "2026-08-01T12:00:00.000Z",
+    });
+  });
+  return {
+    account: { id: CROWD_ID, display_name: "World", email: "world@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "Europe" },
+    children,
+    ledger,
+  };
+}
+
 export function createSeed(): DemoDb {
   const pirate = PIRATE_ID;
   const egypt = "b1000000-0000-4000-8000-000000000002";
@@ -316,6 +396,7 @@ export function createSeed(): DemoDb {
     row.completed_at = at.toISOString();
   });
 
+  const crowd = crowdClub();
   const ledger: DemoLedger[] = [
     ...progress
       .filter((row) => row.status === "complete")
@@ -338,6 +419,7 @@ export function createSeed(): DemoDb {
     { child_id: "c1000000-0000-4000-8000-000000000004", account_id: "a1000000-0000-4000-8000-000000000003", amount: 512, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000004", created_at: "2026-09-01T12:00:00.000Z" },
     { child_id: "c1000000-0000-4000-8000-000000000005", account_id: "a1000000-0000-4000-8000-000000000004", amount: 480, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000005", created_at: "2026-09-01T12:00:00.000Z" },
     { child_id: "c1000000-0000-4000-8000-000000000006", account_id: "a1000000-0000-4000-8000-000000000005", amount: 175, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000006", created_at: "2026-09-01T12:00:00.000Z" },
+    ...crowd.ledger,
   ];
 
   return {
@@ -347,6 +429,7 @@ export function createSeed(): DemoDb {
       { id: "a1000000-0000-4000-8000-000000000003", display_name: "Star", email: "star@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "North America" },
       { id: "a1000000-0000-4000-8000-000000000004", display_name: "Dex", email: "dex@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "Asia" },
       { id: "a1000000-0000-4000-8000-000000000005", display_name: "Bea", email: "bea@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "Africa" },
+      crowd.account,
     ],
     children: [
       { id: LOU_ID, account_id: SAM_ID, first_name: "Lou", nickname: "wigglyfrog44", avatar_key: "explorer", gender: "boy", age_years: 4, created_at: "2026-01-15T00:00:00.000Z", avatar_options: portrait({ ...boyAvatar(), top: "theCaesar", hairColor: "2c1b18", eyes: "wink", clothesColor: "e8a428", background: "b5e8f0", skin: "edb98a" }) },
@@ -357,6 +440,7 @@ export function createSeed(): DemoDb {
       { id: "c1000000-0000-4000-8000-000000000004", account_id: "a1000000-0000-4000-8000-000000000003", nickname: "Star Scout", avatar_key: "star", age_years: 8, created_at: "2026-11-10T00:00:00.000Z" },
       { id: "c1000000-0000-4000-8000-000000000005", account_id: "a1000000-0000-4000-8000-000000000004", nickname: "Dino Dex", avatar_key: "dino", age_years: 6, created_at: "2026-11-11T00:00:00.000Z" },
       { id: "c1000000-0000-4000-8000-000000000006", account_id: "a1000000-0000-4000-8000-000000000005", nickname: "Cosmic Bea", avatar_key: "astronaut", age_years: 5, created_at: "2026-11-12T00:00:00.000Z" },
+      ...crowd.children,
     ],
     packs: [
       pack(pirate, "be-a-pirate-for-the-day", "Be a pirate for the day", "history", "Learn about real pirates, maps and ships", "bottle", "900000000001", 4, 8),
@@ -401,7 +485,7 @@ export function createSeed(): DemoDb {
   };
 }
 
-const SEED_VERSION = 5;
+const SEED_VERSION = 6;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {

@@ -53,7 +53,7 @@ function demoLeaderboard(accountId: string): LeaderboardData {
       id: child.id,
       nickname: child.nickname,
       firstName: child.first_name ?? null,
-      region: regions.get(child.account_id) || "Europe",
+      region: child.region || regions.get(child.account_id) || "Europe",
       isMine: child.account_id === accountId,
       ageYears: child.age_years,
       createdAt: child.created_at,

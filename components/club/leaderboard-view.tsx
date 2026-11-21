@@ -46,40 +46,42 @@ export function LeaderboardView({ data }: { data: LeaderboardData }) {
         </select>
       </div>
 
-      {top.length === 0 ? (
-        <p className="rounded-[22px] bg-white p-5 text-sm font-bold text-[#5e7266]">No scores in this leaderboard yet.</p>
-      ) : (
-        <ol className="space-y-2">
-          {top.map((row) => {
-            const person = byId.get(row.id);
-            if (!person) return null;
-            return (
-              <li key={row.id}>
-                <BoardRow person={person} rank={row.rank} points={row.points} move={row.move} onOpen={() => setOpenId(person.id)} />
-              </li>
-            );
-          })}
-        </ol>
-      )}
-
-      <section className="rounded-[28px] bg-white p-4 shadow-[0_16px_40px_rgba(23,53,42,0.06)] sm:p-6">
-        <h2 className="font-display text-2xl text-[#306A51]">Your rank</h2>
-        {mine.length === 0 ? (
-          <p className="mt-3 text-sm font-bold text-[#5e7266]">Nobody in your group has a score for this filter.</p>
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,4fr)_minmax(16rem,1fr)]">
+        {top.length === 0 ? (
+          <p className="rounded-[22px] bg-white p-5 text-sm font-bold text-[#5e7266]">No scores in this leaderboard yet.</p>
         ) : (
-          <ul className="mt-4 space-y-3">
-            {mine.map((row) => {
+          <ol className="space-y-2">
+            {top.map((row) => {
               const person = byId.get(row.id);
               if (!person) return null;
               return (
                 <li key={row.id}>
-                  <BoardRow person={person} rank={row.rank} points={row.points} move={row.move} large onOpen={() => setOpenId(person.id)} />
+                  <BoardRow person={person} rank={row.rank} points={row.points} move={row.move} onOpen={() => setOpenId(person.id)} />
                 </li>
               );
             })}
-          </ul>
+          </ol>
         )}
-      </section>
+
+        <section className="rounded-[28px] bg-white p-4 shadow-[0_16px_40px_rgba(23,53,42,0.06)] lg:sticky lg:top-24">
+          <h2 className="font-display text-2xl text-[#306A51]">Your rank</h2>
+          {mine.length === 0 ? (
+            <p className="mt-3 text-sm font-bold text-[#5e7266]">Nobody in your group has a score for this filter.</p>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {mine.map((row) => {
+                const person = byId.get(row.id);
+                if (!person) return null;
+                return (
+                  <li key={row.id}>
+                    <BoardRow person={person} rank={row.rank} points={row.points} move={row.move} large onOpen={() => setOpenId(person.id)} />
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+      </div>
 
       {open && (
         <Scrapbook
