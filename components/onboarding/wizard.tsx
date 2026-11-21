@@ -366,7 +366,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       {screen === "details" && child && (
         <section className={stepCard}>
           <h1 className="step-title text-4xl lg:text-3xl">{child.firstName.trim() || `Child ${editing + 1}`}</h1>
-          <div className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 sm:grid-cols-[auto_auto_minmax(0,1fr)] sm:gap-x-3 lg:mt-3 lg:grid-cols-[auto_auto_minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-4">
+          <div className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] items-stretch gap-x-3 gap-y-3 sm:grid-cols-[auto_auto_minmax(0,1fr)] sm:gap-x-3 lg:mt-3 lg:grid-cols-[auto_auto_minmax(0,1fr)_minmax(0,1fr)] lg:items-stretch lg:gap-4">
             <button
               type="button"
               onClick={openAvatarModal}
@@ -379,8 +379,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 Edit
               </span>
             </button>
-            <fieldset className="col-start-2 row-start-1 space-y-2 justify-self-start self-end">
-              <legend className="text-sm font-extrabold text-[#1e4d3a]">Gender<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></legend>
+            <fieldset className="col-start-2 row-start-1 flex flex-col justify-self-start">
+              <legend className="m-0 mb-2 flex h-5 items-center text-sm font-extrabold text-[#1e4d3a]">Gender<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></legend>
               <div className="flex gap-2">
                 {(
                   [
@@ -410,8 +410,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 ))}
               </div>
             </fieldset>
-            <div className="col-start-2 row-start-2 min-w-0 max-w-32 space-y-2 sm:col-start-3 sm:row-start-1 sm:max-w-none lg:max-w-none">
-              <Label htmlFor="firstName">First name only<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
+            <div className="col-start-2 row-start-2 flex min-w-0 flex-col sm:col-start-3 sm:row-start-1">
+              <Label htmlFor="firstName" className="mb-2 flex h-5 items-center">First name only<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
               <Input
                 id="firstName"
                 value={child.firstName}
@@ -420,12 +420,12 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 autoComplete="off"
               />
             </div>
-            <div className="col-span-2 min-w-0 space-y-2 sm:col-span-1 sm:col-start-2 sm:row-start-2 sm:w-[10rem] lg:w-auto lg:col-start-4 lg:row-start-1">
-              <Label htmlFor="birthday">Birthday<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
+            <div className="col-span-2 flex min-w-0 flex-col sm:col-span-1 sm:col-start-2 sm:row-start-2 sm:w-[10rem] lg:w-auto lg:col-start-4 lg:row-start-1">
+              <Label htmlFor="birthday" className="mb-2 flex h-5 items-center">Birthday<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
               <BirthdayPicker id="birthday" value={child.birthday} onChange={(birthday) => patchChild({ birthday })} />
             </div>
-            <div className="col-span-2 space-y-2 sm:col-span-1 sm:col-start-3 sm:row-start-2 lg:col-span-3 lg:col-start-2">
-              <div className="flex items-center gap-1.5">
+            <div className="col-span-2 flex flex-col sm:col-span-1 sm:col-start-3 sm:row-start-2 lg:col-span-3 lg:col-start-2">
+              <div className="mb-2 flex h-5 items-center gap-1.5">
                 <Label htmlFor="nickname">Username<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
                 <span className="group relative inline-flex">
                   <button type="button" className="inline-flex size-4 items-center justify-center rounded-full text-[#306a51]" aria-label="About usernames">
