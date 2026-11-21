@@ -510,6 +510,14 @@ select {
   }
 }
 
+@media (min-width: 1024px) {
+  .birthday-panel.is-floating {
+    position: fixed;
+    right: auto;
+    bottom: auto;
+  }
+}
+
 .birthday-month {
   margin: 0;
   color: #306a51;

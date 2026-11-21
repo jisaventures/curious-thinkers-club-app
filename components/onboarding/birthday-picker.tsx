@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   birthdayBounds,
+  birthdayMonths,
   birthdayYears,
   formatBirthday,
   isBirthdayAllowed,
   monthGrid,
-  monthLabel,
   parseIsoDate,
   sameDay,
   shiftMonth,
@@ -26,6 +26,7 @@ export function BirthdayPicker({ id, value, onChange }: { id: string; value: str
   const bounds = useMemo(() => birthdayBounds(today), [today]);
   const years = useMemo(() => birthdayYears(today), [today]);
   const [cursor, setCursor] = useState(() => new Date(bounds.latest.getFullYear(), bounds.latest.getMonth(), 1));
+  const [floating, setFloating] = useState<{ top: number; left: number } | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -42,6 +43,37 @@ export function BirthdayPicker({ id, value, onChange }: { id: string; value: str
       document.removeEventListener("keydown", onKey);
     };
   }, [open]);
+
+  useLayoutEffect(() => {
+    if (!open) {
+      setFloating(null);
+      return;
+    }
+    const place = () => {
+      if (window.innerWidth < 1024) {
+        setFloating(null);
+        return;
+      }
+      const trigger = rootRef.current?.querySelector("button");
+      const panel = document.getElementById(panelId);
+      if (!trigger) return;
+      const rect = trigger.getBoundingClientRect();
+      const height = panel?.offsetHeight ?? 340;
+      const width = panel?.offsetWidth ?? 304;
+      const gap = 8;
+      const below = window.innerHeight - rect.bottom;
+      const top = below >= height + gap ? rect.bottom + gap : Math.max(8, rect.top - height - gap);
+      const left = Math.max(8, Math.min(rect.right - width, window.innerWidth - width - 8));
+      setFloating({ top, left });
+    };
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [open, panelId, cursor]);
 
   const days = monthGrid(cursor);
   const previous = shiftMonth(cursor, -1);
@@ -68,27 +100,38 @@ export function BirthdayPicker({ id, value, onChange }: { id: string; value: str
         <Calendar className="size-5 shrink-0 text-[#306a51]" aria-hidden="true" />
       </button>
       {open && (
-        <div id={panelId} role="dialog" aria-label="Choose a birthday" className="birthday-panel">
+        <div
+          id={panelId}
+          role="dialog"
+          aria-label="Choose a birthday"
+          className={`birthday-panel${floating ? " is-floating" : ""}`}
+          style={floating ? { top: floating.top, left: floating.left } : undefined}
+        >
           <div className="flex items-center justify-between gap-2">
             <button type="button" className="birthday-nav" disabled={!canGoBack} onClick={() => canGoBack && setCursor(previous)} aria-label="Previous month">
               <ChevronLeft className="size-4" aria-hidden="true" />
             </button>
             <div className="flex min-w-0 items-center gap-2">
-              <p className="birthday-month">{monthLabel(cursor)}</p>
+              <select
+                className="birthday-year"
+                aria-label="Month"
+                value={cursor.getMonth()}
+                onChange={(event) => setCursor(clampMonth(cursor.getFullYear(), Number(event.target.value), bounds))}
+              >
+                {birthdayMonths().map((label, index) => {
+                  const allowed = monthAllowed(cursor.getFullYear(), index, bounds);
+                  return (
+                    <option key={label} value={index} disabled={!allowed}>
+                      {label}
+                    </option>
+                  );
+                })}
+              </select>
               <select
                 className="birthday-year"
                 aria-label="Year"
                 value={cursor.getFullYear()}
-                onChange={(event) => {
-                  const year = Number(event.target.value);
-                  let month = cursor.getMonth();
-                  const firstOfLatest = new Date(bounds.latest.getFullYear(), bounds.latest.getMonth(), 1);
-                  const firstOfEarliest = new Date(bounds.earliest.getFullYear(), bounds.earliest.getMonth(), 1);
-                  const candidate = new Date(year, month, 1);
-                  if (candidate > firstOfLatest) month = bounds.latest.getMonth();
-                  if (candidate < firstOfEarliest) month = bounds.earliest.getMonth();
-                  setCursor(new Date(year, month, 1));
-                }}
+                onChange={(event) => setCursor(clampMonth(Number(event.target.value), cursor.getMonth(), bounds))}
               >
                 {years.map((year) => (
                   <option key={year} value={year}>
@@ -135,4 +178,20 @@ export function BirthdayPicker({ id, value, onChange }: { id: string; value: str
       )}
     </div>
   );
+}
+
+function monthAllowed(year: number, month: number, bounds: { earliest: Date; latest: Date }) {
+  const candidate = new Date(year, month, 1);
+  const earliest = new Date(bounds.earliest.getFullYear(), bounds.earliest.getMonth(), 1);
+  const latest = new Date(bounds.latest.getFullYear(), bounds.latest.getMonth(), 1);
+  return candidate >= earliest && candidate <= latest;
+}
+
+function clampMonth(year: number, month: number, bounds: { earliest: Date; latest: Date }) {
+  const earliest = new Date(bounds.earliest.getFullYear(), bounds.earliest.getMonth(), 1);
+  const latest = new Date(bounds.latest.getFullYear(), bounds.latest.getMonth(), 1);
+  let candidate = new Date(year, month, 1);
+  if (candidate > latest) candidate = latest;
+  if (candidate < earliest) candidate = earliest;
+  return new Date(candidate.getFullYear(), candidate.getMonth(), 1);
 }

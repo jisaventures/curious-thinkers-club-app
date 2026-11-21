@@ -315,7 +315,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
       {screen === "family" && (
         <section className={stepCard}>
-          <h1 className="step-title text-4xl">How many children are in the family?</h1>
+          <h1 className="step-title text-4xl">How many are in the group?</h1>
           <p className="mt-3 text-base leading-relaxed text-[#5e7266] lg:text-xl">
             You can add up to 5 children on this account. You don&apos;t have to add everyone now. More can be added later.
           </p>
