@@ -4,6 +4,7 @@ import { isDemoMode } from "@/lib/demo/mode";
 import { shopUrl } from "@/lib/env";
 import type { AccountRecord } from "@/lib/auth/session";
 import { LogoMark } from "@/components/brand/logo";
+import { Button } from "@/components/ui/button";
 
 export function AppShell({
   account,
@@ -11,15 +12,26 @@ export function AppShell({
   hideShop: _hideShop = false,
   centered = false,
   onboarding = false,
+  variant = "marketing",
 }: {
   account: AccountRecord | null;
   children: React.ReactNode;
   hideShop?: boolean;
   centered?: boolean;
   onboarding?: boolean;
+  variant?: "marketing" | "parent";
 }) {
   void _hideShop;
   const shop = shopUrl();
+  if (variant === "parent") {
+    return (
+      <div className="flex min-h-svh flex-col bg-[#f6f1e6]">
+        <ParentHeader account={account} />
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+        {isDemoMode() && <DemoModeMenu corner="bottom" />}
+      </div>
+    );
+  }
   const frame = centered
     ? `mx-auto flex w-full max-w-6xl flex-1 flex-col px-3 [justify-content:safe_center] sm:px-4 ${onboarding ? "pt-4 pb-28 sm:pt-6" : "py-4 sm:py-6"}`
     : "mx-auto w-full max-w-none px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5";
@@ -33,6 +45,64 @@ export function AppShell({
       </div>
       {isDemoMode() && <DemoModeMenu />}
     </div>
+  );
+}
+
+function ParentHeader({ account }: { account: AccountRecord | null }) {
+  const name = account?.display_name?.trim() || "Parent";
+  const initial = name.slice(0, 1).toUpperCase();
+  return (
+    <header className="sticky top-0 z-40 bg-[#f6f1e6]">
+      <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 sm:px-6">
+        <Link href="/club" className="flex min-w-0 items-center gap-2">
+          <img
+            src="/brand/bulb.png"
+            alt=""
+            width={103}
+            height={160}
+            loading="eager"
+            fetchPriority="high"
+            decoding="sync"
+            className="h-9 w-auto shrink-0 bg-transparent sm:h-10"
+          />
+          <span className="wordmark min-w-0 text-[#306A51] max-sm:!text-[13px]">Curious Thinkers Club</span>
+        </Link>
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          <Button asChild variant="mustard" size="sm" className="px-3 sm:px-4">
+            <Link href="/club/shop">Shop packs</Link>
+          </Button>
+          <details className="relative">
+            <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-[#eadfce] bg-white py-1 pr-2 pl-1 shadow-sm sm:pr-3 [&::-webkit-details-marker]:hidden">
+              <span className="flex size-8 items-center justify-center rounded-full bg-[#306A51] font-display text-sm font-bold text-white">{initial}</span>
+              <span className="hidden font-display text-base text-[#17352A] sm:inline">{name}</span>
+              <svg viewBox="0 0 20 20" className="size-4 text-[#306A51]" aria-hidden="true">
+                <path d="M5 7.5 10 12.5 15 7.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </summary>
+            <div className="absolute right-0 z-30 mt-2 w-48 rounded-2xl border border-[#eadfce] bg-white p-2 shadow-lg">
+              <Link href="/club/rewards" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
+                Rewards
+              </Link>
+              <Link href="/club/uploads" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
+                Uploads
+              </Link>
+              <Link href="/club/children" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
+                Children
+              </Link>
+              {account?.role === "admin" && (
+                <Link href="/admin" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
+                  Admin
+                </Link>
+              )}
+              <form action={signOut}>
+                <button className="w-full rounded-xl px-3 py-2 text-left text-sm font-bold text-[#17352A] hover:bg-[#f6efe2]">Sign out</button>
+              </form>
+            </div>
+          </details>
+        </div>
+      </div>
+      <div className="border-b border-dashed border-[#306A51]/25" />
+    </header>
   );
 }
 
@@ -131,9 +201,9 @@ function SiteHeader({
   );
 }
 
-function DemoModeMenu() {
+function DemoModeMenu({ corner = "top" }: { corner?: "top" | "bottom" }) {
   return (
-    <details className="fixed top-3 right-3 z-50">
+    <details className={`fixed z-50 ${corner === "bottom" ? "bottom-3 left-3" : "top-3 right-3"}`}>
       <summary
         className="flex cursor-pointer list-none flex-col items-center [&::-webkit-details-marker]:hidden"
         aria-label="Demo mode"

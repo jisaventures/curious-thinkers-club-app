@@ -2,58 +2,29 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { markNextStepNow, setFocusChild } from "@/app/club/actions";
-import { signOut } from "@/app/login/actions";
+import { setFocusChild } from "@/app/club/actions";
 import { Avatar } from "@/components/brand/avatar";
-import { BookCover } from "@/components/club/book-cover";
 import { ChildForm } from "@/components/club/child-form";
-import { CopyCode, ShareWork } from "@/components/club/share-work";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { formatMonth, formatPounds, ordinal, possessive } from "@/lib/format";
-import { shopUrl } from "@/lib/env";
-import { levelProgress } from "@/lib/levels";
+import { shortName } from "@/lib/format";
+import type { CoverTone } from "@/lib/validators";
 import type { loadDashboard } from "@/lib/club/data";
 
 type DashboardData = Awaited<ReturnType<typeof loadDashboard>>;
+type Pack = DashboardData["packs"][number];
 
 export function DashboardView({ data, notice }: { data: DashboardData; notice?: string }) {
   const { account } = data;
-  const month = formatMonth();
-  const shop = shopUrl();
-  const serverKey = JSON.stringify(data.doneByChild) + JSON.stringify(data.pointsByChild);
-  const [seenKey, setSeenKey] = useState(serverKey);
   const [focusId, setFocusId] = useState(data.focus?.id ?? "");
-  const [doneByChild, setDoneByChild] = useState(data.doneByChild);
-  const [pointsByChild, setPointsByChild] = useState(data.pointsByChild);
-  const [localNotice, setLocalNotice] = useState<string | null>(null);
-  if (seenKey !== serverKey) {
-    setSeenKey(serverKey);
-    setDoneByChild(data.doneByChild);
-    setPointsByChild(data.pointsByChild);
-  }
   const focus = data.children.find((child) => child.id === focusId) ?? data.focus;
-  const points = focus ? (pointsByChild[focus.id] ?? 0) : 0;
-  const level = levelProgress(points);
-  const packs = data.packs.map((pack) => ({
-    ...pack,
-    done: focus ? (doneByChild[focus.id]?.[pack.id] ?? 0) : 0,
-  }));
-  const unlockedReward =
-    [...data.rewardLadder].filter((reward) => points >= reward.min_points).sort((a, b) => b.min_points - a.min_points)[0] ??
-    null;
-  const nextReward =
-    [...data.rewardLadder].filter((reward) => points < reward.min_points).sort((a, b) => a.min_points - b.min_points)[0] ??
-    null;
-  const latestSubmission = data.submissions.find((row) => !focus || row.child_id === focus.id) ?? null;
-  const partial = [...packs]
-    .filter((pack) => pack.owned && pack.total > 0 && pack.done > 0 && pack.done < pack.total)
-    .sort((a, b) => b.done / b.total - a.done / a.total)[0];
-  const hint = partial
-    ? partial.slug === "become-a-spy"
-      ? "Finish this spy pack and share a photo to level up."
-      : `Finish “${partial.title}” and share a photo to level up.`
-    : "Finish a pack and share a photo to level up.";
+  const owned = data.packs.filter((pack) => pack.owned);
+  const spotlight = focus ? pickSpotlight(owned, data.doneByChild[focus.id] ?? {}) : null;
+  const welcome = spotlight && focus
+    ? activityLine(shortName(focus.nickname), spotlight.pack.title, spotlight.done, spotlight.total)
+    : focus
+      ? `${shortName(focus.nickname)} is ready for a new pack.`
+      : "Add a child to start a pack together.";
 
   function chooseChild(childId: string) {
     setFocusId(childId);
@@ -62,321 +33,245 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
     void setFocusChild(body);
   }
 
-  function markPack(packId: string) {
-    if (!focus) return;
-    const pack = packs.find((item) => item.id === packId);
-    if (!pack || pack.done >= pack.total) {
-      setLocalNotice("This pack is already finished.");
-      return;
-    }
-    const stepPoints = pack.stepPoints[pack.done] ?? 0;
-    const bonus = pack.done + 1 === pack.total ? pack.certificate_bonus_points : 0;
-    const previousDone = doneByChild;
-    const previousPoints = pointsByChild;
-    setDoneByChild((current) => ({
-      ...current,
-      [focus.id]: { ...current[focus.id], [packId]: pack.done + 1 },
-    }));
-    setPointsByChild((current) => ({
-      ...current,
-      [focus.id]: (current[focus.id] ?? 0) + stepPoints + bonus,
-    }));
-    setLocalNotice(bonus > 0 ? "Pack finished. Certificate and bonus points added." : "Step marked complete");
-    void markNextStepNow(packId, focus.id).then((result) => {
-      if (result.ok) return;
-      setDoneByChild(previousDone);
-      setPointsByChild(previousPoints);
-      setLocalNotice(result.message ?? "Something went wrong.");
-    });
-  }
-
   return (
-    <div className="space-y-5">
-      <section className="rounded-[24px] bg-gradient-to-br from-[#e5f6df] via-[#f3faf0] to-[#fffdf8] p-4 sm:p-6">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <p className="inline-flex items-center gap-1 text-xs font-extrabold tracking-wide text-[#c45b73] uppercase">
-              <span aria-hidden>✦</span> My Club dashboard
-            </p>
-            <h1 className="mt-1 font-display text-3xl text-[#1e4d3a] sm:text-4xl">
-              Welcome back, {account.display_name}
-            </h1>
-            <p className="mt-1 text-sm text-[#3d5348] sm:text-base">
-              {focus
-                ? `You're looking at ${possessive(focus.nickname)} adventures today.`
-                : "Add a child to start a pack together."}
-            </p>
-            <p className="mt-3 max-w-xl text-xs leading-relaxed text-[#5e7266]">
-              This club account is managed by an adult. Kids appear as nicknames only.
-            </p>
-            <div className="mt-3 flex gap-3 sm:hidden">
-              <Link href="/club/children" className="text-sm font-extrabold text-[#1e4d3a] underline">
-                Children
-              </Link>
-              <form action={signOut}>
-                <button className="text-sm font-extrabold text-[#1e4d3a] underline">Sign out</button>
-              </form>
+    <div className="space-y-8 sm:space-y-10">
+      <section className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="font-display text-3xl leading-tight text-[#17352A] sm:text-4xl">Welcome back, {account.display_name}</h1>
+          <p className="mt-2 text-base text-[#3d5348] sm:text-lg">{welcome}</p>
+        </div>
+        <img src="/brand/mascot-spy.png" alt="" className="h-16 w-auto shrink-0 sm:hidden" />
+      </section>
+
+      {notice && <p className="rounded-2xl bg-white px-4 py-3 text-sm font-bold text-[#306A51]">{notice}</p>}
+
+      {spotlight && focus ? (
+        <article className="rounded-[28px] bg-white p-4 shadow-[0_18px_50px_rgba(23,53,42,0.06)] sm:p-6">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+            <PackArt tone={spotlight.pack.cover_tone} title={spotlight.pack.title} className="mx-auto h-44 w-36 sm:mx-0 sm:h-48 sm:w-40" />
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-extrabold tracking-[0.16em] text-[#306A51]">UP NEXT</p>
+              <h2 className="mt-1 font-display text-2xl text-[#17352A] sm:text-3xl">{spotlight.pack.title}</h2>
+              <p className="mt-1 text-base text-[#3d5348]">
+                Next: {data.nextStepByChild[focus.id]?.[spotlight.pack.id] ?? "Keep going"}
+              </p>
+              <div className="mt-4">
+                <div className="mb-1.5 flex items-center justify-between gap-3 text-sm text-[#3d5348]">
+                  <span>
+                    {spotlight.done} of {spotlight.total} steps done
+                  </span>
+                  <span>{paceWord(spotlight.done, spotlight.total)}</span>
+                </div>
+                <Progress value={spotlight.done} total={spotlight.total} />
+              </div>
+              <Button asChild variant="mustard" size="md" className="mt-4 w-full sm:w-auto">
+                <Link href={`/club/packs/${spotlight.pack.slug}?mode=together&child=${focus.id}`}>
+                  Continue with {shortName(focus.nickname)}
+                </Link>
+              </Button>
             </div>
+            <img src="/brand/mascot-spy.png" alt="" className="hidden h-40 w-auto shrink-0 md:block" />
           </div>
-          <div>
-            <p className="text-sm font-extrabold text-[#1e4d3a]">Who&apos;s joined?</p>
-            <div className="mt-2 flex flex-wrap items-end gap-3">
-              {data.children.map((child) => {
-                const active = child.id === focus?.id;
-                return (
-                  <div key={child.id}>
-                    <button
-                      type="button"
-                      className="w-[72px] text-center active:scale-95"
-                      aria-pressed={active}
-                      onClick={() => chooseChild(child.id)}
-                    >
-                      <Avatar
-                        avatar={child.avatar_key}
-                        colour={child.avatar_bg}
-                        face={child.avatar_face}
-                        hairStyle={child.avatar_hair_style}
-                        hairColour={child.avatar_hair_colour}
-                        glasses={child.avatar_glasses}
-                        hat={child.avatar_hat}
-                        gender={child.gender === "girl" ? "girl" : "boy"}
-                        skin={child.avatar_skin}
-                        eyeColour={child.avatar_eyes}
-                        shirt={child.avatar_shirt}
-                        options={child.avatar_options}
-                        title={child.nickname}
-                        className={`mx-auto h-16 w-12 ${active ? "rounded-2xl ring-4 ring-[#1e4d3a]" : ""}`}
-                      />
-                      <span className="mt-1 block truncate text-xs font-extrabold">{child.nickname.split(" ").slice(-1)}</span>
-                      <span className="block text-[11px] text-[#5e7266]">Age {child.age_years}</span>
-                    </button>
+        </article>
+      ) : (
+        <article className="rounded-[28px] bg-white p-6 text-[#3d5348] shadow-[0_18px_50px_rgba(23,53,42,0.06)]">
+          <h2 className="font-display text-2xl text-[#17352A]">Nothing in progress yet</h2>
+          <p className="mt-2">When a child starts a pack, the next step will show up here.</p>
+          <Button asChild variant="mustard" size="md" className="mt-4">
+            <Link href="/club/shop">Find a pack</Link>
+          </Button>
+        </article>
+      )}
+
+      <section>
+        <div className="mb-4 flex items-end justify-between gap-3">
+          <h2 className="font-display text-2xl text-[#17352A]">Your kids</h2>
+          {data.children.length < 5 && (
+            <Dialog>
+              <DialogTrigger className="text-sm font-extrabold text-[#306A51] underline-offset-2 hover:underline">
+                Add a child
+              </DialogTrigger>
+              <DialogContent>
+                <DialogTitle>Add a child</DialogTitle>
+                <DialogDescription>Up to 5 children share every pack you unlock.</DialogDescription>
+                <div className="mt-4">
+                  <ChildForm mode="add" />
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          {data.children.map((child) => {
+            const current = currentPack(owned, data.doneByChild[child.id] ?? {});
+            const done = current ? (data.doneByChild[child.id]?.[current.id] ?? 0) : 0;
+            const active = child.id === focus?.id;
+            return (
+              <button
+                key={child.id}
+                type="button"
+                aria-pressed={active}
+                onClick={() => chooseChild(child.id)}
+                className={`rounded-[22px] bg-white p-4 text-left shadow-[0_10px_30px_rgba(23,53,42,0.05)] ${active ? "ring-2 ring-[#306A51]" : "ring-1 ring-transparent"}`}
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar avatar={child.avatar_key} title={child.nickname} className="size-12 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="truncate font-display text-lg text-[#17352A]">{shortName(child.nickname)}</p>
+                    <p className="text-sm text-[#5e7266]">{child.age_years} years old</p>
                   </div>
-                );
-              })}
-              {data.children.length < 5 && (
-                <Dialog>
-                  <DialogTrigger className="w-[72px] text-center">
-                    <span className="mx-auto flex size-14 items-center justify-center rounded-full border border-dashed border-[#c9b89a] bg-white text-2xl text-[#1e4d3a]">
-                      +
-                    </span>
-                    <span className="mt-1 block text-xs font-extrabold">Add child</span>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogTitle>Add a child</DialogTitle>
-                    <DialogDescription>
-                      Up to 5 children share every pack you unlock. Nicknames and avatars only.
-                    </DialogDescription>
-                    <div className="mt-4">
-                      <ChildForm mode="add" />
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              )}
-            </div>
-            <p className="mt-3 max-w-xs text-xs text-[#5e7266]">
-              One pack unlocks for all your kids — up to 5 per account.
-            </p>
-          </div>
+                </div>
+                <p className="mt-3 text-sm text-[#3d5348]">
+                  {current ? `${packLabel(current.title)} · ${done} of ${current.total} steps` : "No pack yet"}
+                </p>
+                <Progress value={done} total={current?.total ?? 0} className="mt-2" />
+              </button>
+            );
+          })}
         </div>
       </section>
 
-      {(localNotice || notice) && (
-        <p className="rounded-2xl bg-[#e7f5e1] px-4 py-3 text-sm font-bold text-[#1e4d3a]">{localNotice || notice}</p>
-      )}
-
-      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-5 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_340px]">
-        <section className="min-w-0">
-          <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-            <h2 className="font-display text-2xl text-[#1e4d3a]">My Packs</h2>
-            {focus && <p className="text-sm font-bold text-[#5e7266]">Progress for {focus.nickname}</p>}
-          </div>
-          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-            {packs.map((pack) => (
-              <PackCard
-                key={pack.id}
-                pack={pack}
-                focusId={focus?.id ?? null}
-                shop={shop}
-                onMark={() => markPack(pack.id)}
-              />
-            ))}
-            {packs.length === 0 && (
-              <p className="rounded-[22px] bg-white p-5 text-sm text-[#5e7266]">
-                Packs you buy in the shop will show up here for every child on this account.
-              </p>
-            )}
-          </div>
-        </section>
-
-        <aside className="space-y-4">
-          <section className="rounded-[22px] bg-[#1b4332] p-4 text-white">
-            <p className="text-sm font-bold text-[#d7eccf]">
-              {focus ? `${focus.nickname.split(" ").slice(-1)}'s points` : "Points"}
-            </p>
-            <p className="font-display text-5xl text-[#f5c542]">{points}</p>
-            <p className="text-sm">Level {level.current.name}</p>
-            {level.next && (
-              <>
-                <p className="mt-2 text-xs text-[#d7eccf]">Next level: {level.next.name}</p>
-                <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-[#0f2c22]">
-                  <div className="h-full rounded-full bg-[#f0b429]" style={{ width: `${Math.round(level.ratio * 100)}%` }} />
-                </div>
-                <p className="mt-1 text-xs text-[#f5c542]">{level.toGo} pts to go</p>
-              </>
-            )}
-            <p className="mt-3 text-sm leading-snug text-[#e7f5e1]">{hint}</p>
-          </section>
-
-          <section className="rounded-[22px] border border-[#efe2d0] bg-white p-4">
-            <h2 className="font-display text-xl text-[#1e4d3a]">This month&apos;s leaderboard</h2>
-            <p className="text-xs text-[#5e7266]">{month} · nicknames only</p>
-            <ol className="mt-3 space-y-1">
-              {data.leaderboard.slice(0, 5).map((row) => {
-                const highlight = focus && row.nickname === focus.nickname && row.age_years === focus.age_years;
-                return (
-                  <li
-                    key={`${row.rank}-${row.nickname}`}
-                    className={`flex items-center gap-2 rounded-2xl px-2 py-1.5 ${highlight ? "bg-[#e7f5e1]" : ""}`}
-                  >
-                    <Avatar avatar={row.avatar_key} className="size-9" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-extrabold">{row.nickname}</p>
-                      <p className="text-[11px] text-[#5e7266]">Age {row.age_years}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-display text-lg leading-none">{row.points}</p>
-                      <p className="text-[11px] text-[#5e7266]">{ordinal(row.rank)}</p>
-                    </div>
-                  </li>
-                );
-              })}
-            </ol>
-          </section>
-
-          <section className="rounded-[22px] bg-[#fbf6ec] p-4">
-            <h2 className="font-display text-xl text-[#1e4d3a]">This month&apos;s prizes</h2>
-            <p className="text-xs text-[#5e7266]">For the top three thinkers in {month}</p>
-            <ul className="mt-3 space-y-2">
-              {data.prizes.map((prize) => (
-                <li key={prize.id} className="flex gap-2 text-sm">
-                  <span aria-hidden>★</span>
-                  <span>
-                    <span className="font-extrabold">{prize.title}</span>
-                    <span className="block text-xs text-[#5e7266]">{prize.detail}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <section className="rounded-[22px] border border-[#f0e0b0] bg-[#fff6dc] p-4">
-            {unlockedReward ? (
-              <>
-                <p className="text-xs font-extrabold tracking-wide text-[#8a6a12] uppercase">Rewards unlocked</p>
-                <h2 className="mt-1 font-display text-xl leading-tight text-[#1e4d3a]">{unlockedReward.headline}</h2>
-                <p className="mt-1 text-sm text-[#5e7266]">{unlockedReward.description}</p>
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                  <p className="rounded-xl border border-dashed border-[#e0c56a] bg-white px-3 py-2 font-display tracking-widest">
-                    {unlockedReward.code}
-                  </p>
-                  <CopyCode code={unlockedReward.code} />
-                </div>
-              </>
-            ) : (
-              <>
-                <h2 className="font-display text-xl text-[#1e4d3a]">Rewards</h2>
-                <p className="mt-1 text-sm text-[#5e7266]">
-                  {nextReward
-                    ? `${nextReward.min_points - points} points to go until ${nextReward.code}.`
-                    : "Shop codes will appear here when you reach a reward."}
-                </p>
-              </>
-            )}
-          </section>
-
-          {focus && (
-            <ShareWork
-              childId={focus.id}
-              nickname={focus.nickname.split(" ").slice(-1)[0]}
-              packs={data.packs.filter((pack) => pack.owned).map((pack) => ({ id: pack.id, title: pack.title }))}
-              latest={latestSubmission}
-            />
-          )}
-        </aside>
-      </div>
-      <p className="text-center text-xs leading-relaxed text-[#5e7266]">
-        We store a first name, an email, and each child&apos;s nickname, age and chosen avatar. No surnames, no dates of birth, and no photos of children.
-      </p>
+      <section>
+        <div className="mb-4 flex items-end justify-between gap-3">
+          <h2 className="font-display text-2xl text-[#17352A]">My packs</h2>
+          <Link href="/club/shop" className="text-sm font-extrabold text-[#306A51] underline-offset-2 hover:underline">
+            Find a pack
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {owned.map((pack) => {
+            const done = focus ? (data.doneByChild[focus.id]?.[pack.id] ?? pack.done) : pack.done;
+            const total = pack.total || pack.step_count;
+            return (
+              <Link key={pack.id} href={focus ? `/club/packs/${pack.slug}?mode=together&child=${focus.id}` : `/club/packs/${pack.slug}`} className="min-w-0 no-underline">
+                <PackArt tone={pack.cover_tone} title={pack.title} className="aspect-[3/4] w-full" />
+                <p className="mt-2 font-display text-base leading-tight text-[#17352A]">{pack.title}</p>
+                <p className="text-sm text-[#5e7266]">{statusWord(done, total)}</p>
+              </Link>
+            );
+          })}
+          <Link href="/club/shop" className="flex min-h-48 flex-col items-center justify-center rounded-[22px] border-2 border-dashed border-[#c9b89a] bg-[#fbf7f0] text-center no-underline">
+            <span className="flex size-10 items-center justify-center rounded-full bg-white text-2xl text-[#306A51] shadow-sm">+</span>
+            <span className="mt-3 text-sm font-extrabold text-[#306A51]">Find a pack</span>
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }
 
-function PackCard({
-  pack,
-  focusId,
-  shop,
-  onMark,
-}: {
-  pack: DashboardData["packs"][number];
-  focusId: string | null;
-  shop: string;
-  onMark: () => void;
-}) {
-  const pct = pack.total ? Math.round((pack.done / pack.total) * 100) : 0;
+function pickSpotlight(packs: Pack[], doneByPack: Record<string, number>) {
+  const open = packs
+    .map((pack) => ({ pack, done: doneByPack[pack.id] ?? 0, total: pack.total || pack.step_count }))
+    .filter((item) => item.total > 0 && item.done < item.total && item.done > 0);
+  open.sort((a, b) => b.done / b.total - a.done / a.total);
+  return open[0] ?? null;
+}
+
+function currentPack(packs: Pack[], doneByPack: Record<string, number>) {
+  const ranked = packs
+    .map((pack) => ({ ...pack, done: doneByPack[pack.id] ?? 0, total: pack.total || pack.step_count }))
+    .filter((pack) => pack.total > 0);
+  ranked.sort((a, b) => {
+    const aOpen = a.done > 0 && a.done < a.total ? 1 : 0;
+    const bOpen = b.done > 0 && b.done < b.total ? 1 : 0;
+    return bOpen - aOpen || b.done / b.total - a.done / a.total;
+  });
+  return ranked[0] ?? null;
+}
+
+function paceWord(done: number, total: number) {
+  if (!total || done <= 0) return "Started";
+  const ratio = done / total;
+  if (ratio >= 1) return "Finished";
+  if (ratio >= 0.75) return "Almost done";
+  if (ratio >= 0.35) return "Halfway";
+  return "Started";
+}
+
+function statusWord(done: number, total: number) {
+  if (!total || done <= 0) return "Started";
+  const ratio = done / total;
+  if (ratio >= 1) return "Finished";
+  if (ratio >= 0.75) return "Almost done";
+  if (ratio >= 0.34) return "In progress";
+  return "Started";
+}
+
+function activityLine(name: string, title: string, done: number, total: number) {
+  const pack = packLabel(title).toLowerCase();
+  const ratio = total ? done / total : 0;
+  if (ratio >= 1) return `${name} has finished the ${pack}.`;
+  if (ratio >= 0.75) return `${name} is nearly done with the ${pack}.`;
+  if (ratio >= 0.4) return `${name} is halfway through the ${pack}.`;
+  if (done > 0) return `${name} has started the ${pack}.`;
+  return `${name} can start the ${pack}.`;
+}
+
+function packLabel(title: string) {
+  const value = title.toLowerCase();
+  if (value.includes("pirate")) return "Pirate pack";
+  if (value.includes("egypt")) return "Egypt pack";
+  if (value.includes("spy")) return "Spy pack";
+  if (value.includes("knight")) return "Knight pack";
+  if (value.includes("space")) return "Space pack";
+  return title;
+}
+
+function Progress({ value, total, className = "" }: { value: number; total: number; className?: string }) {
+  const pct = total ? Math.max(0, Math.min(100, Math.round((value / total) * 100))) : 0;
   return (
-    <article className="min-w-0 rounded-[22px] border border-[#f0e6d6] bg-white p-4 shadow-[0_8px_24px_rgba(30,77,58,0.04)]">
-      <div className="flex gap-3">
-        <BookCover tone={pack.cover_tone} title={pack.title} locked={!pack.owned} />
-        <div className="min-w-0 flex-1">
-          <h3 className="font-display text-xl leading-tight text-[#1e4d3a]">{pack.title}</h3>
-          <p className="mt-1 text-sm text-[#5e7266]">{pack.blurb}</p>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            <Tag tone="pink">video path</Tag>
-            <Tag tone="green">{pack.theme}</Tag>
-            <Tag tone="sand">{pack.duration_label.replace("About ", "~")}</Tag>
-          </div>
-          {pack.owned && (
-            <div className="mt-3">
-              <div className="mb-1 flex justify-between text-xs font-bold text-[#5e7266]">
-                <span>
-                  {pack.done} of {pack.total} steps
-                </span>
-                <span>{pct}%</span>
-              </div>
-              <div className="h-2.5 overflow-hidden rounded-full bg-[#f3eadc]">
-                <div className="h-full rounded-full bg-[#f0b429]" style={{ width: `${pct}%` }} />
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {pack.owned && focusId ? (
-          <>
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/club/packs/${pack.slug}?mode=together&child=${focusId}`}>Continue</Link>
-            </Button>
-            <Button type="button" size="sm" onClick={onMark}>
-              Mark complete
-            </Button>
-          </>
-        ) : (
-          <Button asChild>
-            <a href={shop} target="_blank" rel="noreferrer">
-              Unlock, {formatPounds(pack.price_pence)}
-            </a>
-          </Button>
-        )}
-      </div>
-    </article>
+    <div className={`h-2 overflow-hidden rounded-full bg-[#F3E7CF] ${className}`}>
+      <div className="h-full rounded-full bg-[#306A51]" style={{ width: `${pct}%` }} />
+    </div>
   );
 }
 
-function Tag({ children, tone }: { children: React.ReactNode; tone: "pink" | "green" | "sand" }) {
-  const colors = {
-    pink: "bg-[#fde8f0] text-[#9a4d66]",
-    green: "bg-[#e5f6df] text-[#1e4d3a]",
-    sand: "bg-[#f6efe2] text-[#6d5b3e]",
-  };
-  return <span className={`rounded-full px-2 py-0.5 text-[11px] font-extrabold ${colors[tone]}`}>{children}</span>;
+const tones: Record<CoverTone, string> = {
+  bottle: "bg-[#1e4d3a]",
+  palm: "bg-[#2f6b45]",
+  navy: "bg-[#1e3a5f]",
+  plum: "bg-[#5c3d6e]",
+  sea: "bg-[#245e78]",
+};
+
+function PackArt({ tone, title, className = "" }: { tone: CoverTone; title: string; className?: string }) {
+  return (
+    <div className={`relative overflow-hidden rounded-[22px] ${tones[tone]} ${className}`}>
+      <div className="absolute inset-x-3 top-3 bottom-[28%] rounded-xl bg-[#f7f1e6]">
+        <CoverSketch title={title} />
+      </div>
+      <p className="absolute inset-x-3 bottom-3 text-center text-xs leading-tight font-bold text-white sm:text-sm">{title}</p>
+    </div>
+  );
+}
+
+function CoverSketch({ title }: { title: string }) {
+  const value = title.toLowerCase();
+  if (value.includes("egypt")) {
+    return (
+      <svg viewBox="0 0 80 90" className="h-full w-full" aria-hidden="true">
+        <path d="M10 70 L40 18 L70 70 Z" fill="#e7c56a" />
+        <path d="M28 70 L40 42 L52 70 Z" fill="#f3e0a0" />
+        <circle cx="58" cy="24" r="8" fill="#e8a428" />
+      </svg>
+    );
+  }
+  if (value.includes("spy")) {
+    return (
+      <svg viewBox="0 0 80 90" className="h-full w-full" aria-hidden="true">
+        <rect x="18" y="16" width="44" height="56" rx="4" fill="#f4e2b0" />
+        <circle cx="40" cy="40" r="12" fill="none" stroke="#1e4d3a" strokeWidth="3" />
+        <path d="M48 48 L60 62" stroke="#1e4d3a" strokeWidth="3" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 80 90" className="h-full w-full" aria-hidden="true">
+      <path d="M14 58 C28 40 52 40 66 58" fill="none" stroke="#c45b4a" strokeWidth="3" strokeDasharray="3 3" />
+      <circle cx="22" cy="50" r="4" fill="#e07a3d" />
+      <path d="M48 28 l4 8 h8 l-6 5 2 8 -8-5 -8 5 2-8 -6-5 h8 z" fill="#e8a428" />
+      <rect x="16" y="62" width="48" height="8" rx="2" fill="#d7c4a2" />
+    </svg>
+  );
 }
