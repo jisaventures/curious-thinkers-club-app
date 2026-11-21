@@ -440,8 +440,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 <Input id="nickname" value={child.nickname} disabled />
                 <span className="inline-flex pb-[5px]">
                   <Button type="button" variant="green" size="sm" className="regen-button shrink-0" aria-label="Re-generate" onClick={regenerateNickname}>
-                    <RefreshCw className="hidden size-6 sm:block lg:hidden" strokeWidth={3} aria-hidden="true" />
-                    <span className="sm:hidden lg:inline">Re-generate</span>
+                    <RefreshCw className="size-6 lg:hidden" strokeWidth={3} aria-hidden="true" />
+                    <span className="hidden lg:inline">Re-generate</span>
                   </Button>
                 </span>
               </div>

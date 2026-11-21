@@ -595,7 +595,14 @@ select {
   align-self: center;
 }
 
-@media (min-width: 640px) and (max-width: 1023px) {
+@media (max-width: 639px) {
+  .onboarding-zoom {
+    zoom: 0.9;
+    min-height: 111.111svh;
+  }
+}
+
+@media (max-width: 1023px) {
   .ctc-button.regen-button {
     width: 3rem;
     min-width: 3rem;
