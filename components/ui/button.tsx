@@ -15,6 +15,7 @@ const buttonVariants = cva(
         mustard: "ctc-button",
         green: "ctc-button",
         grey: "ctc-button",
+        pink: "ctc-button",
       },
       size: {
         sm: "h-9 px-3.5",
@@ -38,7 +39,7 @@ export function Button({
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : "button";
-  const chunky = variant === "mustard" || variant === "green" || variant === "grey";
+  const chunky = variant === "mustard" || variant === "green" || variant === "grey" || variant === "pink";
   return (
     <Comp
       data-variant={chunky ? variant : undefined}

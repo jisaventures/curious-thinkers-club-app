@@ -71,10 +71,10 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
           <div className="mt-2 flex flex-wrap items-center justify-center gap-2 xl:justify-start">
             <span className="font-display text-base text-[#306A51] sm:text-lg">Activity log</span>
             <div className="relative max-w-full" onMouseEnter={showLog} onMouseLeave={hideLogSoon}>
-              <button type="button" className="inline-flex max-w-full items-center gap-1 rounded-full border border-[#eadfce] bg-white px-3 py-1 text-left font-display text-sm text-[#306A51] shadow-sm" aria-expanded={logOpen} onClick={() => (logOpen ? closeLog() : showLog())}>
-                <span className="min-w-0">{welcome}</span>
-                <ChevronDown className={`size-4 shrink-0 transition ${logOpen ? "rotate-180" : ""}`} aria-hidden="true" />
-              </button>
+              <Button type="button" variant="pink" size="sm" className="max-w-full gap-1.5" aria-expanded={logOpen} onClick={() => (logOpen ? closeLog() : showLog())}>
+                <span className="min-w-0 text-left">{welcome}</span>
+                <ChevronDown className={`size-4 shrink-0 text-white transition ${logOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+              </Button>
               {logOpen && (
                 <div className="absolute top-full left-1/2 z-20 min-w-full max-w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 pt-2 text-left xl:left-0 xl:translate-x-0">
                   <div className="rounded-2xl border border-[#eadfce] bg-white p-2 shadow-[0_16px_40px_rgba(23,53,42,0.08)]">

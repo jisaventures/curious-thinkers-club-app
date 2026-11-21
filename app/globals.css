@@ -18,6 +18,8 @@
   --ctc-green-deeper: #17352a;
   --ctc-grey: #b9b5ad;
   --ctc-grey-deeper: #8d8982;
+  --ctc-pink: #e56b93;
+  --ctc-pink-shadow: #c44b73;
   --color-leaf: #e7f5e1;
   --color-line: #efe2d0;
 }
@@ -370,6 +372,11 @@ select {
   box-shadow: 0 5px 0 var(--ctc-grey-deeper);
 }
 
+.ctc-button[data-variant="pink"] {
+  background: var(--ctc-pink);
+  box-shadow: 0 5px 0 var(--ctc-pink-shadow), 0 8px 16px rgba(196, 75, 115, 0.25);
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .ctc-button:hover:not(:disabled) {
     transform: translateY(-2px) rotate(-0.4deg);
@@ -392,6 +399,12 @@ select {
     transform: translateY(3px) scale(0.97);
     filter: none;
     box-shadow: 0 2px 0 var(--ctc-grey-deeper);
+  }
+
+  .ctc-button[data-variant="pink"]:active:not(:disabled) {
+    transform: translateY(3px) scale(0.97);
+    filter: none;
+    box-shadow: 0 2px 0 var(--ctc-pink-shadow), 0 4px 8px rgba(196, 75, 115, 0.18);
   }
 }
 
