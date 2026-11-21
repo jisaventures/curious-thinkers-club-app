@@ -244,8 +244,8 @@ export function OnboardingWizard({ shopFirstName, shopLocation }: { shopFirstNam
   }
 
   return (
-    <div className="w-full">
-      <div className="step-tabs relative mb-5 max-lg:sticky max-lg:top-[var(--site-header-h)] max-lg:z-30 max-lg:-mx-3 max-lg:bg-[#fffdf8] max-lg:px-3 max-lg:pb-3 sm:max-lg:-mx-5 sm:max-lg:px-5 md:max-lg:-mx-7 md:max-lg:px-7">
+    <div className={screen === "family" ? "create-group-screen w-full" : "w-full"}>
+      <div className={`step-tabs relative max-lg:sticky max-lg:top-[var(--site-header-h)] max-lg:z-30 max-lg:-mx-3 max-lg:bg-[#fffdf8] max-lg:px-3 max-lg:pb-3 sm:max-lg:-mx-5 sm:max-lg:px-5 md:max-lg:-mx-7 md:max-lg:px-7 ${screen === "family" ? "mb-3 lg:mb-5" : "mb-5"}`}>
       <ol ref={tabsRef} className="tab-scroll flex gap-2 overflow-x-auto px-1 pt-2" aria-label="Onboarding progress">
         {progressLabels.map((label, index) => {
           const done = index < progress;
@@ -309,7 +309,7 @@ export function OnboardingWizard({ shopFirstName, shopLocation }: { shopFirstNam
       {screen === "welcome" && (
         <section className={stepCard}>
           <h1 className="step-title text-4xl leading-tight sm:text-5xl">
-            {shopFirstName ? `Welcome ${shopFirstName}` : "Welcome Curious Thinker!"}
+            {shopFirstName ? `Welcome ${shopFirstName}` : "Welcome Curious Thinkers!"}
           </h1>
           <p className="mt-3 text-base leading-relaxed text-[#5e7266] lg:text-xl">
             This club must be managed by a parent or guardian. Children do not get their own login.
@@ -335,8 +335,8 @@ export function OnboardingWizard({ shopFirstName, shopLocation }: { shopFirstNam
 
       {screen === "family" && (
         <section className={stepCard}>
-          <h1 className="step-title text-4xl lg:text-3xl">{groupName.trim() && !groupNameProblem(groupName) ? groupName.trim() : "Create group"}</h1>
-          <div className="mt-4 flex flex-col gap-3 lg:grid lg:grid-cols-[11rem_12.5rem_minmax(0,1fr)_minmax(0,1fr)] lg:items-stretch lg:gap-4">
+          <h1 className="step-title text-3xl">{groupName.trim() && !groupNameProblem(groupName) ? groupName.trim() : "Create group"}</h1>
+          <div className="mt-3 flex flex-col gap-3 lg:mt-4 lg:grid lg:grid-cols-[11rem_12.5rem_minmax(0,1fr)_minmax(0,1fr)] lg:items-stretch lg:gap-4">
             <div className="flex items-center gap-3 lg:contents">
             <button
               type="button"
@@ -344,7 +344,7 @@ export function OnboardingWizard({ shopFirstName, shopLocation }: { shopFirstNam
                 setGroupAvatarDraft(groupIcon);
                 setGroupAvatarOpen(true);
               }}
-              className="group relative size-28 shrink-0 overflow-hidden rounded-[28px] sm:size-36 lg:row-span-2 lg:size-auto lg:h-full lg:w-full"
+              className="group relative size-24 shrink-0 overflow-hidden rounded-[28px] sm:size-28 lg:row-span-2 lg:size-auto lg:h-full lg:w-full"
               aria-label="Edit group icon"
             >
               <GroupIcon icon={groupIcon.icon} background={groupIcon.background} colour={groupIcon.colour} className="size-full" title="Group icon" />

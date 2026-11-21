@@ -769,6 +769,36 @@ select {
   }
 }
 
+@media (min-width: 640px) {
+  html:has(.create-group-screen),
+  html:has(.create-group-screen) body {
+    height: 100%;
+    overflow-y: hidden;
+  }
+
+  html:has(.create-group-screen) .onboarding-zoom {
+    height: 100svh;
+    max-height: 100svh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  html:has(.create-group-screen) .onboarding-frame {
+    min-height: 0;
+    justify-content: center;
+    overflow: hidden;
+    padding-top: 0.75rem;
+    padding-bottom: 6rem;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  html:has(.create-group-screen) .onboarding-card-body {
+    padding-top: 1.15rem;
+    padding-bottom: 1rem;
+  }
+}
+
 @media (max-width: 1023px) {
   .ctc-button.regen-button {
     width: 3rem;
