@@ -23,6 +23,26 @@ function asAccount(account: DemoAccount): AccountRecord {
   return account;
 }
 
+function nextTitles(
+  children: Array<{ id: string }>,
+  db: ReturnType<typeof demoDb>,
+) {
+  const nextStepByChild: Record<string, Record<string, string | null>> = {};
+  for (const child of children) {
+    nextStepByChild[child.id] = {};
+    for (const pack of db.packs) {
+      const packSteps = db.steps
+        .filter((step) => step.pack_id === pack.id)
+        .sort((a, b) => a.position - b.position);
+      const next = packSteps.find(
+        (step) => !db.progress.some((row) => row.child_id === child.id && row.step_id === step.id && row.status === "complete"),
+      );
+      nextStepByChild[child.id][pack.id] = next?.title ?? null;
+    }
+  }
+  return nextStepByChild;
+}
+
 export async function demoDashboard(account: AccountRecord) {
   const db = demoDb();
   const children = db.children
@@ -101,6 +121,7 @@ export async function demoDashboard(account: AccountRecord) {
     submissions: db.submissions.slice(0, 12),
     partial: null,
     doneByChild,
+    nextStepByChild: nextTitles(children, db),
     pointsByChild,
     rewardLadder: rewards
       .filter((reward) => reward.active)

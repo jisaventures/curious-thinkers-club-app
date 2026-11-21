@@ -108,7 +108,7 @@ export async function loadDashboard() {
 
   const ownedIds = [...owned];
   const stepsRes = ownedIds.length
-    ? await supabase.from("steps").select("id, pack_id, position, points").in("pack_id", ownedIds)
+    ? await supabase.from("steps").select("id, pack_id, position, points, title").in("pack_id", ownedIds)
     : { data: [], error: null };
   const progressRes = children.length
     ? await supabase
@@ -165,13 +165,21 @@ export async function loadDashboard() {
     });
 
   const doneByChild: Record<string, Record<string, number>> = {};
+  const nextStepByChild: Record<string, Record<string, string | null>> = {};
   for (const child of children) {
     doneByChild[child.id] = {};
+    nextStepByChild[child.id] = {};
     for (const pack of packs) {
-      const packSteps = steps.filter((step) => step.pack_id === pack.id);
+      const packSteps = steps
+        .filter((step) => step.pack_id === pack.id)
+        .sort((a, b) => a.position - b.position);
       doneByChild[child.id][pack.id] = packSteps.filter((step) =>
         progress.some((row) => row.child_id === child.id && row.step_id === step.id && row.status === "complete"),
       ).length;
+      const next = packSteps.find(
+        (step) => !progress.some((row) => row.child_id === child.id && row.step_id === step.id && row.status === "complete"),
+      );
+      nextStepByChild[child.id][pack.id] = next && "title" in next ? String(next.title) : null;
     }
   }
 
@@ -204,6 +212,7 @@ export async function loadDashboard() {
     submissions: submissions.slice(0, 12),
     partial: packCards.find((pack) => pack.owned && pack.done > 0 && pack.total > 0 && pack.done < pack.total) ?? null,
     doneByChild,
+    nextStepByChild,
     pointsByChild: Object.fromEntries(pointsByChild),
     rewardLadder: rewards
       .filter((reward) => reward.active)
