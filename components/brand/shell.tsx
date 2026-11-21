@@ -52,7 +52,16 @@ function SiteHeader({
     <header className="sticky top-0 z-50 w-full border-b border-dashed border-club/25 bg-header">
       <div className={`flex items-center gap-2 py-1.5 ${row} ${onboarding ? "justify-center" : ""} ${!onboarding && isDemoMode() ? "pr-16 sm:pr-20" : ""}`}>
         <Link href={account ? "/club" : "/"} className="flex min-w-0 items-center gap-2">
-          <img src="/brand/bulb.png" alt="" className="h-10 w-auto shrink-0 bg-transparent" />
+          <img
+            src="/brand/bulb.png"
+            alt=""
+            width={103}
+            height={160}
+            loading="eager"
+            fetchPriority="high"
+            decoding="sync"
+            className="h-10 w-auto shrink-0 bg-transparent"
+          />
           <span className="wordmark">Curious Thinkers Club</span>
         </Link>
         {!onboarding && (
