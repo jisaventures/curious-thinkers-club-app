@@ -83,7 +83,13 @@ function ParentHeader({ account }: { account: AccountRecord | null }) {
               Club shop
             </Link>
           </Button>
-          <AccountMenu name={name} isAdmin={account?.role === "admin"} />
+          <AccountMenu
+            name={account?.group_name?.trim() || name}
+            icon={account?.group_icon}
+            background={account?.group_bg}
+            colour={account?.group_icon_colour}
+            isAdmin={account?.role === "admin"}
+          />
         </div>
       </div>
       <div className="border-b border-dashed border-[#306A51]/25" />

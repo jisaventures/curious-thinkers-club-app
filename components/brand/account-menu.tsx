@@ -3,10 +3,28 @@
 import { useState } from "react";
 import Link from "next/link";
 import { signOut } from "@/app/login/actions";
+import { GROUP_ICONS, GroupIcon, type GroupIconId } from "@/components/brand/group-icon";
 
-export function AccountMenu({ name, isAdmin }: { name: string; isAdmin: boolean }) {
+function isGroupIcon(value: string | null | undefined): value is GroupIconId {
+  return !!value && (GROUP_ICONS as readonly string[]).includes(value);
+}
+
+export function AccountMenu({
+  name,
+  icon,
+  background,
+  colour,
+  isAdmin,
+}: {
+  name: string;
+  icon?: string | null;
+  background?: string | null;
+  colour?: string | null;
+  isAdmin: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const initial = name.slice(0, 1).toUpperCase();
+  const groupIcon = isGroupIcon(icon) ? icon : null;
 
   function close() {
     setOpen(false);
@@ -23,8 +41,12 @@ export function AccountMenu({ name, isAdmin }: { name: string; isAdmin: boolean 
           if (window.matchMedia("(hover: none)").matches) setOpen((current) => !current);
         }}
       >
-        <span className="flex size-8 items-center justify-center rounded-full bg-[#306A51] font-display text-sm font-bold text-white">{initial}</span>
-        <span className="hidden font-display text-base text-[#17352A] sm:inline">{name}</span>
+        {groupIcon ? (
+          <GroupIcon icon={groupIcon} background={background || "2f9a4a"} colour={colour || "fff4dc"} className="size-8 shrink-0 rounded-lg" title={name} />
+        ) : (
+          <span className="flex size-8 items-center justify-center rounded-full bg-[#306A51] font-display text-sm font-bold text-white">{initial}</span>
+        )}
+        <span className="hidden max-w-40 truncate font-display text-base text-[#17352A] sm:inline">{name}</span>
         <svg viewBox="0 0 20 20" className="size-4 text-[#306A51]" aria-hidden="true">
           <path d="M5 7.5 10 12.5 15 7.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
         </svg>

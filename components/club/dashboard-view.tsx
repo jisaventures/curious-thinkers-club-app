@@ -39,13 +39,19 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
         <div className="w-full min-w-0 xl:w-auto xl:flex-1">
           <div className="flex items-center justify-center gap-3 xl:justify-start">
             {isGroupIcon(account.group_icon) && (
-              <GroupIcon
-                icon={account.group_icon}
-                background={account.group_bg || "2f9a4a"}
-                colour={account.group_icon_colour || "fff4dc"}
-                className="size-16 shrink-0 rounded-[22px] sm:size-20"
-                title={account.group_name || "Group icon"}
-              />
+              <Link href="/club/group#profile" className="group relative size-16 shrink-0 overflow-hidden rounded-[22px] sm:size-20" aria-label="Edit group icon">
+                <GroupIcon
+                  icon={account.group_icon}
+                  background={account.group_bg || "2f9a4a"}
+                  colour={account.group_icon_colour || "fff4dc"}
+                  className="size-full"
+                  title="Group icon"
+                />
+                <span className="pointer-events-none absolute inset-0 bg-black/0 transition group-hover:bg-black/45" />
+                <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent pt-6 pb-2 text-center text-sm font-extrabold text-white">
+                  Edit
+                </span>
+              </Link>
             )}
             <div className="min-w-0 text-left">
               <p className="text-xs font-extrabold text-[#5e7266] sm:text-sm">Group Leader: {account.display_name}</p>
