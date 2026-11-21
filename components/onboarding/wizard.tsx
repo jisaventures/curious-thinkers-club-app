@@ -337,11 +337,11 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       {screen === "details" && child && (
         <section className={stepCard}>
           <h1 className="step-title text-4xl lg:text-3xl">{child.firstName.trim() || `Child ${editing + 1}`}</h1>
-          <div className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 sm:gap-x-4 lg:mt-3 lg:flex lg:items-center lg:gap-4">
+          <div className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 sm:gap-x-4 lg:mt-3 lg:grid-cols-[auto_auto_minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-4">
             <button
               type="button"
               onClick={openAvatarModal}
-              className="group relative size-32 shrink-0 overflow-hidden rounded-[28px] bg-[#f6efe2] justify-self-center sm:size-40 lg:size-36"
+              className="group relative row-span-2 size-32 shrink-0 self-center overflow-hidden rounded-[28px] bg-[#f6efe2] justify-self-center sm:size-40 lg:size-36"
               aria-label="Edit avatar"
             >
               <FamilyAvatar build={child.avatar} className="size-full" title="Child avatar" />
@@ -350,7 +350,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 Edit
               </span>
             </button>
-            <fieldset className="space-y-2 justify-self-start lg:hidden">
+            <fieldset className="space-y-2 justify-self-start lg:col-start-2 lg:row-start-1 lg:self-end">
               <legend className="text-sm font-extrabold text-[#1e4d3a]">Gender</legend>
               <div className="flex gap-2">
                 {(
@@ -372,76 +372,41 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                         avatar: { ...child.avatar, top: base.top, clothing: base.clothing, eyebrows: "defaultNatural", facialHair: "none" },
                       });
                     }}
-                    className={`inline-flex size-10 items-center justify-center rounded-2xl border-2 sm:size-12 ${child.gender === gender ? `border-[#306A51] ${gender === "boy" ? "bg-[#3d6fbf] text-white" : gender === "girl" ? "bg-[#e36aa2] text-white" : "bg-[#1e4d3a] text-white"}` : "border-transparent bg-[#f6efe2] text-[#1e4d3a]"}`}
+                    className={`inline-flex size-10 items-center justify-center rounded-2xl border-2 sm:size-12 lg:size-14 ${child.gender === gender ? `border-[#306A51] ${gender === "boy" ? "bg-[#3d6fbf] text-white" : gender === "girl" ? "bg-[#e36aa2] text-white" : "bg-[#1e4d3a] text-white"}` : "border-transparent bg-[#f6efe2] text-[#1e4d3a]"}`}
                   >
-                    {gender === "boy" && <Mars className="size-5 sm:size-6" strokeWidth={3} aria-hidden="true" />}
-                    {gender === "girl" && <Venus className="size-5 sm:size-6" strokeWidth={3} aria-hidden="true" />}
-                    {gender === "unspecified" && <X className="size-5 sm:size-6" strokeWidth={3} aria-hidden="true" />}
+                    {gender === "boy" && <Mars className="size-5 sm:size-6 lg:size-7" strokeWidth={3} aria-hidden="true" />}
+                    {gender === "girl" && <Venus className="size-5 sm:size-6 lg:size-7" strokeWidth={3} aria-hidden="true" />}
+                    {gender === "unspecified" && <X className="size-5 sm:size-6 lg:size-7" strokeWidth={3} aria-hidden="true" />}
                   </button>
                 ))}
               </div>
             </fieldset>
-            <div className="col-span-2 min-w-0 flex-1 space-y-3 lg:col-span-1">
-              <div className="grid gap-3 lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] lg:items-end">
-                <fieldset className="hidden space-y-2 lg:block">
-                  <legend className="text-sm font-extrabold text-[#1e4d3a]">Gender</legend>
-                  <div className="flex gap-2">
-                    {(
-                      [
-                        ["boy", "Boy"],
-                        ["girl", "Girl"],
-                        ["unspecified", "Prefer not to say"],
-                      ] as const
-                    ).map(([gender, label]) => (
-                      <button
-                        key={gender}
-                        type="button"
-                        aria-label={label}
-                        aria-pressed={child.gender === gender}
-                        onClick={() => {
-                          const base = gender === "girl" ? girlAvatar() : boyAvatar();
-                          patchChild({
-                            gender,
-                            avatar: { ...child.avatar, top: base.top, clothing: base.clothing, eyebrows: "defaultNatural", facialHair: "none" },
-                          });
-                        }}
-                        className={`inline-flex size-14 items-center justify-center rounded-2xl border-2 ${child.gender === gender ? `border-[#306A51] ${gender === "boy" ? "bg-[#3d6fbf] text-white" : gender === "girl" ? "bg-[#e36aa2] text-white" : "bg-[#1e4d3a] text-white"}` : "border-transparent bg-[#f6efe2] text-[#1e4d3a]"}`}
-                      >
-                        {gender === "boy" && <Mars className="size-7" strokeWidth={3} aria-hidden="true" />}
-                        {gender === "girl" && <Venus className="size-7" strokeWidth={3} aria-hidden="true" />}
-                        {gender === "unspecified" && <X className="size-7" strokeWidth={3} aria-hidden="true" />}
-                      </button>
-                    ))}
-                  </div>
-                </fieldset>
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First name only</Label>
-                  <Input
-                    id="firstName"
-                    value={child.firstName}
-                    onChange={(event) => patchChild({ firstName: event.target.value.slice(0, 15) })}
-                    maxLength={15}
-                    autoComplete="off"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="birthday">Birthday</Label>
-                  <BirthdayPicker id="birthday" value={child.birthday} onChange={(birthday) => patchChild({ birthday })} />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="nickname">Username</Label>
-            <div className="flex gap-2">
-              <Input id="nickname" value={child.nickname} disabled />
-              <Button type="button" variant="green" size="sm" className="shrink-0" onClick={regenerateNickname}>
-                Re-generate
-              </Button>
+            <div className="min-w-0 space-y-2 lg:col-start-3 lg:row-start-1">
+              <Label htmlFor="firstName">First name only</Label>
+              <Input
+                id="firstName"
+                value={child.firstName}
+                onChange={(event) => patchChild({ firstName: event.target.value.slice(0, 15) })}
+                maxLength={15}
+                autoComplete="off"
+              />
             </div>
-            <p className="text-sm leading-relaxed text-[#5e7266]">
-              A playful nickname is made for them. Re-generate it if you want a different one.
-            </p>
-            {child.nicknameMessage && <p className="text-sm font-bold text-[#8a4b3a]">{child.nicknameMessage}</p>}
+            <div className="col-span-2 min-w-0 space-y-2 lg:col-span-1 lg:col-start-4 lg:row-start-1">
+              <Label htmlFor="birthday">Birthday</Label>
+              <BirthdayPicker id="birthday" value={child.birthday} onChange={(birthday) => patchChild({ birthday })} />
+            </div>
+            <div className="col-span-2 space-y-2 lg:col-span-3 lg:col-start-2 lg:row-start-2">
+              <Label htmlFor="nickname">Username</Label>
+              <div className="flex gap-2">
+                <Input id="nickname" value={child.nickname} disabled />
+                <Button type="button" variant="green" size="sm" className="shrink-0" onClick={regenerateNickname}>
+                  Re-generate
+                </Button>
               </div>
+              <p className="text-sm leading-relaxed text-[#5e7266]">
+                A playful nickname is made for them. Re-generate it if you want a different one.
+              </p>
+              {child.nicknameMessage && <p className="text-sm font-bold text-[#8a4b3a]">{child.nicknameMessage}</p>}
             </div>
           </div>
 
