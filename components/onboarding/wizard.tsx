@@ -336,48 +336,53 @@ export function OnboardingWizard({ shopFirstName, shopLocation }: { shopFirstNam
       {screen === "family" && (
         <section className={stepCard}>
           <h1 className="step-title text-4xl lg:text-3xl">{groupName.trim() && !groupNameProblem(groupName) ? groupName.trim() : "Create group"}</h1>
-          <div className="mt-4 grid grid-cols-[7.25rem_minmax(0,1fr)] items-start gap-3 sm:grid-cols-[9rem_minmax(0,1fr)] lg:mt-3 lg:grid-cols-[11rem_minmax(0,1fr)_minmax(0,1.35fr)_6.5rem] lg:gap-x-4 lg:gap-y-4">
+          <div className="mt-4 lg:grid lg:grid-cols-[11rem_minmax(0,1fr)_minmax(0,1.35fr)_6.5rem] lg:items-start lg:gap-4">
+            <div className="flex items-start gap-3 lg:contents">
             <button
               type="button"
               onClick={() => {
                 setGroupAvatarDraft(groupIcon);
                 setGroupAvatarOpen(true);
               }}
-              className="group relative row-span-3 size-full min-h-36 overflow-hidden rounded-[28px] lg:row-span-2 lg:size-44"
+              className="group relative size-36 shrink-0 overflow-hidden rounded-[28px] sm:size-40 lg:row-span-2 lg:size-44"
               aria-label="Edit group icon"
             >
-              <GroupIcon icon={groupIcon.icon} background={groupIcon.background} colour={groupIcon.colour} className="size-full min-h-36 lg:absolute lg:inset-0" title="Group icon" />
+              <GroupIcon icon={groupIcon.icon} background={groupIcon.background} colour={groupIcon.colour} className="size-full" title="Group icon" />
               <span className="pointer-events-none absolute inset-0 bg-black/0 transition group-hover:bg-black/45" />
               <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent pt-6 pb-2 text-center text-sm font-extrabold text-white">
                 Edit
               </span>
             </button>
+            <div className="flex min-w-0 flex-1 flex-col gap-2 lg:contents">
             <div className="flex min-w-0 flex-col lg:col-start-2 lg:row-start-1">
-              <Label htmlFor="groupType" className="mb-2 flex h-5 items-center">Group type<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
-              <select id="groupType" value={groupType} onChange={(event) => setGroupType(event.target.value as GroupType)} className="h-12 w-full rounded-2xl border border-[#eadfce] bg-white px-4 text-base text-[#173528] outline-none focus:border-[#1e4d3a] focus:ring-2 focus:ring-[#1e4d3a]/20 lg:h-14">
+              <Label htmlFor="groupType" className="mb-1 flex h-4 items-center text-xs lg:mb-2 lg:h-5 lg:text-sm">Group type<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
+              <select id="groupType" value={groupType} onChange={(event) => setGroupType(event.target.value as GroupType)} className="h-9 w-full rounded-2xl border border-[#eadfce] bg-white px-3 text-sm text-[#173528] outline-none focus:border-[#1e4d3a] focus:ring-2 focus:ring-[#1e4d3a]/20 lg:h-14 lg:px-4 lg:text-base">
                 <option value="">Choose a type</option>
                 {GROUP_TYPES.map((type) => (
                   <option key={type} value={type}>{type}</option>
                 ))}
               </select>
             </div>
-            <div className="flex min-w-0 flex-col lg:col-start-2 lg:row-start-2 lg:w-[calc(16ch+2.5rem)]">
-              <Label htmlFor="groupLocation" className="mb-2 flex h-5 items-center">Location</Label>
-              <Input id="groupLocation" value={shopLocation} disabled className="lg:h-14" />
+            <div className="flex min-w-0 flex-col lg:col-start-2 lg:row-start-2">
+              <Label htmlFor="groupLocation" className="mb-1 flex h-4 items-center text-xs lg:mb-2 lg:h-5 lg:text-sm">Location</Label>
+              <Input id="groupLocation" value={shopLocation} disabled className="h-9 px-3 text-sm lg:h-14 lg:px-4 lg:text-base" />
             </div>
             <div className="flex min-w-0 flex-col lg:col-span-2 lg:col-start-3 lg:row-start-1">
-              <Label htmlFor="groupName" className="mb-2 flex h-5 items-center">Group name<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
-              <Input id="groupName" value={groupName} onChange={(event) => setGroupName(event.target.value.replace(/\s+/g, " ").slice(0, 32))} maxLength={32} autoComplete="off" aria-invalid={Boolean(groupNameProblem(groupName))} className="lg:h-14" />
+              <Label htmlFor="groupName" className="mb-1 flex h-4 items-center text-xs lg:mb-2 lg:h-5 lg:text-sm">Group name<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
+              <Input id="groupName" value={groupName} onChange={(event) => setGroupName(event.target.value.replace(/\s+/g, " ").slice(0, 32))} maxLength={32} autoComplete="off" aria-invalid={Boolean(groupNameProblem(groupName))} className="h-9 px-3 text-sm lg:h-14 lg:px-4 lg:text-base" />
               {groupNameProblem(groupName) && <p className="mt-1 text-sm font-bold text-[#8a4b3a]">{groupNameProblem(groupName)}</p>}
             </div>
-            <div className="col-span-2 flex min-w-0 flex-col lg:col-span-1 lg:col-start-3 lg:row-start-2">
-              <Label htmlFor="leaderName" className="mb-2 flex h-5 items-center whitespace-nowrap">Group Leader First Name only<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
-              <Input id="leaderName" value={leaderName} onChange={(event) => setLeaderName(event.target.value.replace(/\s+/g, "").slice(0, 15))} maxLength={15} autoComplete="given-name" aria-invalid={Boolean(childFirstNameProblem(leaderName))} className="lg:h-14" />
+            </div>
+            </div>
+            <div className="mt-3 grid grid-cols-[minmax(0,1fr)_6rem] items-start gap-3 lg:contents lg:mt-0">
+            <div className="flex min-w-0 flex-col lg:col-start-3 lg:row-start-2">
+              <Label htmlFor="leaderName" className="mb-1 flex h-4 items-center text-xs whitespace-nowrap lg:mb-2 lg:h-5 lg:text-sm">Group Leader First Name only<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
+              <Input id="leaderName" value={leaderName} onChange={(event) => setLeaderName(event.target.value.replace(/\s+/g, "").slice(0, 15))} maxLength={15} autoComplete="given-name" aria-invalid={Boolean(childFirstNameProblem(leaderName))} className="h-9 px-3 text-sm lg:h-14 lg:px-4 lg:text-base" />
               {childFirstNameProblem(leaderName) && <p className="mt-1 text-sm font-bold text-[#8a4b3a]">{childFirstNameProblem(leaderName)}</p>}
             </div>
-            <div className="col-span-2 flex min-w-0 flex-col lg:col-span-1 lg:col-start-4 lg:row-start-2">
-              <div className="mb-2 flex h-5 items-center gap-1.5">
-                <Label htmlFor="groupSize">Number of people</Label>
+            <div className="flex min-w-0 flex-col lg:col-start-4 lg:row-start-2">
+              <div className="mb-1 flex h-4 items-center gap-1.5 lg:mb-2 lg:h-5">
+                <Label htmlFor="groupSize" className="text-xs lg:text-sm">Number of people</Label>
                 <span className="group relative inline-flex">
                   <button type="button" className="inline-flex size-4 items-center justify-center rounded-full text-[#306a51]" aria-label="About group size">
                     <Info className="size-4" strokeWidth={2.4} aria-hidden="true" />
@@ -399,8 +404,9 @@ export function OnboardingWizard({ shopFirstName, shopLocation }: { shopFirstNam
                   if (!Number.isFinite(next)) return;
                   resize(Math.min(5, Math.max(1, Math.round(next))));
                 }}
-                className="w-24 lg:h-14 lg:w-full"
+                className="h-9 w-full px-3 text-sm lg:h-14 lg:px-4 lg:text-base"
               />
+            </div>
             </div>
           </div>
         </section>
