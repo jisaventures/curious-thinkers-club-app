@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { ChevronDown } from "lucide-react";
+import { useState } from "react";
 import Link from "next/link";
 import { setFocusChild } from "@/app/club/actions";
 import { Avatar } from "@/components/brand/avatar";
@@ -11,8 +10,8 @@ import { ChildForm } from "@/components/club/child-form";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Scrapbook } from "@/components/club/scrapbook";
-import { formatWhen, shortName } from "@/lib/format";
-import { colourForChild, memberColour } from "@/lib/member-colour";
+import { shortName } from "@/lib/format";
+import { memberColour } from "@/lib/member-colour";
 import type { CoverTone } from "@/lib/validators";
 import type { loadDashboard } from "@/lib/club/data";
 
@@ -23,36 +22,9 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
   const { account } = data;
   const [focusId, setFocusId] = useState(data.focus?.id ?? "");
   const [bookId, setBookId] = useState<string | null>(null);
-  const [logOpen, setLogOpen] = useState(false);
-  const closeLogTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const focus = data.children.find((child) => child.id === focusId) ?? data.focus;
   const owned = data.packs.filter((pack) => pack.owned);
   const spotlight = focus ? pickSpotlight(owned, data.doneByChild[focus.id] ?? {}) : null;
-  const latest = data.activities[0] ?? null;
-  const latestColour = latest ? colourForChild(latest.childId, data.children) : null;
-  const logLabel = latest?.summary ?? "Nothing has been logged yet.";
-  const recent = data.activities.slice(0, 3);
-
-  useEffect(() => {
-    return () => {
-      if (closeLogTimer.current) clearTimeout(closeLogTimer.current);
-    };
-  }, []);
-
-  function showLog() {
-    if (closeLogTimer.current) clearTimeout(closeLogTimer.current);
-    setLogOpen(true);
-  }
-
-  function hideLogSoon() {
-    if (closeLogTimer.current) clearTimeout(closeLogTimer.current);
-    closeLogTimer.current = setTimeout(() => setLogOpen(false), 450);
-  }
-
-  function closeLog() {
-    if (closeLogTimer.current) clearTimeout(closeLogTimer.current);
-    setLogOpen(false);
-  }
 
   function chooseChild(childId: string) {
     setFocusId(childId);
@@ -81,42 +53,6 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
                 <span className="text-[#e8a428]">{account.group_name || account.display_name}</span>
                 {account.group_location && <CountryFlag country={account.group_location} className="h-3.5 w-5 sm:h-4 sm:w-6" />}
               </h1>
-            </div>
-          </div>
-          <div className="mt-2 flex flex-wrap items-center justify-center gap-2 xl:justify-start">
-            <span className="font-display text-base text-[#306A51] sm:text-lg">Activity log</span>
-            <div className="relative max-w-full" onMouseEnter={showLog} onMouseLeave={hideLogSoon}>
-              <Button type="button" variant={latestColour ? "member" : "grey"} size="sm" className="activity-log-button max-w-full gap-1.5" style={latestColour ? memberButtonStyle(latestColour.dot) : undefined} aria-expanded={logOpen} onClick={() => (logOpen ? closeLog() : showLog())}>
-                <span className="min-w-0 text-left">{logLabel}</span>
-                <ChevronDown className={`size-4 shrink-0 text-white transition ${logOpen ? "rotate-180" : ""}`} aria-hidden="true" />
-              </Button>
-              {logOpen && (
-                <div className="absolute top-full left-0 z-30 min-w-full pt-3">
-                  <div className="w-max min-w-full max-w-[min(24rem,calc(100vw-2rem))] rounded-2xl border border-[#eadfce] bg-white p-2 text-left shadow-[0_16px_40px_rgba(23,53,42,0.08)]">
-                    {recent.length === 0 ? (
-                      <p className="px-2 py-1 text-xs text-[#5e7266]">Nothing has been logged yet.</p>
-                    ) : (
-                      <ul className="space-y-1">
-                        {recent.map((item) => {
-                          const colour = colourForChild(item.childId, data.children);
-                          return (
-                            <li key={item.id} className="flex items-baseline justify-between gap-2 rounded-lg px-2 py-1 text-xs font-bold" style={{ background: colour.wash, color: colour.ink }}>
-                              <span className="min-w-0">
-                                <span className="mr-1.5 inline-block size-2 rounded-full align-middle" style={{ background: colour.dot }} />
-                                {item.summary}
-                              </span>
-                              {item.at && <time className="shrink-0 text-[10px] font-extrabold">{formatWhen(item.at)}</time>}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )}
-                    <Link href="/club/group#activity" className="mt-1 block rounded-lg px-2 py-1.5 text-xs font-extrabold text-[#306A51] underline hover:bg-[#f6efe2]">
-                      View full activity log
-                    </Link>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -346,26 +282,6 @@ function statusWord(done: number, total: number) {
   if (ratio >= 0.75) return "Almost done";
   if (ratio >= 0.34) return "In progress";
   return "Started";
-}
-
-function memberButtonStyle(dot: string): CSSProperties {
-  const shadow = darken(dot, 0.24);
-  return {
-    "--ctc-member": dot,
-    "--ctc-member-shadow": shadow,
-    "--ctc-member-glow": toRgba(shadow, 0.25),
-  } as CSSProperties;
-}
-
-function darken(hex: string, amount: number) {
-  const value = Number.parseInt(hex.slice(1), 16);
-  const channel = (shift: number) => Math.max(0, Math.round(((value >> shift) & 255) * (1 - amount)));
-  return `#${[channel(16), channel(8), channel(0)].map((part) => part.toString(16).padStart(2, "0")).join("")}`;
-}
-
-function toRgba(hex: string, alpha: number) {
-  const value = Number.parseInt(hex.slice(1), 16);
-  return `rgba(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255}, ${alpha})`;
 }
 
 function packLabel(title: string) {
