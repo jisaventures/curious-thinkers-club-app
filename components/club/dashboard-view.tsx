@@ -48,13 +48,13 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
           </h1>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className="font-display text-base text-[#306A51] sm:text-lg">Activity log</span>
-            <button type="button" className="inline-flex items-center gap-1 rounded-full bg-[#f6efe2] px-3 py-1.5 text-left font-display text-base text-[#306A51]" aria-expanded={logOpen} onClick={() => setLogOpen((open) => !open)}>
+            <button type="button" className="inline-flex items-center gap-1 rounded-full border border-[#eadfce] bg-white px-3 py-1.5 text-left font-display text-base text-[#306A51] shadow-sm" aria-expanded={logOpen} onClick={() => setLogOpen((open) => !open)}>
               {welcome}
               <ChevronDown className={`size-5 shrink-0 transition ${logOpen ? "rotate-180" : ""}`} aria-hidden="true" />
             </button>
           </div>
           {logOpen && (
-            <div className="absolute z-20 mt-2 w-[min(100%,28rem)] rounded-2xl bg-[#f6efe2] p-3">
+            <div className="absolute z-20 mt-2 w-[min(100%,28rem)] rounded-2xl border border-[#eadfce] bg-white p-3 shadow-[0_16px_40px_rgba(23,53,42,0.08)]">
               {recent.length === 0 ? (
                 <p className="text-sm text-[#5e7266]">Nothing has been logged yet.</p>
               ) : (

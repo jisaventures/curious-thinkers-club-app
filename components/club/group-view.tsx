@@ -12,6 +12,8 @@ type Section = "users" | "activity" | "reports";
 
 export function GroupView({ data }: { data: DashboardData }) {
   const [section, setSection] = useState<Section>("users");
+  const [nameFilter, setNameFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("");
   useEffect(() => {
     const read = () => {
       const hash = window.location.hash.replace("#", "");
@@ -75,10 +77,23 @@ export function GroupView({ data }: { data: DashboardData }) {
 
       {section === "activity" && (
         <section id="activity" className="space-y-3">
-          <h1 className="font-display text-3xl text-[#306A51]">Activity log</h1>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h1 className="font-display text-3xl text-[#306A51]">Activity log</h1>
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="sr-only" htmlFor="activity-name">Filter by name</label>
+              <select id="activity-name" className="rounded-full border border-[#eadfce] bg-white px-3 py-2 font-display text-sm text-[#306A51]" value={nameFilter} onChange={(event) => setNameFilter(event.target.value)}>
+                <option value="all">All names</option>
+                {data.children.map((child) => (
+                  <option key={child.id} value={child.id}>{memberName(child)}</option>
+                ))}
+              </select>
+              <label className="sr-only" htmlFor="activity-date">Filter by date</label>
+              <input id="activity-date" type="date" className="rounded-full border border-[#eadfce] bg-white px-3 py-2 font-display text-sm text-[#306A51]" value={dateFilter} onChange={(event) => setDateFilter(event.target.value)} />
+            </div>
+          </div>
           <ul className="space-y-2">
-            {data.activities.length === 0 && <li className="rounded-2xl bg-white p-4 text-sm text-[#5e7266]">Nothing has been logged yet.</li>}
-            {data.activities.map((item) => {
+            {filteredActivities(data, nameFilter, dateFilter).length === 0 && <li className="rounded-2xl bg-white p-4 text-sm text-[#5e7266]">Nothing has been logged yet.</li>}
+            {filteredActivities(data, nameFilter, dateFilter).map((item) => {
               const colour = colourForChild(item.childId, data.children);
               return (
                 <li key={item.id} className="flex items-start justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-bold" style={{ background: colour.wash, color: colour.ink }}>
@@ -142,6 +157,16 @@ function Stat({ label, value }: { label: string; value: string }) {
       <p className="font-display text-3xl text-[#17352A]">{value}</p>
     </div>
   );
+}
+
+function filteredActivities(data: DashboardData, nameFilter: string, dateFilter: string) {
+  return data.activities.filter((item) => {
+    if (nameFilter !== "all" && item.childId !== nameFilter) return false;
+    if (!dateFilter || !item.at) return !dateFilter;
+    const day = new Date(item.at);
+    const key = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`;
+    return key === dateFilter;
+  });
 }
 
 function memberName(child: DashboardData["children"][number]) {
