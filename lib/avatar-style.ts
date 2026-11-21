@@ -66,6 +66,7 @@ export const GROUP_BACKGROUND_COLOURS = [
   { id: "orange", label: "Orange", hex: "#e07a22" },
   { id: "red", label: "Red", hex: "#d6453d" },
   { id: "brown", label: "Brown", hex: "#a56b32" },
+  { id: "black", label: "Black", hex: "#1c1c1c" },
 ] as const;
 
 export const GROUP_ICON_COLOURS = [
@@ -77,6 +78,7 @@ export const GROUP_ICON_COLOURS = [
   { id: "sky", label: "Sky", hex: "#9ad7f0" },
   { id: "pink", label: "Pink", hex: "#ffc4e0" },
   { id: "peach", label: "Peach", hex: "#ffc9a8" },
+  { id: "lilac", label: "Lilac", hex: "#d4c2ff" },
 ] as const;
 
 export const CLOTHES_COLOURS = [
