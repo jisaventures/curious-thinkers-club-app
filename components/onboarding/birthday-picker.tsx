@@ -23,6 +23,7 @@ export function BirthdayPicker({
   value,
   onChange,
   range,
+  marked,
   placeholder = "Select date",
   note = "Ages 2 to 15. Birthdays only go back 15 years.",
   label = "Choose a birthday",
@@ -31,6 +32,7 @@ export function BirthdayPicker({
   value: string;
   onChange: (value: string) => void;
   range?: { earliest: Date; latest: Date };
+  marked?: ReadonlySet<string>;
   placeholder?: string;
   note?: string;
   label?: string;
@@ -175,13 +177,14 @@ export function BirthdayPicker({
               const inMonth = day.getMonth() === cursor.getMonth();
               const allowed = inMonth && (range ? inRange(iso, bounds) : isBirthdayAllowed(iso, today));
               const selected = value === iso;
+              const hasActivity = inMonth && Boolean(marked?.has(iso));
               return (
                 <button
                   key={iso}
                   type="button"
                   disabled={!allowed}
                   aria-pressed={selected}
-                  aria-label={formatBirthday(iso)}
+                  aria-label={hasActivity ? `${formatBirthday(iso)}, activity logged` : formatBirthday(iso)}
                   onClick={() => {
                     onChange(iso);
                     setOpen(false);
@@ -189,6 +192,7 @@ export function BirthdayPicker({
                   className={`birthday-day ${selected ? "is-selected" : ""} ${sameDay(day, today) && allowed ? "is-today" : ""}`}
                 >
                   {inMonth ? day.getDate() : ""}
+                  {hasActivity && <span className="birthday-mark" aria-hidden="true" />}
                 </button>
               );
             })}

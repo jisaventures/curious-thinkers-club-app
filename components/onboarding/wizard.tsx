@@ -3,10 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { checkNickname, completeOnboarding } from "@/app/onboarding/actions";
 import { FamilyAvatar } from "@/components/brand/family-avatar";
+import { GROUP_ICONS, GroupIcon, type GroupIconId } from "@/components/brand/group-icon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ACCESSORY_COLOURS, AVATAR_COLOURS, CLOTHES_COLOURS, EYE_COLOURS, HAIR_COLOURS, SKIN_COLOURS } from "@/lib/avatar-style";
+import { ACCESSORY_COLOURS, AVATAR_COLOURS, CLOTHES_COLOURS, EYE_COLOURS, GROUP_BACKGROUND_COLOURS, GROUP_ICON_COLOURS, HAIR_COLOURS, SKIN_COLOURS } from "@/lib/avatar-style";
 import {
   AVATAAARS_ACCESSORIES,
   AVATAAARS_EYES,
@@ -21,7 +22,7 @@ import {
 import { BirthdayPicker } from "@/components/onboarding/birthday-picker";
 import { ageFromBirthday, isBirthdayAllowed } from "@/lib/birthday";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
-import { childFirstNameProblem, isUnsafeChildName } from "@/lib/unsafe-language";
+import { childFirstNameProblem, groupNameProblem, isUnsafeChildName } from "@/lib/unsafe-language";
 import { Check, ChevronLeft, ChevronRight, Info, Mars, RefreshCw, Rocket, Trophy, Venus, X } from "lucide-react";
 
 type Gender = "boy" | "girl" | "unspecified";
@@ -37,6 +38,10 @@ type ChildDraft = {
 };
 
 type Screen = "welcome" | "family" | "details";
+type GroupType = "Family" | "School" | "Team" | "Club" | "Homeschool" | "Other";
+type GroupIconDraft = { icon: GroupIconId; background: string; colour: string };
+
+const GROUP_TYPES: GroupType[] = ["Family", "School", "Team", "Club", "Homeschool", "Other"];
 
 const stepCard = "mx-auto w-full rounded-[28px] bg-white p-5 shadow-sm sm:p-7";
 
@@ -71,7 +76,7 @@ const emptyChild = (): ChildDraft => ({
   nicknameMessage: "",
 });
 
-export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | null }) {
+export function OnboardingWizard({ shopFirstName, shopLocation }: { shopFirstName: string | null; shopLocation: string }) {
   const [screen, setScreen] = useState<Screen>("welcome");
   const [terms, setTerms] = useState(true);
   const [count, setCount] = useState(1);
@@ -82,12 +87,18 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   const [celebrating, setCelebrating] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [avatarDraft, setAvatarDraft] = useState<AvatarBuild | null>(null);
+  const [groupName, setGroupName] = useState("");
+  const [groupType, setGroupType] = useState<GroupType | "">("");
+  const [leaderName, setLeaderName] = useState(shopFirstName ?? "");
+  const [groupIcon, setGroupIcon] = useState<GroupIconDraft>({ icon: "star", background: "2f9a4a", colour: "fff4dc" });
+  const [groupAvatarOpen, setGroupAvatarOpen] = useState(false);
+  const [groupAvatarDraft, setGroupAvatarDraft] = useState<GroupIconDraft | null>(null);
   const tabsRef = useRef<HTMLOListElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
   const child = children[editing];
-  const progressLabels = ["Welcome", "Create Family", ...Array.from({ length: count }, (_, index) => `Child ${index + 1} Profile`)];
+  const progressLabels = ["Welcome", "Create Group", ...Array.from({ length: count }, (_, index) => `Child ${index + 1} Profile`)];
   const progress = screen === "welcome" ? 0 : screen === "family" ? 1 : 2 + editing;
 
   const siblingNames = useMemo(
@@ -205,7 +216,16 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
     setMessage(null);
     const result = await completeOnboarding({
       adult: true,
-      children: children.slice(0, count).map((item) => ({
+        group: {
+          name: groupName.trim(),
+          type: groupType,
+          location: shopLocation,
+          leaderName: leaderName.trim(),
+          icon: groupIcon.icon,
+          background: groupIcon.background,
+          colour: groupIcon.colour,
+        },
+        children: children.slice(0, count).map((item) => ({
         firstName: item.firstName.trim().slice(0, 15),
         nickname: item.nickname.trim(),
         ageYears: ageFromBirthday(item.birthday) ?? 0,
@@ -224,8 +244,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   }
 
   return (
-    <div className="w-full">
-      <div className="step-tabs relative mb-5 max-lg:sticky max-lg:top-[var(--site-header-h)] max-lg:z-30 max-lg:-mx-3 max-lg:bg-[#fffdf8] max-lg:px-3 max-lg:pb-3 sm:max-lg:-mx-5 sm:max-lg:px-5 md:max-lg:-mx-7 md:max-lg:px-7">
+    <div className={screen === "family" ? "create-group-screen w-full" : "w-full"}>
+      <div className={`step-tabs relative max-lg:sticky max-lg:top-[var(--site-header-h)] max-lg:z-30 max-lg:-mx-3 max-lg:bg-[#fffdf8] max-lg:px-3 max-lg:pb-3 sm:max-lg:-mx-5 sm:max-lg:px-5 md:max-lg:-mx-7 md:max-lg:px-7 ${screen === "family" ? "mb-3 lg:mb-5" : "mb-5"}`}>
       <ol ref={tabsRef} className="tab-scroll flex gap-2 overflow-x-auto px-1 pt-2" aria-label="Onboarding progress">
         {progressLabels.map((label, index) => {
           const done = index < progress;
@@ -260,7 +280,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             type="button"
             variant="mustard"
             size="sm"
-            className="absolute bottom-8 left-1 z-10 -translate-y-1/2"
+            className="tab-nudge tab-nudge-left"
             aria-label="Show previous steps"
             onClick={() => tabsRef.current?.scrollBy({ left: -200, behavior: "smooth" })}
           >
@@ -275,7 +295,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             type="button"
             variant="mustard"
             size="sm"
-            className="absolute right-1 bottom-8 z-10 -translate-y-1/2"
+            className="tab-nudge tab-nudge-right"
             aria-label="Show more steps"
             onClick={() => tabsRef.current?.scrollBy({ left: 200, behavior: "smooth" })}
           >
@@ -289,7 +309,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       {screen === "welcome" && (
         <section className={stepCard}>
           <h1 className="step-title text-4xl leading-tight sm:text-5xl">
-            {shopFirstName ? `Welcome ${shopFirstName}` : "Welcome Curious Thinker!"}
+            {shopFirstName ? `Welcome ${shopFirstName}` : "Welcome Curious Thinkers!"}
           </h1>
           <p className="mt-3 text-base leading-relaxed text-[#5e7266] lg:text-xl">
             This club must be managed by a parent or guardian. Children do not get their own login.
@@ -315,22 +335,79 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
       {screen === "family" && (
         <section className={stepCard}>
-          <h1 className="step-title text-4xl">How many children are in the group?</h1>
-          <p className="mt-3 text-base leading-relaxed text-[#5e7266] lg:text-xl">
-            You can add up to 5 children on this account. You don&apos;t have to add everyone now. More can be added later.
-          </p>
-          <div className="mt-5 grid grid-cols-5 gap-2">
-            {[1, 2, 3, 4, 5].map((value) => (
-              <button
-                key={value}
-                type="button"
-                aria-pressed={count === value}
-                onClick={() => resize(value)}
-                className={`count-pick flex h-16 items-center justify-center rounded-2xl sm:h-24 ${count === value ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
-              >
-                {value}
-              </button>
-            ))}
+          <h1 className="step-title text-3xl">{groupName.trim() && !groupNameProblem(groupName) ? groupName.trim() : "Create group"}</h1>
+          <div className="mt-3 flex flex-col gap-3 lg:mt-4 lg:grid lg:grid-cols-[11rem_12.5rem_minmax(0,1fr)_minmax(0,1fr)] lg:items-stretch lg:gap-4">
+            <div className="flex items-center gap-3 lg:contents">
+            <button
+              type="button"
+              onClick={() => {
+                setGroupAvatarDraft(groupIcon);
+                setGroupAvatarOpen(true);
+              }}
+              className="group relative size-24 shrink-0 overflow-hidden rounded-[28px] sm:size-28 lg:row-span-2 lg:size-auto lg:h-full lg:w-full"
+              aria-label="Edit group icon"
+            >
+              <GroupIcon icon={groupIcon.icon} background={groupIcon.background} colour={groupIcon.colour} className="size-full" title="Group icon" />
+              <span className="pointer-events-none absolute inset-0 bg-black/0 transition group-hover:bg-black/45" />
+              <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent pt-6 pb-2 text-center text-sm font-extrabold text-white">
+                Edit
+              </span>
+            </button>
+            <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_8.25rem] items-start gap-2 lg:contents">
+            <div className="flex min-w-0 flex-col lg:col-start-2 lg:row-start-1">
+              <Label htmlFor="groupType" className="mb-1 flex h-4 items-center text-xs lg:mb-2 lg:h-5 lg:text-sm">Group type<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
+              <select id="groupType" value={groupType} onChange={(event) => setGroupType(event.target.value as GroupType)} className="h-9 w-full rounded-2xl border border-[#eadfce] bg-white px-3 text-sm text-[#173528] outline-none focus:border-[#1e4d3a] focus:ring-2 focus:ring-[#1e4d3a]/20 lg:h-14 lg:px-4 lg:text-base">
+                <option value="">Type</option>
+                {GROUP_TYPES.map((type) => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex min-w-0 flex-col lg:col-span-2 lg:col-start-3 lg:row-start-2">
+              <div className="mb-1 flex h-4 items-center gap-1.5 lg:mb-2 lg:h-5">
+                <Label htmlFor="groupSize" className="whitespace-nowrap text-xs lg:text-sm">Number of members</Label>
+                <span className="group relative inline-flex">
+                  <button type="button" className="inline-flex size-4 items-center justify-center rounded-full text-[#306a51]" aria-label="About group size">
+                    <Info className="size-4" strokeWidth={2.4} aria-hidden="true" />
+                  </button>
+                  <span role="tooltip" className="absolute bottom-[calc(100%+0.45rem)] left-0 z-20 hidden w-56 rounded-xl bg-[#1e4d3a] px-3 py-2 text-left text-xs leading-snug font-semibold text-white group-hover:block group-focus-within:block">
+                    The maximum per group is 5. To add more, <a href="mailto:hello@curiousthinkersclub.com" className="font-extrabold underline">contact us</a>.
+                  </span>
+                </span>
+              </div>
+              <Input
+                id="groupSize"
+                type="number"
+                min={1}
+                max={5}
+                inputMode="numeric"
+                value={count}
+                onChange={(event) => {
+                  const next = Number(event.target.value);
+                  if (!Number.isFinite(next)) return;
+                  resize(Math.min(5, Math.max(1, Math.round(next))));
+                }}
+                className="h-9 w-full px-3 text-sm lg:h-14 lg:px-4 lg:text-base"
+              />
+            </div>
+            <div className="col-span-2 flex min-w-0 flex-col lg:col-span-1 lg:col-start-2 lg:row-start-2">
+              <Label htmlFor="groupLocation" className="mb-1 flex h-4 items-center text-xs lg:mb-2 lg:h-5 lg:text-sm">Location</Label>
+              <Input id="groupLocation" value={shopLocation} disabled className="h-9 px-3 text-sm lg:h-14 lg:px-4 lg:text-base" />
+            </div>
+            </div>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:contents">
+            <div className="flex min-w-0 flex-col lg:col-start-3 lg:row-start-1">
+              <Label htmlFor="groupName" className="mb-1 flex h-4 items-center text-xs lg:mb-2 lg:h-5 lg:text-sm">Group name<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
+              <Input id="groupName" value={groupName} onChange={(event) => setGroupName(event.target.value.replace(/\s+/g, " ").slice(0, 32))} maxLength={32} autoComplete="off" aria-invalid={Boolean(groupNameProblem(groupName))} className="h-9 px-3 text-sm lg:h-14 lg:px-4 lg:text-base" />
+              {groupNameProblem(groupName) && <p className="mt-1 text-sm font-bold text-[#8a4b3a]">{groupNameProblem(groupName)}</p>}
+            </div>
+            <div className="flex min-w-0 flex-col lg:col-start-4 lg:row-start-1">
+              <Label htmlFor="leaderName" className="mb-1 flex h-4 items-center text-xs whitespace-nowrap lg:mb-2 lg:h-5 lg:text-sm">Group Leader First Name only<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
+              <Input id="leaderName" value={leaderName} onChange={(event) => setLeaderName(event.target.value.replace(/\s+/g, "").slice(0, 15))} maxLength={15} autoComplete="given-name" aria-invalid={Boolean(childFirstNameProblem(leaderName))} className="h-9 px-3 text-sm lg:h-14 lg:px-4 lg:text-base" />
+              {childFirstNameProblem(leaderName) && <p className="mt-1 text-sm font-bold text-[#8a4b3a]">{childFirstNameProblem(leaderName)}</p>}
+            </div>
+            </div>
           </div>
         </section>
       )}
@@ -464,6 +541,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               variant="mustard"
               size="lg"
               className="footer-cta gap-2"
+              disabled={!groupName.trim() || Boolean(groupNameProblem(groupName)) || !groupType || !leaderName.trim() || Boolean(childFirstNameProblem(leaderName))}
               onClick={() => {
                 setEditing(0);
                 setMessage(null);
@@ -496,6 +574,66 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             avatar: item.avatar,
           }))}
         />
+      )}
+
+      {groupAvatarOpen && groupAvatarDraft && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setGroupAvatarOpen(false);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="group-avatar-title"
+            className="relative flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-[28px] bg-white shadow-xl"
+            onKeyDown={(event) => {
+              if (event.key === "Escape") setGroupAvatarOpen(false);
+            }}
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-[#eadfce] bg-white px-5 py-4 sm:px-6">
+              <h2 id="group-avatar-title" className="step-title text-3xl">Edit group icon</h2>
+              <button type="button" onClick={() => setGroupAvatarOpen(false)} className="rounded-full p-2 text-[#1e4d3a] hover:bg-[#f6efe2]" aria-label="Close">
+                <X className="size-5" />
+              </button>
+            </div>
+            <div className="avatar-modal-scroll min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6">
+              <div className="grid items-start gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+                <div className="lg:self-stretch lg:border-r lg:border-[#b9b5ad] lg:pr-5">
+                  <div className="flex justify-center rounded-[24px] bg-[#f6efe2] p-3">
+                    <GroupIcon icon={groupAvatarDraft.icon} background={groupAvatarDraft.background} colour={groupAvatarDraft.colour} className="h-40 w-40 rounded-[24px]" title="Group icon preview" />
+                  </div>
+                  <ColourRow legend="Background" value={groupAvatarDraft.background} colours={GROUP_BACKGROUND_COLOURS} onChange={(background) => setGroupAvatarDraft({ ...groupAvatarDraft, background })} className="mt-3" />
+                  <ColourRow legend="Icon colour" value={groupAvatarDraft.colour} colours={GROUP_ICON_COLOURS} onChange={(colour) => setGroupAvatarDraft({ ...groupAvatarDraft, colour })} className="mt-3" />
+                </div>
+                <fieldset>
+                  <legend className="text-sm font-extrabold text-[#1e4d3a]">Icon</legend>
+                  <div className="mt-2 grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8">
+                    {GROUP_ICONS.map((icon) => (
+                      <button
+                        key={icon}
+                        type="button"
+                        aria-label={icon}
+                        aria-pressed={groupAvatarDraft.icon === icon}
+                        onClick={() => setGroupAvatarDraft({ ...groupAvatarDraft, icon })}
+                        className={`aspect-square w-full overflow-hidden rounded-2xl ${groupAvatarDraft.icon === icon ? "ring-2 ring-[#173528]" : ""}`}
+                      >
+                        <GroupIcon icon={icon} background={groupAvatarDraft.background} colour={groupAvatarDraft.colour} className="size-full" />
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+            <div className="border-t border-[#eadfce] bg-white px-5 py-4 sm:px-6">
+              <Button type="button" variant="mustard" size="lg" className="w-full" onClick={() => { setGroupIcon(groupAvatarDraft); setGroupAvatarOpen(false); }}>
+                Save
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {avatarOpen && avatarDraft && (
@@ -761,7 +899,7 @@ function ColourRow({
               aria-label={colour.label}
               aria-pressed={value.toLowerCase() === hex.toLowerCase()}
               onClick={() => onChange(hex)}
-              className={`${compact ? "size-5 shrink-0" : "size-8 shrink-0 sm:size-11"} rounded-full border-2 ${value.toLowerCase() === hex.toLowerCase() ? "border-[#173528]" : "border-white"}`}
+              className={`${compact ? "size-5 shrink-0" : "size-8 shrink-0 sm:size-11"} rounded-full border-2 ${value.toLowerCase() === hex.toLowerCase() ? "border-[#173528]" : "border-[#eadfce]"}`}
               style={{ background: colour.hex }}
             />
           );

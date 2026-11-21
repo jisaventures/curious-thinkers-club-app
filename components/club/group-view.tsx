@@ -1,25 +1,48 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, BarChart3, ClipboardList, Lock, ShoppingBag, UserRound, Users, X } from "lucide-react";
 import Link from "next/link";
+import { updateGroupProfile } from "@/app/club/actions";
 import { Avatar } from "@/components/brand/avatar";
+import { GROUP_ICONS, GroupIcon, type GroupIconId } from "@/components/brand/group-icon";
+import { GROUP_BACKGROUND_COLOURS, GROUP_ICON_COLOURS } from "@/lib/avatar-style";
 import { BirthdayPicker } from "@/components/onboarding/birthday-picker";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { formatWhen, shortName } from "@/lib/format";
+import { toIsoDate } from "@/lib/birthday";
 import { colourForChild, memberColour } from "@/lib/member-colour";
 import type { loadDashboard } from "@/lib/club/data";
 
 type DashboardData = Awaited<ReturnType<typeof loadDashboard>>;
-type Section = "users" | "activity" | "reports";
+type Section = "profile" | "orders" | "users" | "activity" | "reports";
+
+type ClubOrder = {
+  id: string;
+  name: string;
+  createdAt: string;
+  financialStatus: string;
+  fulfillmentStatus: string;
+  currency: string;
+  total: string;
+  email: string;
+  shippingCountry: string;
+  items: { title: string; quantity: number; price: string }[];
+  shopUrl: string;
+};
 
 export function GroupView({ data }: { data: DashboardData }) {
-  const [section, setSection] = useState<Section>("users");
+  const [section, setSection] = useState<Section>("profile");
   const [nameFilter, setNameFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("");
   useEffect(() => {
     const read = () => {
       const hash = window.location.hash.replace("#", "");
-      if (hash === "users" || hash === "activity" || hash === "reports") setSection(hash);
+      if (hash === "profile" || hash === "orders" || hash === "users" || hash === "activity" || hash === "reports") setSection(hash);
     };
     read();
     window.addEventListener("hashchange", read);
@@ -30,28 +53,50 @@ export function GroupView({ data }: { data: DashboardData }) {
   const maxScore = Math.max(1, ...data.children.map((child) => data.pointsByChild[child.id] ?? 0));
   const stamps = data.children.reduce((sum, child) => sum + finishedPacks(owned, data.doneByChild[child.id] ?? {}).length, 0);
 
+  function choose(next: Section) {
+    setSection(next);
+    const url = `${window.location.pathname}${window.location.search}#${next}`;
+    window.history.replaceState(null, "", url);
+  }
+
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[15rem_minmax(0,1fr)]">
-      <nav className="rounded-[24px] bg-white p-3 shadow-[0_10px_30px_rgba(23,53,42,0.05)]" aria-label="My Group">
-        <SideLink href="#users" active={section === "users"} onClick={() => setSection("users")}>
-          Users
-        </SideLink>
-        <div className="mb-3 flex flex-wrap gap-1 px-2">
-          {data.children.map((child) => (
-            <Avatar key={child.id} avatar={child.avatar_key} options={child.avatar_options} gender={child.gender === "girl" ? "girl" : "boy"} title={memberName(child)} className="size-8 rounded-full" />
-          ))}
-        </div>
-        <SideLink href="#activity" active={section === "activity"} onClick={() => setSection("activity")}>
-          Activity log
-        </SideLink>
-        <SideLink href="#reports" active={section === "reports"} onClick={() => setSection("reports")}>
-          Reports
-        </SideLink>
-      </nav>
+    <div className="grid items-start gap-4 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-x-6">
+      <div className="flex flex-col">
+        <Link href="/club" data-variant="mustard" data-size="md" className="ctc-button w-full gap-3">
+          <ArrowLeft className="size-5 shrink-0" aria-hidden="true" />
+          Dashboard
+        </Link>
+        <hr className="my-3 h-px border-0 bg-[#306A51]/30" />
+        <nav className="group-nav flex flex-col gap-4" aria-label="My Group">
+          <Button type="button" variant={section === "profile" ? "green" : "white"} size="md" onClick={() => choose("profile")}>
+            <UserRound className="size-5 shrink-0" aria-hidden="true" />
+            Profile
+          </Button>
+          <Button type="button" variant={section === "orders" ? "green" : "white"} size="md" onClick={() => choose("orders")}>
+            <ShoppingBag className="size-5 shrink-0" aria-hidden="true" />
+            Orders
+          </Button>
+          <Button type="button" variant={section === "users" ? "green" : "white"} size="md" onClick={() => choose("users")}>
+            <Users className="size-5 shrink-0" aria-hidden="true" />
+            Members
+          </Button>
+          <Button type="button" variant={section === "activity" ? "green" : "white"} size="md" onClick={() => choose("activity")}>
+            <ClipboardList className="size-5 shrink-0" aria-hidden="true" />
+            Activity log
+          </Button>
+          <Button type="button" variant={section === "reports" ? "green" : "white"} size="md" onClick={() => choose("reports")}>
+            <BarChart3 className="size-5 shrink-0" aria-hidden="true" />
+            Reports
+          </Button>
+        </nav>
+      </div>
+
+      {section === "profile" && <ProfileSection data={data} />}
+
+      {section === "orders" && <OrdersSection />}
 
       {section === "users" && (
         <section id="users" className="space-y-3">
-          <h1 className="font-display text-3xl text-[#306A51]">Users</h1>
           <ul className="space-y-3">
             {data.children.map((child, index) => {
               const goal = recommendedGoal(child, owned, data.doneByChild[child.id] ?? {});
@@ -79,9 +124,7 @@ export function GroupView({ data }: { data: DashboardData }) {
 
       {section === "activity" && (
         <section id="activity" className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="font-display text-3xl text-[#306A51]">Activity log</h1>
-            <div className="activity-filters flex flex-wrap items-center gap-2">
+          <div className="activity-filters flex flex-wrap items-center gap-2">
               <label className="sr-only" htmlFor="activity-name">Filter by name</label>
               <select id="activity-name" className="birthday-year h-11 px-4" value={nameFilter} onChange={(event) => setNameFilter(event.target.value)}>
                 <option value="all">All names</option>
@@ -94,6 +137,7 @@ export function GroupView({ data }: { data: DashboardData }) {
                 value={dateFilter}
                 onChange={setDateFilter}
                 range={activityRange(data.activities)}
+                marked={activityDays(data.activities)}
                 placeholder="Any date"
                 note=""
                 label="Filter by date"
@@ -101,7 +145,6 @@ export function GroupView({ data }: { data: DashboardData }) {
               <Button type="button" variant="grey" size="sm" disabled={nameFilter === "all" && !dateFilter} onClick={() => { setNameFilter("all"); setDateFilter(""); }}>
                 Clear filters
               </Button>
-            </div>
           </div>
           <ul className="space-y-2">
             {filteredActivities(data, nameFilter, dateFilter).length === 0 && <li className="rounded-2xl bg-white p-4 text-sm text-[#5e7266]">Nothing has been logged yet.</li>}
@@ -123,7 +166,6 @@ export function GroupView({ data }: { data: DashboardData }) {
 
       {section === "reports" && (
         <section id="reports" className="space-y-4">
-          <h1 className="font-display text-3xl text-[#306A51]">Reports</h1>
           <div className="grid grid-cols-3 gap-3">
             <Stat label="Children" value={String(data.children.length)} />
             <Stat label="Stamps" value={String(stamps)} />
@@ -154,12 +196,312 @@ export function GroupView({ data }: { data: DashboardData }) {
   );
 }
 
-function SideLink({ href, active, onClick, children }: { href: string; active: boolean; onClick: () => void; children: React.ReactNode }) {
+type GroupIconDraft = { icon: GroupIconId; background: string; colour: string };
+
+function isGroupIcon(value: string | null | undefined): value is GroupIconId {
+  return !!value && (GROUP_ICONS as readonly string[]).includes(value);
+}
+
+function ProfileSection({ data }: { data: DashboardData }) {
+  const router = useRouter();
+  const { account } = data;
+  const [groupName, setGroupName] = useState(account.group_name || "");
+  const [leaderName, setLeaderName] = useState(account.display_name);
+  const [icon, setIcon] = useState<GroupIconDraft>({
+    icon: isGroupIcon(account.group_icon) ? account.group_icon : "star",
+    background: account.group_bg || "2f9a4a",
+    colour: account.group_icon_colour || "fff4dc",
+  });
+  const [draft, setDraft] = useState<GroupIconDraft | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    if (!draft) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setDraft(null);
+    };
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
+  }, [draft]);
+
+  async function persist(nextIcon: GroupIconDraft) {
+    const body = new FormData();
+    body.set("groupName", groupName);
+    body.set("leaderName", leaderName);
+    body.set("icon", nextIcon.icon);
+    body.set("background", nextIcon.background);
+    body.set("colour", nextIcon.colour);
+    return updateGroupProfile(body);
+  }
+
+  async function save(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPending(true);
+    setMessage(null);
+    setError(null);
+    const result = await persist(icon);
+    setPending(false);
+    if ("error" in result && result.error) {
+      setError(result.error);
+      return;
+    }
+    if (result.ok) {
+      setGroupName(result.groupName);
+      setLeaderName(result.leaderName);
+      setMessage("Saved");
+      router.refresh();
+    }
+  }
+
+  async function saveIcon() {
+    if (!draft) return;
+    setPending(true);
+    setMessage(null);
+    setError(null);
+    const result = await persist(draft);
+    setPending(false);
+    if ("error" in result && result.error) {
+      setError(result.error);
+      return;
+    }
+    if (result.ok) {
+      setIcon(draft);
+      setDraft(null);
+      setMessage("Saved");
+      router.refresh();
+    }
+  }
+
   return (
-    <a href={href} onClick={onClick} className={`block rounded-2xl px-3 py-2 font-display text-lg no-underline ${active ? "bg-[#306A51] text-white" : "text-[#306A51] hover:bg-[#f6efe2]"}`}>
-      {children}
-    </a>
+    <section id="profile" className="rounded-[22px] bg-white p-5 sm:p-6">
+      <form className="space-y-4" onSubmit={save}>
+        <button
+          type="button"
+          onClick={() => setDraft(icon)}
+          className="group relative size-28 overflow-hidden rounded-[28px] sm:size-32"
+          aria-label="Edit group icon"
+        >
+          <GroupIcon icon={icon.icon} background={icon.background} colour={icon.colour} className="size-full" title="Group icon" />
+          <span className="pointer-events-none absolute inset-0 bg-black/0 transition group-hover:bg-black/45" />
+          <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent pt-6 pb-2 text-center text-sm font-extrabold text-white">
+            Edit
+          </span>
+        </button>
+        <div>
+          <Label htmlFor="groupName">Group name</Label>
+          <Input id="groupName" className="mt-1" value={groupName} onChange={(event) => setGroupName(event.target.value.replace(/\s+/g, " ").slice(0, 32))} maxLength={32} autoComplete="off" />
+        </div>
+        <div>
+          <Label htmlFor="leaderName">Group leader first name</Label>
+          <Input id="leaderName" className="mt-1" value={leaderName} onChange={(event) => setLeaderName(event.target.value.replace(/\s+/g, "").slice(0, 15))} maxLength={15} autoComplete="given-name" />
+        </div>
+        <div>
+          <Label htmlFor="shopEmail" className="flex items-center gap-1.5">
+            <Lock className="size-3.5" aria-hidden="true" />
+            Shop email
+          </Label>
+          <Input id="shopEmail" className="mt-1" value={account.email} disabled readOnly />
+          <p className="mt-1 text-xs font-semibold text-[#5e7266]">This is the email on the Shopify account. It cannot be changed here.</p>
+        </div>
+        {error && <p className="text-sm font-bold text-[#8a4b3a]">{error}</p>}
+        {message && <p className="text-sm font-bold text-[#306A51]">{message}</p>}
+        <Button type="submit" variant="mustard" size="lg" disabled={pending}>
+          {pending ? "Saving…" : "Save profile"}
+        </Button>
+      </form>
+      {draft && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setDraft(null);
+          }}
+        >
+          <div role="dialog" aria-modal="true" aria-labelledby="group-avatar-title" className="relative flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-[28px] bg-white shadow-xl">
+            <div className="flex items-center justify-between gap-3 border-b border-[#eadfce] bg-white px-5 py-4 sm:px-6">
+              <h2 id="group-avatar-title" className="step-title text-3xl">Edit group icon</h2>
+              <button type="button" onClick={() => setDraft(null)} className="rounded-full p-2 text-[#1e4d3a] hover:bg-[#f6efe2]" aria-label="Close">
+                <X className="size-5" />
+              </button>
+            </div>
+            <div className="avatar-modal-scroll min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6">
+              <div className="grid items-start gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+                <div className="lg:self-stretch lg:border-r lg:border-[#b9b5ad] lg:pr-5">
+                  <div className="flex justify-center rounded-[24px] bg-[#f6efe2] p-3">
+                    <GroupIcon icon={draft.icon} background={draft.background} colour={draft.colour} className="h-40 w-40 rounded-[24px]" title="Group icon preview" />
+                  </div>
+                  <ColourRow legend="Background" value={draft.background} colours={GROUP_BACKGROUND_COLOURS} onChange={(background) => setDraft({ ...draft, background })} className="mt-3" />
+                  <ColourRow legend="Icon colour" value={draft.colour} colours={GROUP_ICON_COLOURS} onChange={(colour) => setDraft({ ...draft, colour })} className="mt-3" />
+                </div>
+                <fieldset>
+                  <legend className="text-sm font-extrabold text-[#1e4d3a]">Icon</legend>
+                  <div className="mt-2 grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8">
+                    {GROUP_ICONS.map((item) => (
+                      <button
+                        key={item}
+                        type="button"
+                        aria-label={item}
+                        aria-pressed={draft.icon === item}
+                        onClick={() => setDraft({ ...draft, icon: item })}
+                        className={`aspect-square w-full overflow-hidden rounded-2xl ${draft.icon === item ? "ring-2 ring-[#173528]" : ""}`}
+                      >
+                        <GroupIcon icon={item} background={draft.background} colour={draft.colour} className="size-full" />
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+            <div className="border-t border-[#eadfce] bg-white px-5 py-4 sm:px-6">
+              <Button type="button" variant="mustard" size="lg" className="w-full" disabled={pending} onClick={() => void saveIcon()}>
+                {pending ? "Saving…" : "Save"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
   );
+}
+
+function ColourRow({
+  legend,
+  colours,
+  value,
+  onChange,
+  className = "",
+}: {
+  legend: string;
+  colours: readonly { id: string; label: string; hex: string }[];
+  value: string;
+  onChange: (hex: string) => void;
+  className?: string;
+}) {
+  return (
+    <fieldset className={className}>
+      <legend className="text-sm font-extrabold text-[#1e4d3a]">{legend}</legend>
+      <div className="mt-2 flex flex-wrap gap-1 sm:gap-2">
+        {colours.map((colour) => {
+          const hex = colour.hex.replace("#", "");
+          return (
+            <button
+              key={colour.id}
+              type="button"
+              aria-label={colour.label}
+              aria-pressed={value.toLowerCase() === hex.toLowerCase()}
+              onClick={() => onChange(hex)}
+              className={`size-8 shrink-0 rounded-full border-2 sm:size-11 ${value.toLowerCase() === hex.toLowerCase() ? "border-[#173528]" : "border-[#eadfce]"}`}
+              style={{ background: colour.hex }}
+            />
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
+function OrdersSection() {
+  const [orders, setOrders] = useState<ClubOrder[] | null>(null);
+  const [shopAccountUrl, setShopAccountUrl] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/club/orders")
+      .then((response) => {
+        if (!response.ok) throw new Error("orders");
+        return response.json() as Promise<{ orders: ClubOrder[]; shopAccountUrl?: string }>;
+      })
+      .then((body) => {
+        if (cancelled) return;
+        setOrders(body.orders);
+        setShopAccountUrl(body.shopAccountUrl ?? "");
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const open = orders?.find((order) => order.id === openId) ?? null;
+
+  return (
+    <section id="orders" className="space-y-3">
+      {failed && <p className="rounded-2xl bg-white p-4 text-sm text-[#5e7266]">Orders could not be loaded.</p>}
+      {orders && orders.length === 0 && <p className="rounded-2xl bg-white p-4 text-sm text-[#5e7266]">No shop orders yet.</p>}
+      {orders === null && !failed && <p className="rounded-2xl bg-white p-4 text-sm text-[#5e7266]">Loading orders…</p>}
+      <ul className="space-y-3">
+        {orders?.map((order) => (
+          <li key={order.id} className="rounded-[22px] bg-white p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="font-display text-xl text-[#17352A]">{order.name}</p>
+                <p className="text-sm font-semibold text-[#5e7266]">{formatWhen(order.createdAt)} · {money(order.currency, order.total)} · {order.fulfillmentStatus}</p>
+              </div>
+              <Button type="button" variant="white" size="sm" onClick={() => setOpenId(order.id)}>
+                View order
+              </Button>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <Dialog open={Boolean(open)} onOpenChange={(next) => { if (!next) setOpenId(null); }}>
+        <DialogContent className="w-[min(100%-1.5rem,36rem)]" aria-describedby={undefined}>
+          {open && (
+            <>
+              <DialogTitle>{open.name}</DialogTitle>
+              <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
+                <Detail label="Placed" value={formatWhen(open.createdAt)} />
+                <Detail label="Payment" value={open.financialStatus} />
+                <Detail label="Delivery" value={open.fulfillmentStatus} />
+                <Detail label="Total" value={money(open.currency, open.total)} />
+                <Detail label="Ship to" value={open.shippingCountry} />
+                <Detail label="Shop email" value={open.email} />
+              </dl>
+              <ul className="mt-4 space-y-2">
+                {open.items.map((item) => (
+                  <li key={item.title} className="flex items-center justify-between gap-3 rounded-2xl bg-[#f6efe2] px-3 py-2 text-sm font-bold text-[#17352A]">
+                    <span>{item.title} × {item.quantity}</span>
+                    <span>{money(open.currency, item.price)}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <a href={open.shopUrl} target="_blank" rel="noreferrer" data-variant="mustard" data-size="md" className="ctc-button">
+                  Open in Shopify
+                </a>
+                {shopAccountUrl && (
+                  <a href={shopAccountUrl} target="_blank" rel="noreferrer" data-variant="white" data-size="md" className="ctc-button">
+                    Shopify account
+                  </a>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </section>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-xs font-extrabold tracking-wide text-[#306A51] uppercase">{label}</dt>
+      <dd className="font-bold text-[#17352A]">{value}</dd>
+    </div>
+  );
+}
+
+function money(currency: string, amount: string) {
+  const value = Number(amount);
+  if (!Number.isFinite(value)) return amount;
+  return new Intl.NumberFormat("en-GB", { style: "currency", currency }).format(value);
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
@@ -169,6 +511,17 @@ function Stat({ label, value }: { label: string; value: string }) {
       <p className="font-display text-3xl text-[#17352A]">{value}</p>
     </div>
   );
+}
+
+function activityDays(activities: DashboardData["activities"]) {
+  const days = new Set<string>();
+  for (const item of activities) {
+    if (!item.at) continue;
+    const day = new Date(item.at);
+    if (Number.isNaN(day.getTime())) continue;
+    days.add(toIsoDate(day));
+  }
+  return days;
 }
 
 function activityRange(activities: DashboardData["activities"]) {

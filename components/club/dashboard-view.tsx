@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { setFocusChild } from "@/app/club/actions";
 import { Avatar } from "@/components/brand/avatar";
+import { CountryFlag } from "@/components/brand/country-flag";
+import { GROUP_ICONS, GroupIcon, type GroupIconId } from "@/components/brand/group-icon";
 import { ChildForm } from "@/components/club/child-form";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Scrapbook } from "@/components/club/scrapbook";
-import { formatWhen, shortName } from "@/lib/format";
-import { colourForChild, memberColour } from "@/lib/member-colour";
+import { shortName } from "@/lib/format";
+import { memberColour } from "@/lib/member-colour";
 import type { CoverTone } from "@/lib/validators";
 import type { loadDashboard } from "@/lib/club/data";
 
@@ -21,16 +22,9 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
   const { account } = data;
   const [focusId, setFocusId] = useState(data.focus?.id ?? "");
   const [bookId, setBookId] = useState<string | null>(null);
-  const [logOpen, setLogOpen] = useState(false);
   const focus = data.children.find((child) => child.id === focusId) ?? data.focus;
   const owned = data.packs.filter((pack) => pack.owned);
   const spotlight = focus ? pickSpotlight(owned, data.doneByChild[focus.id] ?? {}) : null;
-  const welcome = spotlight && focus
-    ? activityLine(memberName(focus), spotlight.pack.title, spotlight.done, spotlight.total)
-    : focus
-      ? `${memberName(focus)} is ready for a new pack.`
-      : "Add a child to start a pack together.";
-  const recent = data.activities.slice(0, 3);
 
   function chooseChild(childId: string) {
     setFocusId(childId);
@@ -41,50 +35,31 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
 
   return (
     <div className="space-y-8 sm:space-y-10">
-      <section className="flex items-center justify-between gap-4">
-        <div className="relative min-w-0">
-          <h1 className="font-display text-3xl leading-tight text-[#306A51] sm:text-4xl">
-            Welcome back, <span className="text-[#e8a428]">{account.display_name}</span>
-          </h1>
-          <div className="relative mt-2" onMouseEnter={() => setLogOpen(true)} onMouseLeave={() => setLogOpen(false)}>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-display text-base text-[#306A51] sm:text-lg">Activity log</span>
-              <button type="button" className="inline-flex items-center gap-1 rounded-full border border-[#eadfce] bg-white px-3 py-1 text-left font-display text-sm text-[#306A51] shadow-sm" aria-expanded={logOpen} onClick={() => setLogOpen((open) => !open)}>
-                {welcome}
-                <ChevronDown className={`size-4 shrink-0 transition ${logOpen ? "rotate-180" : ""}`} aria-hidden="true" />
-              </button>
-            </div>
-            {logOpen && (
-              <div className="absolute z-20 mt-1.5 w-[min(100%,20rem)] rounded-2xl border border-[#eadfce] bg-white p-2 shadow-[0_16px_40px_rgba(23,53,42,0.08)]">
-                {recent.length === 0 ? (
-                  <p className="px-2 py-1 text-xs text-[#5e7266]">Nothing has been logged yet.</p>
-                ) : (
-                  <ul className="space-y-1">
-                    {recent.map((item) => {
-                      const colour = colourForChild(item.childId, data.children);
-                      return (
-                        <li key={item.id} className="flex items-baseline justify-between gap-2 rounded-lg px-2 py-1 text-xs font-bold" style={{ background: colour.wash, color: colour.ink }}>
-                          <span className="min-w-0">
-                            <span className="mr-1.5 inline-block size-2 rounded-full align-middle" style={{ background: colour.dot }} />
-                            {item.summary}
-                          </span>
-                          {item.at && <time className="shrink-0 text-[10px] font-extrabold">{formatWhen(item.at)}</time>}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-                <Link href="/club/group#activity" className="mt-1.5 inline-block px-2 text-xs font-extrabold text-[#306A51] underline">
-                  View full activity log
-                </Link>
-              </div>
+      <section className="flex flex-col items-center gap-6 text-center xl:flex-row xl:items-center xl:justify-between xl:gap-8 xl:text-left">
+        <div className="w-full min-w-0 xl:w-auto xl:flex-1">
+          <div className="flex items-center justify-center gap-3 xl:justify-start">
+            {isGroupIcon(account.group_icon) && (
+              <GroupIcon
+                icon={account.group_icon}
+                background={account.group_bg || "2f9a4a"}
+                colour={account.group_icon_colour || "fff4dc"}
+                className="size-16 shrink-0 rounded-[22px] sm:size-20"
+                title={account.group_name || "Group icon"}
+              />
             )}
+            <div className="min-w-0 text-left">
+              <p className="text-xs font-extrabold text-[#5e7266] sm:text-sm">Group Leader: {account.display_name}</p>
+              <h1 className="mt-0.5 flex items-center gap-2 font-display text-3xl leading-tight text-[#306A51] sm:text-4xl">
+                <span className="text-[#e8a428]">{account.group_name || account.display_name}</span>
+                {account.group_location && <CountryFlag country={account.group_location} className="h-3.5 w-5 sm:h-4 sm:w-6" />}
+              </h1>
+            </div>
           </div>
         </div>
         {data.children.length > 0 && (
-          <div className="shrink-0">
+          <div className="w-full xl:w-auto xl:shrink-0">
             <p className="text-center font-display text-sm text-[#306A51]">Group Members</p>
-            <div className="mt-2 flex flex-wrap items-start justify-end gap-x-4 gap-y-3">
+            <div className="mt-2 flex flex-wrap items-start justify-center gap-x-4 gap-y-3 xl:justify-end">
               {data.children.map((child) => {
                 const name = memberName(child);
                 return (
@@ -309,16 +284,6 @@ function statusWord(done: number, total: number) {
   return "Started";
 }
 
-function activityLine(name: string, title: string, done: number, total: number) {
-  const pack = packLabel(title).toLowerCase();
-  const ratio = total ? done / total : 0;
-  if (ratio >= 1) return `${name} has finished the ${pack}.`;
-  if (ratio >= 0.75) return `${name} is nearly done with the ${pack}.`;
-  if (ratio >= 0.4) return `${name} is halfway through the ${pack}.`;
-  if (done > 0) return `${name} has started the ${pack}.`;
-  return `${name} can start the ${pack}.`;
-}
-
 function packLabel(title: string) {
   const value = title.toLowerCase();
   if (value.includes("pirate")) return "Pirate pack";
@@ -327,6 +292,10 @@ function packLabel(title: string) {
   if (value.includes("knight")) return "Knight pack";
   if (value.includes("space")) return "Space pack";
   return title;
+}
+
+function isGroupIcon(value: string | null | undefined): value is GroupIconId {
+  return !!value && (GROUP_ICONS as readonly string[]).includes(value);
 }
 
 function Progress({ value, total, className = "" }: { value: number; total: number; className?: string }) {

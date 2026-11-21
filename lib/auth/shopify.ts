@@ -26,6 +26,32 @@ import { displayNameSchema } from "@/lib/validators";
  * 6. Refuse the login when Shopify does not return a verified email.
  */
 /** First name already stored from Shopify account creation, when it is a real given name. */
+const SHOP_COUNTRIES: Record<string, string> = {
+  GB: "United Kingdom",
+  UK: "United Kingdom",
+  "UNITED KINGDOM": "United Kingdom",
+  "GREAT BRITAIN": "United Kingdom",
+  US: "United States",
+  USA: "United States",
+  "UNITED STATES": "United States",
+  IE: "Ireland",
+  FR: "France",
+  DE: "Germany",
+  ES: "Spain",
+  IT: "Italy",
+  NL: "Netherlands",
+  AU: "Australia",
+  CA: "Canada",
+  NZ: "New Zealand",
+};
+
+/** Country from a Shopify invoice address. A UK billing country becomes United Kingdom. */
+export function locationFromShopifyAddress(country: string | null | undefined) {
+  const raw = country?.trim() ?? "";
+  if (!raw) return "United Kingdom";
+  return SHOP_COUNTRIES[raw.toUpperCase()] ?? raw;
+}
+
 export function firstNameFromShopAccount(displayName: string | null | undefined) {
   const name = displayName?.trim() ?? "";
   return displayNameSchema.safeParse(name).success ? name : null;

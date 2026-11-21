@@ -18,6 +18,13 @@ export type DemoAccount = {
   is_adult_confirmed: boolean;
   role: "member" | "admin";
   shopify_customer_id: string | null;
+  region?: string;
+  group_name?: string;
+  group_type?: string;
+  group_location?: string;
+  group_icon?: string;
+  group_icon_colour?: string;
+  group_bg?: string;
 };
 
 export type DemoChild = {
@@ -27,6 +34,7 @@ export type DemoChild = {
   avatar_key: AvatarKey;
   age_years: number;
   created_at: string;
+  region?: string;
   first_name?: string;
   gender?: "boy" | "girl" | "unspecified";
   avatar_bg?: string;
@@ -88,6 +96,7 @@ export type DemoLedger = {
   amount: number;
   reason: "step_complete" | "pack_certificate" | "submission_featured" | "opening_balance";
   ref_id: string;
+  created_at?: string;
 };
 
 export type DemoSubmission = {
@@ -120,6 +129,26 @@ export type DemoOwnership = {
   granted_at: string;
 };
 
+export type DemoOrderItem = {
+  title: string;
+  quantity: number;
+  price: string;
+};
+
+export type DemoOrder = {
+  id: string;
+  account_id: string;
+  name: string;
+  created_at: string;
+  financial_status: "paid" | "refunded";
+  fulfillment_status: "fulfilled" | "unfulfilled" | "partial";
+  currency: "GBP";
+  total: string;
+  email: string;
+  shipping_country: string;
+  items: DemoOrderItem[];
+};
+
 export type DemoEvent = {
   id: string;
   email: string | null;
@@ -142,6 +171,7 @@ export type DemoDb = {
   prizes: DemoPrize[];
   ownership: DemoOwnership[];
   events: DemoEvent[];
+  orders: DemoOrder[];
   certificates: Array<{ child_id: string; pack_id: string }>;
 };
 
@@ -205,6 +235,85 @@ function pack(
     step_count: 8,
     published: true,
     created_at: new Date().toISOString(),
+  };
+}
+
+const CROWD_ID = "a1000000-0000-4000-8000-000000000099";
+
+function crowdClub(): { account: DemoAccount; children: DemoChild[]; ledger: DemoLedger[] } {
+  const names: Array<[string, string, "girl" | "boy"]> = [
+    ["Amira", "brightotter7", "girl"],
+    ["Jonah", "swiftfox19", "boy"],
+    ["Priya", "calmheron3", "girl"],
+    ["Mateo", "boldlynx12", "boy"],
+    ["Hana", "quietrobin8", "girl"],
+    ["Leo", "wildbadger4", "boy"],
+    ["Noor", "kindwhale21", "girl"],
+    ["Felix", "bravehawk6", "boy"],
+    ["Aya", "softpanda15", "girl"],
+    ["Omar", "quickseal9", "boy"],
+    ["Freya", "merryfinch2", "girl"],
+    ["Kai", "steadywolf18", "boy"],
+    ["Zuri", "goldfinch11", "girl"],
+    ["Hugo", "clevertren5", "boy"],
+    ["Lila", "warmkoala14", "girl"],
+    ["Nico", "trueotter16", "boy"],
+    ["Sana", "littlecrane1", "girl"],
+    ["Eli", "openbadger20", "boy"],
+    ["Maya", "fairrobin13", "girl"],
+    ["Theo", "gentlegull8", "boy"],
+    ["Ines", "brighthare17", "girl"],
+    ["Rafi", "calmlynx10", "boy"],
+    ["Esme", "kindheron22", "girl"],
+    ["Jonas", "boldseal23", "boy"],
+  ];
+  const hairBoy = ["shortRound", "theCaesar", "dreads", "fro", "shaggy", "curly", "shortFlat", "bun"] as const;
+  const hairGirl = ["bob", "curly", "longButNotTooLong", "straight01", "froBand", "bun", "frida", "curvy"] as const;
+  const skins = ["ffdbb4", "edb98a", "ae5d29", "614335", "f8d25c"];
+  const clothes = ["e8a428", "306a51", "65c9ff", "e36aa2", "1e4d3a", "c45b4a"];
+  const backgrounds = ["b5e8f0", "f6d6a8", "c7b6ea", "8fce78", "ffd5dc", "d4e7c5"];
+  const eyes = ["happy", "default", "wink", "side"] as const;
+  const hairColours = ["2c1b18", "4a312c", "e8c070", "6b4423", "b58143"];
+  const regions = ["Europe", "Asia", "Africa", "North America", "South America", "Oceania", "Middle East"];
+  const children: DemoChild[] = [];
+  const ledger: DemoLedger[] = [];
+  names.forEach(([first, nickname, gender], index) => {
+    const id = `c3000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`;
+    const girl = gender === "girl";
+    children.push({
+      id,
+      account_id: CROWD_ID,
+      first_name: first,
+      nickname,
+      avatar_key: "explorer",
+      gender,
+      age_years: 4 + (index % 8),
+      region: regions[index % regions.length],
+      created_at: "2026-03-01T00:00:00.000Z",
+      avatar_options: portrait({
+        ...boyAvatar(),
+        top: girl ? hairGirl[index % hairGirl.length] : hairBoy[index % hairBoy.length],
+        skin: skins[index % skins.length],
+        clothesColor: clothes[index % clothes.length],
+        background: backgrounds[index % backgrounds.length],
+        eyes: eyes[index % eyes.length],
+        hairColor: hairColours[index % hairColours.length],
+        clothing: girl ? "shirtVNeck" : "shirtCrewNeck",
+      }),
+    });
+    ledger.push({
+      child_id: id,
+      account_id: CROWD_ID,
+      amount: 740 - index * 22,
+      reason: "opening_balance",
+      ref_id: id,
+      created_at: index % 3 === 0 ? "2026-11-18T12:00:00.000Z" : "2026-08-01T12:00:00.000Z",
+    });
+  });
+  return {
+    account: { id: CROWD_ID, display_name: "World", email: "world@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "Europe" },
+    children,
+    ledger,
   };
 }
 
@@ -314,6 +423,7 @@ export function createSeed(): DemoDb {
     row.completed_at = at.toISOString();
   });
 
+  const crowd = crowdClub();
   const ledger: DemoLedger[] = [
     ...progress
       .filter((row) => row.status === "complete")
@@ -323,6 +433,7 @@ export function createSeed(): DemoDb {
         amount: 10,
         reason: "step_complete" as const,
         ref_id: row.step_id,
+        created_at: row.completed_at,
       })),
     ...certificates.map((row) => ({
       child_id: row.child_id,
@@ -330,19 +441,36 @@ export function createSeed(): DemoDb {
       amount: 50,
       reason: "pack_certificate" as const,
       ref_id: row.pack_id,
+      created_at: progress.filter((item) => item.child_id === row.child_id && item.completed_at).map((item) => item.completed_at as string).sort().at(-1),
     })),
-    { child_id: "c1000000-0000-4000-8000-000000000004", account_id: "a1000000-0000-4000-8000-000000000003", amount: 512, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000004" },
-    { child_id: "c1000000-0000-4000-8000-000000000005", account_id: "a1000000-0000-4000-8000-000000000004", amount: 480, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000005" },
-    { child_id: "c1000000-0000-4000-8000-000000000006", account_id: "a1000000-0000-4000-8000-000000000005", amount: 175, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000006" },
+    { child_id: "c1000000-0000-4000-8000-000000000004", account_id: "a1000000-0000-4000-8000-000000000003", amount: 512, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000004", created_at: "2026-09-01T12:00:00.000Z" },
+    { child_id: "c1000000-0000-4000-8000-000000000005", account_id: "a1000000-0000-4000-8000-000000000004", amount: 480, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000005", created_at: "2026-09-01T12:00:00.000Z" },
+    { child_id: "c1000000-0000-4000-8000-000000000006", account_id: "a1000000-0000-4000-8000-000000000005", amount: 175, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000006", created_at: "2026-09-01T12:00:00.000Z" },
+    ...crowd.ledger,
   ];
 
   return {
     accounts: [
-      { id: SAM_ID, display_name: "Sam", email: "sam@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null },
-      { id: ADMIN_ID, display_name: "Ada", email: "admin@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "admin", shopify_customer_id: null },
-      { id: "a1000000-0000-4000-8000-000000000003", display_name: "Star", email: "star@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null },
-      { id: "a1000000-0000-4000-8000-000000000004", display_name: "Dex", email: "dex@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null },
-      { id: "a1000000-0000-4000-8000-000000000005", display_name: "Bea", email: "bea@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null },
+      {
+        id: SAM_ID,
+        display_name: "Sam",
+        email: "sam@demo.curiousthinkersclub.test",
+        is_adult_confirmed: true,
+        role: "member",
+        shopify_customer_id: "1001",
+        region: "Europe",
+        group_name: "Sam's Club",
+        group_type: "Family",
+        group_location: "United Kingdom",
+        group_icon: "star",
+        group_icon_colour: "fff4dc",
+        group_bg: "2f9a4a",
+      },
+      { id: ADMIN_ID, display_name: "Ada", email: "admin@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "admin", shopify_customer_id: null, region: "Europe" },
+      { id: "a1000000-0000-4000-8000-000000000003", display_name: "Star", email: "star@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "North America" },
+      { id: "a1000000-0000-4000-8000-000000000004", display_name: "Dex", email: "dex@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "Asia" },
+      { id: "a1000000-0000-4000-8000-000000000005", display_name: "Bea", email: "bea@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "Africa" },
+      crowd.account,
     ],
     children: [
       { id: LOU_ID, account_id: SAM_ID, first_name: "Lou", nickname: "wigglyfrog44", avatar_key: "explorer", gender: "boy", age_years: 4, created_at: "2026-01-15T00:00:00.000Z", avatar_options: portrait({ ...boyAvatar(), top: "theCaesar", hairColor: "2c1b18", eyes: "wink", clothesColor: "e8a428", background: "b5e8f0", skin: "edb98a" }) },
@@ -353,6 +481,7 @@ export function createSeed(): DemoDb {
       { id: "c1000000-0000-4000-8000-000000000004", account_id: "a1000000-0000-4000-8000-000000000003", nickname: "Star Scout", avatar_key: "star", age_years: 8, created_at: "2026-11-10T00:00:00.000Z" },
       { id: "c1000000-0000-4000-8000-000000000005", account_id: "a1000000-0000-4000-8000-000000000004", nickname: "Dino Dex", avatar_key: "dino", age_years: 6, created_at: "2026-11-11T00:00:00.000Z" },
       { id: "c1000000-0000-4000-8000-000000000006", account_id: "a1000000-0000-4000-8000-000000000005", nickname: "Cosmic Bea", avatar_key: "astronaut", age_years: 5, created_at: "2026-11-12T00:00:00.000Z" },
+      ...crowd.children,
     ],
     packs: [
       pack(pirate, "be-a-pirate-for-the-day", "Be a pirate for the day", "history", "Learn about real pirates, maps and ships", "bottle", "900000000001", 4, 8),
@@ -393,11 +522,55 @@ export function createSeed(): DemoDb {
       granted_at: new Date().toISOString(),
     })),
     events: [],
+    orders: [
+      {
+        id: "1048",
+        account_id: SAM_ID,
+        name: "#1048",
+        created_at: "2026-10-12T11:20:00.000Z",
+        financial_status: "paid",
+        fulfillment_status: "fulfilled",
+        currency: "GBP",
+        total: "12.00",
+        email: "sam@demo.curiousthinkersclub.test",
+        shipping_country: "United Kingdom",
+        items: [{ title: "Be a pirate for the day", quantity: 1, price: "12.00" }],
+      },
+      {
+        id: "1062",
+        account_id: SAM_ID,
+        name: "#1062",
+        created_at: "2026-11-02T15:05:00.000Z",
+        financial_status: "paid",
+        fulfillment_status: "fulfilled",
+        currency: "GBP",
+        total: "12.00",
+        email: "sam@demo.curiousthinkersclub.test",
+        shipping_country: "United Kingdom",
+        items: [{ title: "Be an Egyptian explorer", quantity: 1, price: "12.00" }],
+      },
+      {
+        id: "1081",
+        account_id: SAM_ID,
+        name: "#1081",
+        created_at: "2026-11-18T09:40:00.000Z",
+        financial_status: "paid",
+        fulfillment_status: "unfulfilled",
+        currency: "GBP",
+        total: "24.00",
+        email: "sam@demo.curiousthinkersclub.test",
+        shipping_country: "United Kingdom",
+        items: [
+          { title: "Be a space explorer", quantity: 1, price: "12.00" },
+          { title: "Become a spy", quantity: 1, price: "12.00" },
+        ],
+      },
+    ],
     certificates,
   };
 }
 
-const SEED_VERSION = 4;
+const SEED_VERSION = 8;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {
@@ -513,6 +686,14 @@ export function nicknameTaken(nickname: string) {
 
 export function createDemoFamily(input: {
   parentName: string;
+  group?: {
+    name: string;
+    type: string;
+    location: string;
+    icon: string;
+    background: string;
+    colour: string;
+  };
   children: Array<{
     firstName: string;
     nickname: string;
@@ -547,6 +728,12 @@ export function createDemoFamily(input: {
     is_adult_confirmed: true,
     role: "member",
     shopify_customer_id: null,
+    group_name: input.group?.name,
+    group_type: input.group?.type,
+    group_location: input.group?.location,
+    group_icon: input.group?.icon,
+    group_icon_colour: input.group?.colour,
+    group_bg: input.group?.background,
   });
   const childIds = input.children.map((child) => {
     const id = crypto.randomUUID();
