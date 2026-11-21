@@ -341,7 +341,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             <button
               type="button"
               onClick={openAvatarModal}
-              className="group relative row-span-2 size-32 shrink-0 self-center overflow-hidden rounded-[28px] bg-[#f6efe2] justify-self-center sm:size-40 lg:size-36"
+              className="group relative row-span-2 size-36 shrink-0 self-center overflow-hidden rounded-[28px] bg-[#f6efe2] justify-self-center sm:size-44 lg:size-36"
               aria-label="Edit avatar"
             >
               <FamilyAvatar build={child.avatar} className="size-full" title="Child avatar" />
@@ -381,7 +381,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 ))}
               </div>
             </fieldset>
-            <div className="min-w-0 space-y-2 lg:col-start-3 lg:row-start-1">
+            <div className="min-w-0 max-w-32 space-y-2 sm:max-w-40 lg:max-w-none lg:col-start-3 lg:row-start-1">
               <Label htmlFor="firstName">First name only</Label>
               <Input
                 id="firstName"
