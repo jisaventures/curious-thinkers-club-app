@@ -6,6 +6,7 @@ import { Avatar } from "@/components/brand/avatar";
 import { BirthdayPicker } from "@/components/onboarding/birthday-picker";
 import { Button } from "@/components/ui/button";
 import { formatWhen, shortName } from "@/lib/format";
+import { toIsoDate } from "@/lib/birthday";
 import { colourForChild, memberColour } from "@/lib/member-colour";
 import type { loadDashboard } from "@/lib/club/data";
 
@@ -94,6 +95,7 @@ export function GroupView({ data }: { data: DashboardData }) {
                 value={dateFilter}
                 onChange={setDateFilter}
                 range={activityRange(data.activities)}
+                marked={activityDays(data.activities)}
                 placeholder="Any date"
                 note=""
                 label="Filter by date"
@@ -169,6 +171,17 @@ function Stat({ label, value }: { label: string; value: string }) {
       <p className="font-display text-3xl text-[#17352A]">{value}</p>
     </div>
   );
+}
+
+function activityDays(activities: DashboardData["activities"]) {
+  const days = new Set<string>();
+  for (const item of activities) {
+    if (!item.at) continue;
+    const day = new Date(item.at);
+    if (Number.isNaN(day.getTime())) continue;
+    days.add(toIsoDate(day));
+  }
+  return days;
 }
 
 function activityRange(activities: DashboardData["activities"]) {

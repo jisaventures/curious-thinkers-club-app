@@ -582,6 +582,7 @@ select {
 }
 
 .birthday-day {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -593,6 +594,22 @@ select {
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
+}
+
+.birthday-mark {
+  position: absolute;
+  bottom: 0.22rem;
+  left: 50%;
+  width: 0.28rem;
+  height: 0.28rem;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #306a51;
+  pointer-events: none;
+}
+
+.birthday-day.is-selected .birthday-mark {
+  background: #fff;
 }
 
 .birthday-day:hover:not(:disabled) {
