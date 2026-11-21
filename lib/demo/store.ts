@@ -18,6 +18,7 @@ export type DemoAccount = {
   is_adult_confirmed: boolean;
   role: "member" | "admin";
   shopify_customer_id: string | null;
+  region?: string;
 };
 
 export type DemoChild = {
@@ -88,6 +89,7 @@ export type DemoLedger = {
   amount: number;
   reason: "step_complete" | "pack_certificate" | "submission_featured" | "opening_balance";
   ref_id: string;
+  created_at?: string;
 };
 
 export type DemoSubmission = {
@@ -323,6 +325,7 @@ export function createSeed(): DemoDb {
         amount: 10,
         reason: "step_complete" as const,
         ref_id: row.step_id,
+        created_at: row.completed_at,
       })),
     ...certificates.map((row) => ({
       child_id: row.child_id,
@@ -330,19 +333,20 @@ export function createSeed(): DemoDb {
       amount: 50,
       reason: "pack_certificate" as const,
       ref_id: row.pack_id,
+      created_at: progress.filter((item) => item.child_id === row.child_id && item.completed_at).map((item) => item.completed_at as string).sort().at(-1),
     })),
-    { child_id: "c1000000-0000-4000-8000-000000000004", account_id: "a1000000-0000-4000-8000-000000000003", amount: 512, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000004" },
-    { child_id: "c1000000-0000-4000-8000-000000000005", account_id: "a1000000-0000-4000-8000-000000000004", amount: 480, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000005" },
-    { child_id: "c1000000-0000-4000-8000-000000000006", account_id: "a1000000-0000-4000-8000-000000000005", amount: 175, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000006" },
+    { child_id: "c1000000-0000-4000-8000-000000000004", account_id: "a1000000-0000-4000-8000-000000000003", amount: 512, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000004", created_at: "2026-09-01T12:00:00.000Z" },
+    { child_id: "c1000000-0000-4000-8000-000000000005", account_id: "a1000000-0000-4000-8000-000000000004", amount: 480, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000005", created_at: "2026-09-01T12:00:00.000Z" },
+    { child_id: "c1000000-0000-4000-8000-000000000006", account_id: "a1000000-0000-4000-8000-000000000005", amount: 175, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000006", created_at: "2026-09-01T12:00:00.000Z" },
   ];
 
   return {
     accounts: [
-      { id: SAM_ID, display_name: "Sam", email: "sam@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null },
-      { id: ADMIN_ID, display_name: "Ada", email: "admin@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "admin", shopify_customer_id: null },
-      { id: "a1000000-0000-4000-8000-000000000003", display_name: "Star", email: "star@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null },
-      { id: "a1000000-0000-4000-8000-000000000004", display_name: "Dex", email: "dex@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null },
-      { id: "a1000000-0000-4000-8000-000000000005", display_name: "Bea", email: "bea@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null },
+      { id: SAM_ID, display_name: "Sam", email: "sam@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "Europe" },
+      { id: ADMIN_ID, display_name: "Ada", email: "admin@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "admin", shopify_customer_id: null, region: "Europe" },
+      { id: "a1000000-0000-4000-8000-000000000003", display_name: "Star", email: "star@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "North America" },
+      { id: "a1000000-0000-4000-8000-000000000004", display_name: "Dex", email: "dex@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "Asia" },
+      { id: "a1000000-0000-4000-8000-000000000005", display_name: "Bea", email: "bea@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "Africa" },
     ],
     children: [
       { id: LOU_ID, account_id: SAM_ID, first_name: "Lou", nickname: "wigglyfrog44", avatar_key: "explorer", gender: "boy", age_years: 4, created_at: "2026-01-15T00:00:00.000Z", avatar_options: portrait({ ...boyAvatar(), top: "theCaesar", hairColor: "2c1b18", eyes: "wink", clothesColor: "e8a428", background: "b5e8f0", skin: "edb98a" }) },
@@ -397,7 +401,7 @@ export function createSeed(): DemoDb {
   };
 }
 
-const SEED_VERSION = 4;
+const SEED_VERSION = 5;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {

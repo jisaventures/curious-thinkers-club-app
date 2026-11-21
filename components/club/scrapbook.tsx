@@ -71,7 +71,6 @@ export function Scrapbook({
                 <Fact label="Score" value={String(points)} />
                 <Fact label="Rank" value={ordinal(rank)} />
               </dl>
-              <p className="mt-3 text-xs text-[#5e7266]">Rank is a placeholder for now. It will follow scores.</p>
             </section>
             <section className="p-5">
               <p className="font-display text-sm tracking-[0.14em] text-[#306A51] uppercase">Stamps</p>

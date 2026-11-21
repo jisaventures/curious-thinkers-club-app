@@ -392,6 +392,37 @@ select {
   gap: 0.85rem;
 }
 
+.leaderboard-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  background: #e56b93;
+  color: #fff;
+  font-family: var(--font-fredoka), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 5px 0 #c44b73, 0 8px 16px rgba(196, 75, 115, 0.25);
+  transform: rotate(-7deg);
+  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1), filter 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.leaderboard-link:hover {
+  filter: brightness(1.05);
+  transform: rotate(-9deg) translateY(-2px);
+}
+
+.leaderboard-link:focus-visible {
+  outline: 3px solid #306a51;
+  outline-offset: 3px;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .ctc-button:hover:not(:disabled) {
     transform: translateY(-2px) rotate(-0.4deg);

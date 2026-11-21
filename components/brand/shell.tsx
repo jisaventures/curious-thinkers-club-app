@@ -68,6 +68,9 @@ function ParentHeader({ account }: { account: AccountRecord | null }) {
           <span className="wordmark min-w-0 text-[#306A51] max-sm:!text-[13px]">Curious Thinkers Club</span>
         </Link>
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          <Link href="/club/leaderboard" className="leaderboard-link">
+            Leaderboards
+          </Link>
           <Button asChild variant="mustard" size="sm" className="px-3 sm:px-4">
             <Link href="/club/shop">Shop packs</Link>
           </Button>
@@ -82,6 +85,9 @@ function ParentHeader({ account }: { account: AccountRecord | null }) {
             <div className="absolute right-0 z-30 mt-2 w-48 rounded-2xl border border-[#eadfce] bg-white p-2 shadow-lg">
               <Link href="/club/group" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
                 My Group
+              </Link>
+              <Link href="/club/leaderboard" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
+                Leaderboards
               </Link>
               <Link href="/club/rewards" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
                 Rewards
