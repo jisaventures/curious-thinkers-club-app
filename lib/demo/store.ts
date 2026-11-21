@@ -610,6 +610,12 @@ export function restoreSamDemo() {
   db.certificates = replace(db.certificates, fresh.certificates, (row) => SAM_CHILD_IDS.has(row.child_id ?? ""));
 }
 
+export function knownDemoPersona(persona: string | undefined) {
+  if (!persona) return false;
+  if (persona === "sam" || persona === "admin") return true;
+  return demoDb().accounts.some((account) => account.id === persona);
+}
+
 export function accountById(id: string) {
   return demoDb().accounts.find((account) => account.id === id) ?? null;
 }
