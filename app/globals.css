@@ -591,6 +591,10 @@ select {
   text-transform: uppercase;
 }
 
+.ctc-button.regen-button {
+  align-self: center;
+}
+
 @media (min-width: 640px) and (max-width: 1023px) {
   .ctc-button.regen-button {
     width: 3rem;

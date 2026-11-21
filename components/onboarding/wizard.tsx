@@ -436,12 +436,14 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                   </span>
                 </span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <Input id="nickname" value={child.nickname} disabled />
-                <Button type="button" variant="green" size="sm" className="regen-button shrink-0" aria-label="Re-generate" onClick={regenerateNickname}>
-                  <RefreshCw className="hidden size-6 sm:block lg:hidden" strokeWidth={3} aria-hidden="true" />
-                  <span className="sm:hidden lg:inline">Re-generate</span>
-                </Button>
+                <span className="inline-flex pb-[5px]">
+                  <Button type="button" variant="green" size="sm" className="regen-button shrink-0" aria-label="Re-generate" onClick={regenerateNickname}>
+                    <RefreshCw className="hidden size-6 sm:block lg:hidden" strokeWidth={3} aria-hidden="true" />
+                    <span className="sm:hidden lg:inline">Re-generate</span>
+                  </Button>
+                </span>
               </div>
               {child.nicknameMessage && <p className="text-sm font-bold text-[#8a4b3a]">{child.nicknameMessage}</p>}
             </div>
