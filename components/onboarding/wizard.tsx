@@ -21,7 +21,7 @@ import {
 import { BirthdayPicker } from "@/components/onboarding/birthday-picker";
 import { ageFromBirthday, isBirthdayAllowed } from "@/lib/birthday";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
-import { Check, ChevronLeft, ChevronRight, Info, Mars, Rocket, Trophy, Venus, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Info, Mars, RefreshCw, Rocket, Trophy, Venus, X } from "lucide-react";
 
 type Gender = "boy" | "girl" | "unspecified";
 
@@ -83,6 +83,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   const [avatarDraft, setAvatarDraft] = useState<AvatarBuild | null>(null);
   const tabsRef = useRef<HTMLOListElement>(null);
   const tabsBarRef = useRef<HTMLDivElement>(null);
+  const tabsSentinelRef = useRef<HTMLDivElement>(null);
   const [tabsCollapsed, setTabsCollapsed] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -175,16 +176,20 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   const hairValue = avatarDraft && new Set<string>(hairOptions).has(avatarDraft.top) ? avatarDraft.top : hairOptions[0];
 
   useEffect(() => {
-    const bar = tabsBarRef.current;
+    const sentinel = tabsSentinelRef.current;
     const syncCollapsed = () => {
-      if (!bar || window.innerWidth >= 640) {
+      if (!sentinel || window.innerWidth >= 640) {
         setTabsCollapsed(false);
         return;
       }
       const header = document.querySelector("header");
       const headerBottom = header?.getBoundingClientRect().bottom ?? 0;
-      const stuck = bar.getBoundingClientRect().top <= headerBottom + 1 && window.scrollY > 12;
-      setTabsCollapsed(stuck);
+      const top = sentinel.getBoundingClientRect().top;
+      setTabsCollapsed((current) => {
+        if (!current && top <= headerBottom) return true;
+        if (current && (window.scrollY < 8 || top > headerBottom + 48)) return false;
+        return current;
+      });
     };
     syncCollapsed();
     window.addEventListener("scroll", syncCollapsed, { passive: true });
@@ -247,6 +252,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
   return (
     <div className="w-full">
+      <div ref={tabsSentinelRef} className="h-px sm:hidden" aria-hidden="true" />
       <div ref={tabsBarRef} className={`step-tabs relative mb-5 max-lg:sticky max-lg:top-[var(--site-header-h)] max-lg:z-30 max-lg:-mx-3 max-lg:bg-[#fffdf8] max-lg:px-3 max-lg:pb-3 sm:max-lg:-mx-5 sm:max-lg:px-5 md:max-lg:-mx-7 md:max-lg:px-7 ${tabsCollapsed ? "is-collapsed" : ""}`}>
       <ol ref={tabsRef} className="tab-scroll flex gap-2 overflow-x-auto px-1 pt-2" aria-label="Onboarding progress">
         {progressLabels.map((label, index) => {
@@ -432,8 +438,9 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               </div>
               <div className="flex gap-2">
                 <Input id="nickname" value={child.nickname} disabled />
-                <Button type="button" variant="green" size="sm" className="shrink-0" onClick={regenerateNickname}>
-                  Re-generate
+                <Button type="button" variant="green" size="sm" className="regen-button shrink-0" aria-label="Re-generate" onClick={regenerateNickname}>
+                  <RefreshCw className="hidden size-6 sm:block lg:hidden" strokeWidth={3} aria-hidden="true" />
+                  <span className="sm:hidden lg:inline">Re-generate</span>
                 </Button>
               </div>
               {child.nicknameMessage && <p className="text-sm font-bold text-[#8a4b3a]">{child.nicknameMessage}</p>}
