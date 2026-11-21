@@ -18,13 +18,33 @@ import {
 
 const WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
-export function BirthdayPicker({ id, value, onChange }: { id: string; value: string; onChange: (value: string) => void }) {
+export function BirthdayPicker({
+  id,
+  value,
+  onChange,
+  range,
+  placeholder = "Select date",
+  note = "Ages 2 to 15. Birthdays only go back 15 years.",
+  label = "Choose a birthday",
+}: {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+  range?: { earliest: Date; latest: Date };
+  placeholder?: string;
+  note?: string;
+  label?: string;
+}) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const today = useMemo(() => startOfDay(new Date()), []);
-  const bounds = useMemo(() => birthdayBounds(today), [today]);
-  const years = useMemo(() => birthdayYears(today), [today]);
+  const bounds = useMemo(() => range ?? birthdayBounds(today), [range, today]);
+  const years = useMemo(() => {
+    const list: number[] = [];
+    for (let year = bounds.latest.getFullYear(); year >= bounds.earliest.getFullYear(); year -= 1) list.push(year);
+    return list.length ? list : birthdayYears(today);
+  }, [bounds, today]);
   const [cursor, setCursor] = useState(() => new Date(bounds.latest.getFullYear(), bounds.latest.getMonth(), 1));
   const [floating, setFloating] = useState<{ top: number; left: number } | null>(null);
 
@@ -96,14 +116,14 @@ export function BirthdayPicker({ id, value, onChange }: { id: string; value: str
           if (selected) setCursor(new Date(selected.getFullYear(), selected.getMonth(), 1));
         }}
       >
-        <span className={value ? "min-w-0 truncate" : "min-w-0 truncate text-[#8aa092]"}>{value ? formatBirthday(value) : "Select date"}</span>
+        <span className={value ? "min-w-0 truncate" : "min-w-0 truncate text-[#8aa092]"}>{value ? formatBirthday(value) : placeholder}</span>
         <Calendar className="size-5 shrink-0 text-[#306a51]" aria-hidden="true" />
       </button>
       {open && (
         <div
           id={panelId}
           role="dialog"
-          aria-label="Choose a birthday"
+          aria-label={label}
           className={`birthday-panel${floating ? " is-floating" : ""}`}
           style={floating ? { top: floating.top, left: floating.left } : undefined}
         >
@@ -153,7 +173,7 @@ export function BirthdayPicker({ id, value, onChange }: { id: string; value: str
             {days.map((day) => {
               const iso = toIsoDate(day);
               const inMonth = day.getMonth() === cursor.getMonth();
-              const allowed = inMonth && isBirthdayAllowed(iso, today);
+              const allowed = inMonth && (range ? inRange(iso, bounds) : isBirthdayAllowed(iso, today));
               const selected = value === iso;
               return (
                 <button
@@ -173,11 +193,17 @@ export function BirthdayPicker({ id, value, onChange }: { id: string; value: str
               );
             })}
           </div>
-          <p className="birthday-note">Ages 2 to 15. Birthdays only go back 15 years.</p>
+          {note && <p className="birthday-note">{note}</p>}
         </div>
       )}
     </div>
   );
+}
+
+function inRange(iso: string, bounds: { earliest: Date; latest: Date }) {
+  const date = parseIsoDate(iso);
+  if (!date) return false;
+  return date >= startOfDay(bounds.earliest) && date <= startOfDay(bounds.latest);
 }
 
 function monthAllowed(year: number, month: number, bounds: { earliest: Date; latest: Date }) {
