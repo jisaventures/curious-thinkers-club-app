@@ -430,7 +430,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="nickname">Nickname</Label>
+                <Label htmlFor="nickname">Username</Label>
             <div className="flex gap-2">
               <Input id="nickname" value={child.nickname} disabled />
               <Button type="button" variant="green" size="sm" className="shrink-0" onClick={regenerateNickname}>
