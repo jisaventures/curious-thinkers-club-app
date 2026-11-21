@@ -1,5 +1,14 @@
 import type { CoverTone } from "@/lib/validators";
 
+export type ClubRelease = {
+  id: string;
+  slug: string;
+  title: string;
+  blurb: string;
+  coverTone: CoverTone;
+  owned: boolean;
+};
+
 export type ClubBanner = {
   id: string;
   slug: string;
@@ -64,4 +73,22 @@ export function clubPackBanners(input: {
   starts.sort((a, b) => b.purchasedAt.localeCompare(a.purchasedAt));
   continues.sort((a, b) => (b.lastActivity || "").localeCompare(a.lastActivity || ""));
   return [...starts, ...continues];
+}
+
+export function recentReleases(input: {
+  packs: Array<{ id: string; slug: string; title: string; blurb: string; cover_tone: CoverTone; created_at?: string | null; published?: boolean }>;
+  ownedIds: Set<string>;
+}): ClubRelease[] {
+  const published = input.packs.filter((pack) => pack.published !== false);
+  const sorted = [...published].sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""));
+  const unowned = sorted.filter((pack) => !input.ownedIds.has(pack.id));
+  const list = (unowned.length ? unowned : sorted).slice(0, 4);
+  return list.map((pack) => ({
+    id: pack.id,
+    slug: pack.slug,
+    title: pack.title,
+    blurb: pack.blurb,
+    coverTone: pack.cover_tone,
+    owned: input.ownedIds.has(pack.id),
+  }));
 }

@@ -1,6 +1,9 @@
+import { Check } from "lucide-react";
 import Link from "next/link";
 import { Avatar } from "@/components/brand/avatar";
+import { BookCover } from "@/components/club/book-cover";
 import { Button } from "@/components/ui/button";
+import type { ClubRelease } from "@/lib/club/banners";
 import type { AvatarKey, CoverTone } from "@/lib/validators";
 
 type Member = {
@@ -23,6 +26,7 @@ export function PackBanner({
   members,
   href,
   featured,
+  compact = false,
 }: {
   state: "start" | "continue";
   title: string;
@@ -34,27 +38,30 @@ export function PackBanner({
   members: Member[];
   href: string;
   featured?: boolean;
+  compact?: boolean;
 }) {
   const continuing = state === "continue";
   return (
     <article
       className={`relative overflow-hidden rounded-[28px] shadow-[0_18px_50px_rgba(23,53,42,0.06)] ${
         continuing ? "bg-[#f3faf4]" : "bg-[#fff8ee]"
-      } ${featured ? "p-4 sm:p-6" : "p-4"}`}
+      } ${compact ? "p-3" : featured ? "p-4 sm:p-6" : "p-4"}`}
     >
-      <div className={`flex flex-col gap-4 md:flex-row md:items-center ${featured ? "md:pr-36" : ""}`}>
-        <PackArt tone={tone} title={title} className={`mx-auto w-40 shrink-0 md:mx-0 ${featured ? "h-56 md:h-64 md:w-48" : "h-44 md:h-48 md:w-36"}`} />
+      <div className={`flex flex-col md:flex-row md:items-center ${compact ? "gap-3" : "gap-4"} ${featured ? "md:pr-36" : ""}`}>
+        <PackArt tone={tone} title={title} compact={compact} className={`mx-auto shrink-0 md:mx-0 ${compact ? "h-24 w-20" : featured ? "h-56 w-40 md:h-64 md:w-48" : "h-44 w-36 md:h-48"}`} />
         <div className="min-w-0 flex-1">
           <p className="text-xs font-extrabold tracking-[0.16em] text-[#306A51] uppercase">{continuing ? "Continue pack" : "Start pack"}</p>
-          <p className="mt-2 text-sm font-bold text-[#3d5348] sm:text-base">
-            {continuing ? continueLead(clubName, done, total) : "Your new pack is ready"}
-          </p>
-          <h2 className={`mt-1 font-display leading-tight text-[#17352A] ${featured ? "text-3xl sm:text-4xl" : "text-2xl sm:text-3xl"}`}>{title}</h2>
-          <p className="mt-2 text-sm text-[#3d5348] sm:text-base">
+          {!compact && (
+            <p className="mt-2 text-sm font-bold text-[#3d5348] sm:text-base">
+              {continuing ? continueLead(clubName, done, total) : "Your new pack is ready"}
+            </p>
+          )}
+          <h2 className={`font-display leading-tight text-[#17352A] ${compact ? "mt-1 text-lg" : featured ? "mt-1 text-3xl sm:text-4xl" : "mt-1 text-2xl sm:text-3xl"}`}>{title}</h2>
+          <p className={`${compact ? "mt-1 text-sm" : "mt-2 text-sm sm:text-base"} text-[#3d5348]`}>
             {continuing ? `Next: ${nextStep ?? "Keep going"}` : "Print the pages, then start whenever the club is ready."}
           </p>
           {continuing && (
-            <div className="mt-4">
+            <div className={compact ? "mt-2" : "mt-4"}>
               <div className="mb-1.5 flex items-center justify-between gap-3 text-sm text-[#3d5348]">
                 <span>{done} of {total} steps done</span>
                 <span>{paceWord(done, total)}</span>
@@ -64,7 +71,7 @@ export function PackBanner({
               </div>
             </div>
           )}
-          <div className="mt-4 flex items-center gap-2">
+          <div className={`${compact ? "mt-2" : "mt-4"} flex items-center gap-2`}>
             <div className="flex -space-x-2">
               {members.slice(0, 5).map((member) => (
                 <Avatar
@@ -81,8 +88,8 @@ export function PackBanner({
               {continuing ? `${members.length} ${members.length === 1 ? "member" : "members"} on this pack` : "Ready for the whole club"}
             </p>
           </div>
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            <Button asChild variant="mustard" size="md" className="w-full sm:w-auto">
+          <div className={`${compact ? "mt-2" : "mt-4"} flex flex-col gap-2 sm:flex-row`}>
+            <Button asChild variant="mustard" size={compact ? "sm" : "md"} className="w-full sm:w-auto">
               <Link href={href}>{continuing ? "Continue pack" : "Start pack"}</Link>
             </Button>
             {!continuing && (
@@ -97,6 +104,34 @@ export function PackBanner({
         <img src="/brand/mascot-spy.png" alt="" className="pointer-events-none absolute right-3 bottom-2 hidden h-36 w-auto md:block" />
       )}
     </article>
+  );
+}
+
+export function RecentReleases({ releases }: { releases: ClubRelease[] }) {
+  return (
+    <aside className="rounded-[28px] bg-white p-4 shadow-[0_18px_50px_rgba(23,53,42,0.06)]">
+      <h2 className="font-display text-xl text-[#17352A]">Recent Releases</h2>
+      <ul className="mt-3 space-y-3">
+        {releases.map((pack) => (
+          <li key={pack.id} className="flex items-center gap-3">
+            <BookCover tone={pack.coverTone} title={pack.title} locked={!pack.owned} />
+            <div className="min-w-0">
+              <p className="font-display text-base leading-tight text-[#17352A]">{pack.title}</p>
+              {pack.owned ? (
+                <p className="mt-1 flex items-center gap-1 text-sm font-extrabold text-[#306A51]">
+                  <Check className="size-4" strokeWidth={3} aria-hidden="true" />
+                  Already Owned
+                </p>
+              ) : (
+                <Button asChild variant="mustard" size="sm" className="mt-2">
+                  <Link href="/club/shop">Unlock</Link>
+                </Button>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </aside>
   );
 }
 
@@ -135,13 +170,13 @@ const tones: Record<CoverTone, string> = {
   sea: "bg-[#245e78]",
 };
 
-function PackArt({ tone, title, className = "" }: { tone: CoverTone; title: string; className?: string }) {
+function PackArt({ tone, title, className = "", compact = false }: { tone: CoverTone; title: string; className?: string; compact?: boolean }) {
   return (
     <div className={`relative overflow-hidden rounded-[22px] ${tones[tone]} ${className}`}>
-      <div className="absolute inset-x-3 top-3 bottom-[28%] rounded-xl bg-[#f7f1e6]">
+      <div className={`absolute rounded-xl bg-[#f7f1e6] ${compact ? "inset-1.5" : "inset-x-3 top-3 bottom-[28%]"}`}>
         <CoverSketch title={title} />
       </div>
-      <p className="absolute inset-x-3 bottom-3 text-center text-xs leading-tight font-bold text-white sm:text-sm">{title}</p>
+      {!compact && <p className="absolute inset-x-3 bottom-3 text-center text-xs leading-tight font-bold text-white sm:text-sm">{title}</p>}
     </div>
   );
 }

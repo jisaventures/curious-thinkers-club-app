@@ -9,7 +9,7 @@ import { GROUP_ICONS, GroupIcon, type GroupIconId } from "@/components/brand/gro
 import { ChildForm } from "@/components/club/child-form";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { EmptyPackBanner, PackBanner } from "@/components/club/pack-banner";
+import { EmptyPackBanner, PackBanner, RecentReleases } from "@/components/club/pack-banner";
 import { Scrapbook } from "@/components/club/scrapbook";
 import { shortName } from "@/lib/format";
 import { memberColour } from "@/lib/member-colour";
@@ -106,21 +106,44 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
         {data.banners.length === 0 ? (
           <EmptyPackBanner />
         ) : (
-          data.banners.map((banner, index) => (
+          <>
             <PackBanner
-              key={banner.id}
-              state={banner.state}
-              title={banner.title}
-              tone={banner.coverTone}
+              state={data.banners[0].state}
+              title={data.banners[0].title}
+              tone={data.banners[0].coverTone}
               clubName={account.group_name?.trim() || "Your club"}
-              done={banner.done}
-              total={banner.total}
-              nextStep={banner.nextStep}
+              done={data.banners[0].done}
+              total={data.banners[0].total}
+              nextStep={data.banners[0].nextStep}
               members={data.children}
-              href={focus ? `/club/packs/${banner.slug}?mode=together&child=${focus.id}` : `/club/packs/${banner.slug}`}
-              featured={index === 0}
+              href={focus ? `/club/packs/${data.banners[0].slug}?mode=together&child=${focus.id}` : `/club/packs/${data.banners[0].slug}`}
+              featured
             />
-          ))
+            {data.banners.length > 1 ? (
+              <div className="grid items-start gap-4 lg:grid-cols-3">
+                <div className="space-y-3 lg:col-span-2">
+                  {data.banners.slice(1).map((banner) => (
+                    <PackBanner
+                      key={banner.id}
+                      state={banner.state}
+                      title={banner.title}
+                      tone={banner.coverTone}
+                      clubName={account.group_name?.trim() || "Your club"}
+                      done={banner.done}
+                      total={banner.total}
+                      nextStep={banner.nextStep}
+                      members={data.children}
+                      href={focus ? `/club/packs/${banner.slug}?mode=together&child=${focus.id}` : `/club/packs/${banner.slug}`}
+                      compact
+                    />
+                  ))}
+                </div>
+                <RecentReleases releases={data.releases} />
+              </div>
+            ) : (
+              <RecentReleases releases={data.releases} />
+            )}
+          </>
         )}
       </section>
 

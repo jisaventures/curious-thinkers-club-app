@@ -217,6 +217,7 @@ function pack(
   product: string,
   ageMin: number,
   ageMax: number,
+  createdAt = "2026-06-01T00:00:00.000Z",
 ): DemoPack {
   return {
     id,
@@ -234,7 +235,7 @@ function pack(
     certificate_bonus_points: 50,
     step_count: 8,
     published: true,
-    created_at: new Date().toISOString(),
+    created_at: createdAt,
   };
 }
 
@@ -486,11 +487,11 @@ export function createSeed(): DemoDb {
       ...crowd.children,
     ],
     packs: [
-      pack(pirate, "be-a-pirate-for-the-day", "Be a pirate for the day", "history", "Learn about real pirates, maps and ships", "bottle", "900000000001", 4, 8),
-      pack(egypt, "be-an-egyptian-explorer", "Be an Egyptian explorer", "history", "Hieroglyphs, pyramids and real ancient Egypt", "palm", "900000000002", 6, 10),
-      pack(spy, "become-a-spy", "Become a spy", "codes", "Learn about real spies, codes and secret messages", "navy", "900000000003", 7, 10),
-      pack(knight, "be-a-knight-for-the-day", "Be a knight for the day", "castles", "Castles, armour and real medieval life", "plum", "900000000004", 5, 9),
-      pack(space, "be-a-space-explorer", "Be a space explorer", "space", "Planets, rockets and the real night sky", "sea", "900000000005", 6, 10),
+      pack(pirate, "be-a-pirate-for-the-day", "Be a pirate for the day", "history", "Learn about real pirates, maps and ships", "bottle", "900000000001", 4, 8, "2026-07-01T00:00:00.000Z"),
+      pack(egypt, "be-an-egyptian-explorer", "Be an Egyptian explorer", "history", "Hieroglyphs, pyramids and real ancient Egypt", "palm", "900000000002", 6, 10, "2026-08-01T00:00:00.000Z"),
+      pack(spy, "become-a-spy", "Become a spy", "codes", "Learn about real spies, codes and secret messages", "navy", "900000000003", 7, 10, "2026-09-01T00:00:00.000Z"),
+      pack(knight, "be-a-knight-for-the-day", "Be a knight for the day", "castles", "Castles, armour and real medieval life", "plum", "900000000004", 5, 9, "2026-11-10T00:00:00.000Z"),
+      pack(space, "be-a-space-explorer", "Be a space explorer", "space", "Planets, rockets and the real night sky", "sea", "900000000005", 6, 10, "2026-11-20T00:00:00.000Z"),
     ],
     steps,
     progress,
@@ -521,8 +522,6 @@ export function createSeed(): DemoDb {
       { account_id: SAM_ID, pack_id: pirate, source: "seed" as const, granted_at: "2026-11-18T09:00:00.000Z" },
       { account_id: SAM_ID, pack_id: egypt, source: "seed" as const, granted_at: "2026-10-02T09:00:00.000Z" },
       { account_id: SAM_ID, pack_id: spy, source: "seed" as const, granted_at: "2026-09-12T09:00:00.000Z" },
-      { account_id: SAM_ID, pack_id: knight, source: "seed" as const, granted_at: "2026-06-01T09:00:00.000Z" },
-      { account_id: SAM_ID, pack_id: space, source: "seed" as const, granted_at: "2026-05-01T09:00:00.000Z" },
     ],
     events: [],
     orders: [
@@ -573,7 +572,7 @@ export function createSeed(): DemoDb {
   };
 }
 
-const SEED_VERSION = 10;
+const SEED_VERSION = 11;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {

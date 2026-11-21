@@ -5,7 +5,7 @@ import { requireAdult } from "@/lib/auth/session";
 import { isDemoMode } from "@/lib/demo/mode";
 import { demoDashboard, demoPackPage } from "@/lib/demo/view";
 import { levelProgress } from "@/lib/levels";
-import { clubPackBanners } from "@/lib/club/banners";
+import { clubPackBanners, recentReleases } from "@/lib/club/banners";
 import { catchUpNudge, nextStepPosition } from "@/lib/progress";
 import { detectVideoProvider, vimeoId, youtubeId, type AvatarKey, type CoverTone } from "@/lib/validators";
 
@@ -222,6 +222,10 @@ export async function loadDashboard() {
       owned: (ownershipRes.data ?? []) as Array<{ pack_id: string; granted_at?: string | null }>,
       progress: progress as Array<{ child_id: string; step_id: string; status: string; completed_at?: string | null }>,
       childIds: children.map((child) => child.id),
+    }),
+    releases: recentReleases({
+      packs: packs as Array<{ id: string; slug: string; title: string; blurb: string; cover_tone: CoverTone; created_at?: string | null; published?: boolean }>,
+      ownedIds: owned,
     }),
     pointsByChild: Object.fromEntries(pointsByChild),
     rewardLadder: rewards
