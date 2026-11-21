@@ -36,7 +36,8 @@ export function FamilyAvatar({
     eyebrows: ["defaultNatural"],
     backgroundColor: [build.background.replace("#", "")],
     backgroundType: ["solid"],
-    randomizeIds: true,
+    seed: JSON.stringify(build),
+    randomizeIds: false,
   }).toString();
   svg = svg.replace("<svg ", '<svg width="100%" height="100%" ');
   svg = paintEyes(svg, build.eyeColor.replace("#", ""));
