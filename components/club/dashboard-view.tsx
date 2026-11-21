@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { setFocusChild } from "@/app/club/actions";
 import { Avatar } from "@/components/brand/avatar";
 import { CountryFlag } from "@/components/brand/country-flag";
 import { GROUP_ICONS, GroupIcon, type GroupIconId } from "@/components/brand/group-icon";
-import { ChildForm } from "@/components/club/child-form";
+import { PackPoll } from "@/components/club/pack-poll";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { EmptyPackBanner, PackBanner, RecentReleases } from "@/components/club/pack-banner";
 import { Scrapbook } from "@/components/club/scrapbook";
 import { shortName } from "@/lib/format";
@@ -17,20 +15,12 @@ import type { CoverTone } from "@/lib/validators";
 import type { loadDashboard } from "@/lib/club/data";
 
 type DashboardData = Awaited<ReturnType<typeof loadDashboard>>;
-type Pack = DashboardData["packs"][number];
 
 export function DashboardView({ data, notice }: { data: DashboardData; notice?: string }) {
   const { account } = data;
-  const [focusId, setFocusId] = useState(data.focus?.id ?? "");
   const [bookId, setBookId] = useState<string | null>(null);
-  const focus = data.children.find((child) => child.id === focusId) ?? data.focus;
+  const focus = data.focus;
   const owned = data.packs.filter((pack) => pack.owned);
-  function chooseChild(childId: string) {
-    setFocusId(childId);
-    const body = new FormData();
-    body.set("childId", childId);
-    void setFocusChild(body);
-  }
 
   return (
     <div className="space-y-8 sm:space-y-10">
@@ -107,18 +97,23 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
           <EmptyPackBanner />
         ) : (
           <>
-            <PackBanner
-              state={data.banners[0].state}
-              title={data.banners[0].title}
-              tone={data.banners[0].coverTone}
-              clubName={account.group_name?.trim() || "Your club"}
-              done={data.banners[0].done}
-              total={data.banners[0].total}
-              nextStep={data.banners[0].nextStep}
-              members={data.children}
-              href={focus ? `/club/packs/${data.banners[0].slug}?mode=together&child=${focus.id}` : `/club/packs/${data.banners[0].slug}`}
-              featured
-            />
+            <div className="grid items-stretch gap-4 lg:grid-cols-3">
+              <div className="lg:col-span-2 lg:self-start">
+                <PackBanner
+                  state={data.banners[0].state}
+                  title={data.banners[0].title}
+                  tone={data.banners[0].coverTone}
+                  clubName={account.group_name?.trim() || "Your club"}
+                  done={data.banners[0].done}
+                  total={data.banners[0].total}
+                  nextStep={data.banners[0].nextStep}
+                  members={data.children}
+                  href={focus ? `/club/packs/${data.banners[0].slug}?mode=together&child=${focus.id}` : `/club/packs/${data.banners[0].slug}`}
+                  featured
+                />
+              </div>
+              {data.poll && <PackPoll poll={data.poll} />}
+            </div>
             {data.banners.length > 1 ? (
               <div className="grid items-start gap-4 lg:grid-cols-3">
                 <div className="space-y-3 lg:col-span-2">
@@ -149,69 +144,6 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
 
       <section>
         <div className="mb-4 flex items-end justify-between gap-3">
-          <h2 className="font-display text-2xl text-[#17352A]">Your kids</h2>
-          {data.children.length < 5 && (
-            <Dialog>
-              <DialogTrigger className="text-sm font-extrabold text-[#306A51] underline-offset-2 hover:underline">
-                Add a child
-              </DialogTrigger>
-              <DialogContent>
-                <DialogTitle>Add a child</DialogTitle>
-                <DialogDescription>Up to 5 children share every pack you unlock.</DialogDescription>
-                <div className="mt-4">
-                  <ChildForm mode="add" />
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-          {data.children.map((child) => {
-            const current = currentPack(owned, data.doneByChild[child.id] ?? {});
-            const done = current ? (data.doneByChild[child.id]?.[current.id] ?? 0) : 0;
-            const active = child.id === focus?.id;
-            return (
-              <button
-                key={child.id}
-                type="button"
-                aria-pressed={active}
-                onClick={() => chooseChild(child.id)}
-                className={`rounded-[22px] bg-white p-4 text-left shadow-[0_10px_30px_rgba(23,53,42,0.05)] ${active ? "ring-2 ring-[#306A51]" : "ring-1 ring-transparent"}`}
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar
-                    avatar={child.avatar_key}
-                    colour={child.avatar_bg}
-                    face={child.avatar_face}
-                    hairStyle={child.avatar_hair_style}
-                    hairColour={child.avatar_hair_colour}
-                    glasses={child.avatar_glasses}
-                    hat={child.avatar_hat}
-                    gender={child.gender === "girl" ? "girl" : "boy"}
-                    skin={child.avatar_skin}
-                    eyeColour={child.avatar_eyes}
-                    shirt={child.avatar_shirt}
-                    options={child.avatar_options}
-                    title={child.nickname}
-                    className="size-12 shrink-0 rounded-full"
-                  />
-                  <div className="min-w-0">
-                    <p className="truncate font-display text-lg text-[#17352A]">{shortName(child.nickname)}</p>
-                    <p className="text-sm text-[#5e7266]">{child.age_years} years old</p>
-                  </div>
-                </div>
-                <p className="mt-3 text-sm text-[#3d5348]">
-                  {current ? `${packLabel(current.title)} · ${done} of ${current.total} steps` : "No pack yet"}
-                </p>
-                <Progress value={done} total={current?.total ?? 0} className="mt-2" />
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      <section>
-        <div className="mb-4 flex items-end justify-between gap-3">
           <h2 className="font-display text-2xl text-[#17352A]">My packs</h2>
           <Link href="/club/shop" className="text-sm font-extrabold text-[#306A51] underline-offset-2 hover:underline">
             Find a pack
@@ -229,7 +161,7 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
               </Link>
             );
           })}
-          <Link href="/club/shop" className="flex min-h-48 flex-col items-center justify-center rounded-[22px] border-2 border-dashed border-[#c9b89a] bg-[#fbf7f0] text-center no-underline">
+          <Link href="/club/shop" className="flex aspect-[3/4] w-full flex-col items-center justify-center self-start rounded-[22px] border-2 border-dashed border-[#c9b89a] bg-[#fbf7f0] text-center no-underline">
             <span className="flex size-10 items-center justify-center rounded-full bg-white text-2xl text-[#306A51] shadow-sm">+</span>
             <span className="mt-3 text-sm font-extrabold text-[#306A51]">Find a pack</span>
           </Link>
@@ -258,18 +190,6 @@ function memberRank(childId: string, children: DashboardData["children"], points
   return ordered.findIndex((child) => child.id === childId) + 1;
 }
 
-function currentPack(packs: Pack[], doneByPack: Record<string, number>) {
-  const ranked = packs
-    .map((pack) => ({ ...pack, done: doneByPack[pack.id] ?? 0, total: pack.total || pack.step_count }))
-    .filter((pack) => pack.total > 0);
-  ranked.sort((a, b) => {
-    const aOpen = a.done > 0 && a.done < a.total ? 1 : 0;
-    const bOpen = b.done > 0 && b.done < b.total ? 1 : 0;
-    return bOpen - aOpen || b.done / b.total - a.done / a.total;
-  });
-  return ranked[0] ?? null;
-}
-
 function statusWord(done: number, total: number) {
   if (!total || done <= 0) return "Started";
   const ratio = done / total;
@@ -279,27 +199,8 @@ function statusWord(done: number, total: number) {
   return "Started";
 }
 
-function packLabel(title: string) {
-  const value = title.toLowerCase();
-  if (value.includes("pirate")) return "Pirate pack";
-  if (value.includes("egypt")) return "Egypt pack";
-  if (value.includes("spy")) return "Spy pack";
-  if (value.includes("knight")) return "Knight pack";
-  if (value.includes("space")) return "Space pack";
-  return title;
-}
-
 function isGroupIcon(value: string | null | undefined): value is GroupIconId {
   return !!value && (GROUP_ICONS as readonly string[]).includes(value);
-}
-
-function Progress({ value, total, className = "" }: { value: number; total: number; className?: string }) {
-  const pct = total ? Math.max(0, Math.min(100, Math.round((value / total) * 100))) : 0;
-  return (
-    <div className={`h-2 overflow-hidden rounded-full bg-[#F3E7CF] ${className}`}>
-      <div className="h-full rounded-full bg-[#306A51]" style={{ width: `${pct}%` }} />
-    </div>
-  );
 }
 
 const tones: Record<CoverTone, string> = {

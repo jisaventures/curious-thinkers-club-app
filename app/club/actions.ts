@@ -10,6 +10,7 @@ import {
   demoAddChild,
   demoDeleteChild,
   demoUpdateGroupProfile,
+  demoVoteNextPack,
   demoMark,
   demoMarkNext,
   demoMarkNextResult,
@@ -28,6 +29,12 @@ import { childInputSchema, uuidSchema } from "@/lib/validators";
 function text(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value : "";
+}
+
+export async function voteNextPack(optionId: string) {
+  const { account } = await requireAdult();
+  if (isDemoMode()) return demoVoteNextPack(account.id, optionId);
+  return { error: "Pack polls will open once they are managed in admin." };
 }
 
 export async function updateGroupProfile(formData: FormData) {

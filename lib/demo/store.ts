@@ -149,6 +149,19 @@ export type DemoOrder = {
   items: DemoOrderItem[];
 };
 
+export type DemoPoll = {
+  id: string;
+  question: string;
+  opens_at: string;
+  closes_at: string;
+  options: Array<{ id: string; label: string }>;
+};
+
+export type DemoPollVote = {
+  account_id: string;
+  option_id: string;
+};
+
 export type DemoEvent = {
   id: string;
   email: string | null;
@@ -172,6 +185,8 @@ export type DemoDb = {
   ownership: DemoOwnership[];
   events: DemoEvent[];
   orders: DemoOrder[];
+  poll: DemoPoll;
+  poll_votes: DemoPollVote[];
   certificates: Array<{ child_id: string; pack_id: string }>;
 };
 
@@ -524,6 +539,24 @@ export function createSeed(): DemoDb {
       { account_id: SAM_ID, pack_id: spy, source: "seed" as const, granted_at: "2026-09-12T09:00:00.000Z" },
     ],
     events: [],
+    poll: {
+      id: "poll-next-pack",
+      question: "Which pack should we make next?",
+      opens_at: "2026-11-01T00:00:00.000Z",
+      closes_at: "2026-11-30T23:59:00.000Z",
+      options: [
+        { id: "dinosaurs", label: "Dinosaur detective" },
+        { id: "rainforest", label: "Rainforest explorer" },
+        { id: "ocean", label: "Ocean scientist" },
+        { id: "castle-kitchen", label: "Castle kitchen" },
+      ],
+    },
+    poll_votes: [
+      { account_id: "a1000000-0000-4000-8000-000000000003", option_id: "dinosaurs" },
+      { account_id: "a1000000-0000-4000-8000-000000000004", option_id: "dinosaurs" },
+      { account_id: "a1000000-0000-4000-8000-000000000005", option_id: "ocean" },
+      { account_id: CROWD_ID, option_id: "rainforest" },
+    ],
     orders: [
       {
         id: "1048",
@@ -572,7 +605,7 @@ export function createSeed(): DemoDb {
   };
 }
 
-const SEED_VERSION = 11;
+const SEED_VERSION = 12;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {

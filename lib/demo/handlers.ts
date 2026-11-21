@@ -16,6 +16,18 @@ function fail(path: string, message: string): never {
   redirect(`${path}?error=${encodeURIComponent(message)}`);
 }
 
+export async function demoVoteNextPack(accountId: string, optionId: string) {
+  const db = demoDb();
+  const now = Date.now();
+  if (now < Date.parse(db.poll.opens_at) || now > Date.parse(db.poll.closes_at)) {
+    return { error: "This poll is closed." };
+  }
+  if (!db.poll.options.some((option) => option.id === optionId)) return { error: "Choose one of the four packs." };
+  if (db.poll_votes.some((vote) => vote.account_id === accountId)) return { error: "Your group has already voted." };
+  db.poll_votes.push({ account_id: accountId, option_id: optionId });
+  return { ok: true as const };
+}
+
 export async function demoUpdateGroupProfile(
   accountId: string,
   groupName: string,

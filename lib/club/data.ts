@@ -5,7 +5,7 @@ import { requireAdult } from "@/lib/auth/session";
 import { isDemoMode } from "@/lib/demo/mode";
 import { demoDashboard, demoPackPage } from "@/lib/demo/view";
 import { levelProgress } from "@/lib/levels";
-import { clubPackBanners, recentReleases } from "@/lib/club/banners";
+import { clubPackBanners, recentReleases, type ClubPoll } from "@/lib/club/banners";
 import { catchUpNudge, nextStepPosition } from "@/lib/progress";
 import { detectVideoProvider, vimeoId, youtubeId, type AvatarKey, type CoverTone } from "@/lib/validators";
 
@@ -227,6 +227,7 @@ export async function loadDashboard() {
       packs: packs as Array<{ id: string; slug: string; title: string; blurb: string; cover_tone: CoverTone; created_at?: string | null; published?: boolean }>,
       ownedIds: owned,
     }),
+    poll: null as ClubPoll | null,
     pointsByChild: Object.fromEntries(pointsByChild),
     rewardLadder: rewards
       .filter((reward) => reward.active)

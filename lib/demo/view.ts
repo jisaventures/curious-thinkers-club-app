@@ -2,7 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { levelProgress } from "@/lib/levels";
-import { clubPackBanners, recentReleases } from "@/lib/club/banners";
+import { clubPackBanners, clubPoll, recentReleases } from "@/lib/club/banners";
 import { catchUpNudge } from "@/lib/progress";
 import { detectVideoProvider, vimeoId, youtubeId, type AvatarKey } from "@/lib/validators";
 import type { AccountRecord } from "@/lib/auth/session";
@@ -157,6 +157,7 @@ export async function demoDashboard(account: AccountRecord) {
       childIds: children.map((child) => child.id),
     }),
     releases: recentReleases({ packs: db.packs, ownedIds: owned }),
+    poll: clubPoll(db.poll, db.poll_votes, account.id),
     pointsByChild,
     rewardLadder: rewards
       .filter((reward) => reward.active)

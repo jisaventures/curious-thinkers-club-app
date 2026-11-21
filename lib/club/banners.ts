@@ -75,6 +75,37 @@ export function clubPackBanners(input: {
   return [...starts, ...continues];
 }
 
+export type ClubPoll = {
+  question: string;
+  opensAt: string;
+  closesAt: string;
+  open: boolean;
+  votedOptionId: string | null;
+  options: Array<{ id: string; label: string; votes: number }>;
+};
+
+export function clubPoll(
+  poll: { question: string; opens_at: string; closes_at: string; options: Array<{ id: string; label: string }> },
+  votes: Array<{ account_id: string; option_id: string }>,
+  accountId: string,
+  now = Date.now(),
+): ClubPoll {
+  const opens = Date.parse(poll.opens_at);
+  const closes = Date.parse(poll.closes_at);
+  return {
+    question: poll.question,
+    opensAt: poll.opens_at,
+    closesAt: poll.closes_at,
+    open: now >= opens && now <= closes,
+    votedOptionId: votes.find((vote) => vote.account_id === accountId)?.option_id ?? null,
+    options: poll.options.map((option) => ({
+      id: option.id,
+      label: option.label,
+      votes: votes.filter((vote) => vote.option_id === option.id).length,
+    })),
+  };
+}
+
 export function recentReleases(input: {
   packs: Array<{ id: string; slug: string; title: string; blurb: string; cover_tone: CoverTone; created_at?: string | null; published?: boolean }>;
   ownedIds: Set<string>;
