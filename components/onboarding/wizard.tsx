@@ -224,7 +224,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
   return (
     <div className="w-full">
-      <div className="relative mb-5">
+      <div className="relative mb-5 max-lg:sticky max-lg:top-0 max-lg:z-30 max-lg:-mx-3 max-lg:bg-[#fffdf8] max-lg:px-3 max-lg:pt-2 max-lg:pb-3 sm:max-lg:-mx-5 sm:max-lg:px-5 md:max-lg:-mx-7 md:max-lg:px-7">
       <ol ref={tabsRef} className="tab-scroll flex gap-2 overflow-x-auto px-1 pt-2" aria-label="Onboarding progress">
         {progressLabels.map((label, index) => {
           const done = index < progress;
@@ -342,11 +342,11 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       {screen === "details" && child && (
         <section className={stepCard}>
           <h1 className="step-title text-4xl lg:text-3xl">{child.firstName.trim() || `Child ${editing + 1}`}</h1>
-          <div className="mt-5 flex items-start gap-4 lg:mt-3">
+          <div className="mt-4 flex flex-col items-stretch gap-4 lg:mt-3 lg:flex-row lg:items-start">
             <button
               type="button"
               onClick={openAvatarModal}
-              className="group relative size-45 shrink-0 overflow-hidden rounded-[28px] bg-[#f6efe2]"
+              className="group relative mx-auto size-40 shrink-0 overflow-hidden rounded-[28px] bg-[#f6efe2] lg:mx-0 lg:size-36"
               aria-label="Edit avatar"
             >
               <FamilyAvatar build={child.avatar} className="size-full" title="Child avatar" />
@@ -356,7 +356,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               </span>
             </button>
             <div className="min-w-0 flex-1 space-y-3">
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First name only</Label>
                   <Input
@@ -371,6 +371,37 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                   <Label htmlFor="birthday">Birthday</Label>
                   <BirthdayPicker id="birthday" value={child.birthday} onChange={(birthday) => patchChild({ birthday })} />
                 </div>
+                <fieldset className="space-y-2">
+                  <legend className="text-sm font-extrabold text-[#1e4d3a]">Gender</legend>
+                  <div className="flex gap-2">
+                    {(
+                      [
+                        ["boy", "Boy"],
+                        ["girl", "Girl"],
+                        ["unspecified", "Prefer not to say"],
+                      ] as const
+                    ).map(([gender, label]) => (
+                      <button
+                        key={gender}
+                        type="button"
+                        aria-label={label}
+                        aria-pressed={child.gender === gender}
+                        onClick={() => {
+                          const base = gender === "girl" ? girlAvatar() : boyAvatar();
+                          patchChild({
+                            gender,
+                            avatar: { ...child.avatar, top: base.top, clothing: base.clothing, eyebrows: "defaultNatural", facialHair: "none" },
+                          });
+                        }}
+                        className={`inline-flex size-12 items-center justify-center rounded-2xl border-2 ${child.gender === gender ? `border-[#306A51] ${gender === "boy" ? "bg-[#3d6fbf] text-white" : gender === "girl" ? "bg-[#e36aa2] text-white" : "bg-[#1e4d3a] text-white"}` : "border-transparent bg-[#f6efe2] text-[#1e4d3a]"}`}
+                      >
+                        {gender === "boy" && <Mars className="size-5" aria-hidden="true" />}
+                        {gender === "girl" && <Venus className="size-5" aria-hidden="true" />}
+                        {gender === "unspecified" && <X className="size-5" strokeWidth={2.6} aria-hidden="true" />}
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="nickname">Nickname</Label>
@@ -380,44 +411,13 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                     Re-generate
                   </Button>
                 </div>
-                <p className="text-sm leading-relaxed text-[#5e7266] lg:text-lg">
+                <p className="text-sm leading-relaxed text-[#5e7266]">
                   A playful nickname is made for them. Re-generate it if you want a different one.
                 </p>
                 {child.nicknameMessage && <p className="text-sm font-bold text-[#8a4b3a]">{child.nicknameMessage}</p>}
               </div>
             </div>
           </div>
-
-          <fieldset className="mt-5 lg:mt-2">
-            <legend className="text-sm font-extrabold text-[#1e4d3a]">Gender</legend>
-            <div className="gender-row mt-2">
-              {(
-                [
-                  ["boy", "Boy"],
-                  ["girl", "Girl"],
-                  ["unspecified", "Prefer not to say"],
-                ] as const
-              ).map(([gender, label]) => (
-                <button
-                  key={gender}
-                  type="button"
-                  aria-pressed={child.gender === gender}
-                  onClick={() => {
-                    const base = gender === "girl" ? girlAvatar() : boyAvatar();
-                    patchChild({
-                      gender,
-                      avatar: { ...child.avatar, top: base.top, clothing: base.clothing, eyebrows: "defaultNatural", facialHair: "none" },
-                    });
-                  }}
-                  className={`fredoka-bold inline-flex h-11 items-center justify-center rounded-2xl border-2 leading-none whitespace-nowrap ${child.gender === gender ? `border-[#306A51] ${gender === "boy" ? "bg-[#3d6fbf] text-white" : gender === "girl" ? "bg-[#e36aa2] text-white" : "bg-[#1e4d3a] text-white"}` : "border-transparent bg-[#f6efe2] text-[#1e4d3a]"}`}
-                >
-                  {gender === "boy" && <Mars className="gender-icon shrink-0" aria-hidden="true" />}
-                  {gender === "girl" && <Venus className="gender-icon shrink-0" aria-hidden="true" />}
-                  {label}
-                </button>
-              ))}
-            </div>
-          </fieldset>
 
           {message && <p className="mt-4 text-sm font-bold text-[#8a4b3a]">{message}</p>}
         </section>
