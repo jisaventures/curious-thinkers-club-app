@@ -336,23 +336,23 @@ export function OnboardingWizard({ shopFirstName, shopLocation }: { shopFirstNam
       {screen === "family" && (
         <section className={stepCard}>
           <h1 className="step-title text-4xl lg:text-3xl">{groupName.trim() && !groupNameProblem(groupName) ? groupName.trim() : "Create group"}</h1>
-          <div className="mt-4 grid grid-cols-1 items-start gap-3 sm:grid-cols-2 lg:mt-3 lg:grid-cols-[11rem_minmax(9rem,0.8fr)_minmax(0,1.2fr)_auto] lg:gap-4">
+          <div className="mt-4 grid grid-cols-[7.25rem_minmax(0,1fr)] items-start gap-3 sm:grid-cols-[9rem_minmax(0,1fr)] lg:mt-3 lg:grid-cols-[11rem_minmax(0,1fr)_minmax(0,1.35fr)_6.5rem] lg:gap-x-4 lg:gap-y-4">
             <button
               type="button"
               onClick={() => {
                 setGroupAvatarDraft(groupIcon);
                 setGroupAvatarOpen(true);
               }}
-              className="group relative mx-auto size-40 shrink-0 overflow-hidden rounded-[28px] sm:col-span-2 sm:mx-0 sm:size-44 lg:col-span-1 lg:row-span-2 lg:size-44"
+              className="group relative row-span-3 size-full min-h-36 overflow-hidden rounded-[28px] lg:row-span-2 lg:size-44"
               aria-label="Edit group icon"
             >
-              <GroupIcon icon={groupIcon.icon} background={groupIcon.background} colour={groupIcon.colour} className="size-full" title="Group icon" />
+              <GroupIcon icon={groupIcon.icon} background={groupIcon.background} colour={groupIcon.colour} className="size-full min-h-36 lg:absolute lg:inset-0" title="Group icon" />
               <span className="pointer-events-none absolute inset-0 bg-black/0 transition group-hover:bg-black/45" />
               <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent pt-6 pb-2 text-center text-sm font-extrabold text-white">
                 Edit
               </span>
             </button>
-            <div className="flex min-w-0 flex-col">
+            <div className="flex min-w-0 flex-col lg:col-start-2 lg:row-start-1">
               <Label htmlFor="groupType" className="mb-2 flex h-5 items-center">Group type<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
               <select id="groupType" value={groupType} onChange={(event) => setGroupType(event.target.value as GroupType)} className="h-12 w-full rounded-2xl border border-[#eadfce] bg-white px-4 text-base text-[#173528] outline-none focus:border-[#1e4d3a] focus:ring-2 focus:ring-[#1e4d3a]/20 lg:h-14">
                 <option value="">Choose a type</option>
@@ -361,21 +361,21 @@ export function OnboardingWizard({ shopFirstName, shopLocation }: { shopFirstNam
                 ))}
               </select>
             </div>
-            <div className="flex min-w-0 flex-col">
+            <div className="flex min-w-0 flex-col lg:col-start-2 lg:row-start-2 lg:w-[calc(16ch+2.5rem)]">
+              <Label htmlFor="groupLocation" className="mb-2 flex h-5 items-center">Location</Label>
+              <Input id="groupLocation" value={shopLocation} disabled className="lg:h-14" />
+            </div>
+            <div className="flex min-w-0 flex-col lg:col-span-2 lg:col-start-3 lg:row-start-1">
               <Label htmlFor="groupName" className="mb-2 flex h-5 items-center">Group name<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
               <Input id="groupName" value={groupName} onChange={(event) => setGroupName(event.target.value.replace(/\s+/g, " ").slice(0, 32))} maxLength={32} autoComplete="off" aria-invalid={Boolean(groupNameProblem(groupName))} className="lg:h-14" />
               {groupNameProblem(groupName) && <p className="mt-1 text-sm font-bold text-[#8a4b3a]">{groupNameProblem(groupName)}</p>}
             </div>
-            <div className="flex min-w-0 flex-col lg:w-[15rem]">
-              <Label htmlFor="groupLocation" className="mb-2 flex h-5 items-center">Location</Label>
-              <Input id="groupLocation" value={shopLocation} disabled className="lg:h-14" />
-            </div>
-            <div className="flex min-w-0 flex-col lg:col-span-2">
+            <div className="col-span-2 flex min-w-0 flex-col lg:col-span-1 lg:col-start-3 lg:row-start-2">
               <Label htmlFor="leaderName" className="mb-2 flex h-5 items-center whitespace-nowrap">Group Leader First Name only<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
               <Input id="leaderName" value={leaderName} onChange={(event) => setLeaderName(event.target.value.replace(/\s+/g, "").slice(0, 15))} maxLength={15} autoComplete="given-name" aria-invalid={Boolean(childFirstNameProblem(leaderName))} className="lg:h-14" />
               {childFirstNameProblem(leaderName) && <p className="mt-1 text-sm font-bold text-[#8a4b3a]">{childFirstNameProblem(leaderName)}</p>}
             </div>
-            <div className="flex min-w-0 flex-col">
+            <div className="col-span-2 flex min-w-0 flex-col lg:col-span-1 lg:col-start-4 lg:row-start-2">
               <div className="mb-2 flex h-5 items-center gap-1.5">
                 <Label htmlFor="groupSize">Number of people</Label>
                 <span className="group relative inline-flex">
@@ -399,7 +399,7 @@ export function OnboardingWizard({ shopFirstName, shopLocation }: { shopFirstNam
                   if (!Number.isFinite(next)) return;
                   resize(Math.min(5, Math.max(1, Math.round(next))));
                 }}
-                className="w-24 lg:h-14"
+                className="w-24 lg:h-14 lg:w-full"
               />
             </div>
           </div>
