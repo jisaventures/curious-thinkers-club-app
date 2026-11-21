@@ -41,6 +41,13 @@ const STEMS = [
   "goddamn", "dammit", "wanker", "shitter", "asshole", "arsehole", "dipshit", "asshat", "dickwad", "cockhead",
   "shitface", "fuckface", "butthead", "numbnuts", "boner", "nonce", "spaz",
   "kike", "chink", "coon", "dyke", "paki", "homo", "queer", "scum", "knobend", "clusterfuck", "mindfuck",
+  // British insults. These are rude in the UK even when the same spelling is harmless in the US.
+  "nobhead", "nobend", "nobber", "nobjocky", "nobjokey", "knobhead", "knobjocky", "knobjokey", "knobead",
+  "knobcheese", "twathead", "twatface", "twunt", "twunter", "wazzock", "pillock", "plonker", "numpty",
+  "dipstick", "divvy", "minger", "munter", "slapper", "slag", "pikey", "knacker", "cockwomble", "gaylord",
+  "scrote", "smegma", "spunk", "ballbag", "ballsack", "nutsack", "shagger", "shagging", "tosspot",
+  "pissflaps", "fannyflaps", "windowlicker", "pervert", "flasher", "groper", "arsewipe", "arseface",
+  "arsebandit", "cumstain", "shitstain", "bint",
 ];
 
 // Matched as the whole name, or with a rude ending/start, or with junk letters packed around them.
@@ -48,10 +55,10 @@ const STEMS = [
 const LOOSE = [
   "shit", "shite", "hell", "cock", "dick", "ass", "arse", "cum", "sex", "anal", "kill", "rape", "rapist",
   "damn", "piss", "crap", "hate", "drug", "crack", "weed", "meth", "nude", "gimp", "knob", "fart", "pooh",
-  "suck", "shag", "twit", "prat", "dumb", "fat", "bomb", "gun", "nasty",
+  "suck", "shag", "twit", "prat", "dumb", "fat", "bomb", "gun", "nasty", "nob", "git", "yid", "sod",
 ];
 
-const EXACT = ["jap", "spic", "fag", "tit", "poo", "pee", "hoe", "git", "nob", "wtf", "kys", "lsd", "kkk", "isis", "stfu", "ffs", "xxx"];
+const EXACT = ["jap", "spic", "fag", "tit", "poo", "pee", "hoe", "wtf", "kys", "lsd", "kkk", "isis", "stfu", "ffs", "xxx"];
 
 const PREFIXES = new Set([
   "mother", "stupid", "bloody", "super", "smart", "freak", "holy", "cluster", "flying", "piece", "jack",
