@@ -408,20 +408,22 @@ export function createSeed(): DemoDb {
     }
     certificates.push({ child_id: childId, pack_id: packId });
   };
-  for (const [prefix, packId] of packPrefixes) finish(PIP_ID, prefix, packId);
-  finish(LOU_ID, packPrefixes[0][0], pirate);
-  for (let n = 1; n <= 3; n += 1) progress.push(complete(LOU_ID, `51200000-0000-4000-8000-000000000${String(n).padStart(3, "0")}`));
-  finish(MO_ID, packPrefixes[1][0], egypt);
-  finish(MO_ID, packPrefixes[2][0], spy);
-  finish(ARIA_ID, packPrefixes[0][0], pirate);
+  const stamp = (childId: string, prefix: string, positions: number[], when: string) => {
+    positions.forEach((position, index) => {
+      const row = complete(childId, `${prefix}${String(position).padStart(3, "0")}`);
+      const at = new Date(when);
+      at.setDate(at.getDate() - (positions.length - index));
+      row.completed_at = at.toISOString();
+      progress.push(row);
+    });
+  };
+  stamp(LOU_ID, "51200000-0000-4000-8000-000000000", [1, 2, 3, 5], "2026-11-16T12:00:00.000Z");
+  stamp(MO_ID, "51300000-0000-4000-8000-000000000", [1, 2, 3, 4, 5, 6], "2026-11-08T12:00:00.000Z");
   finish(ARIA_ID, packPrefixes[3][0], knight);
-  finish(ARIA_ID, packPrefixes[4][0], space);
-  for (let n = 1; n <= 2; n += 1) progress.push(complete(NOAH_ID, `51500000-0000-4000-8000-000000000${String(n).padStart(3, "0")}`));
-  progress.forEach((row, index) => {
-    const at = new Date("2026-11-20T12:00:00.000Z");
-    at.setDate(at.getDate() - (progress.length - index));
-    row.completed_at = at.toISOString();
-  });
+  finish(PIP_ID, packPrefixes[4][0], space);
+  for (const row of progress) {
+    if (!row.completed_at) row.completed_at = "2026-08-01T12:00:00.000Z";
+  }
 
   const crowd = crowdClub();
   const ledger: DemoLedger[] = [
@@ -515,12 +517,13 @@ export function createSeed(): DemoDb {
       { id: "z2", title: "50% off a pack", detail: "A code in the shop", sort_order: 2 },
       { id: "z3", title: "Certificate + stickers", detail: "Posted to your door", sort_order: 3 },
     ],
-    ownership: [pirate, egypt, spy, knight, space].map((packId) => ({
-      account_id: SAM_ID,
-      pack_id: packId,
-      source: "seed",
-      granted_at: new Date().toISOString(),
-    })),
+    ownership: [
+      { account_id: SAM_ID, pack_id: pirate, source: "seed" as const, granted_at: "2026-11-18T09:00:00.000Z" },
+      { account_id: SAM_ID, pack_id: egypt, source: "seed" as const, granted_at: "2026-10-02T09:00:00.000Z" },
+      { account_id: SAM_ID, pack_id: spy, source: "seed" as const, granted_at: "2026-09-12T09:00:00.000Z" },
+      { account_id: SAM_ID, pack_id: knight, source: "seed" as const, granted_at: "2026-06-01T09:00:00.000Z" },
+      { account_id: SAM_ID, pack_id: space, source: "seed" as const, granted_at: "2026-05-01T09:00:00.000Z" },
+    ],
     events: [],
     orders: [
       {
@@ -570,7 +573,7 @@ export function createSeed(): DemoDb {
   };
 }
 
-const SEED_VERSION = 9;
+const SEED_VERSION = 10;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {

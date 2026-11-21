@@ -5,6 +5,7 @@ import { requireAdult } from "@/lib/auth/session";
 import { isDemoMode } from "@/lib/demo/mode";
 import { demoDashboard, demoPackPage } from "@/lib/demo/view";
 import { levelProgress } from "@/lib/levels";
+import { clubPackBanners } from "@/lib/club/banners";
 import { catchUpNudge, nextStepPosition } from "@/lib/progress";
 import { detectVideoProvider, vimeoId, youtubeId, type AvatarKey, type CoverTone } from "@/lib/validators";
 
@@ -86,7 +87,7 @@ export async function loadDashboard() {
     await Promise.all([
       supabase.from("children").select("id, nickname, avatar_key, age_years, first_name, gender, avatar_bg, avatar_face, avatar_hair_style, avatar_hair_colour, avatar_glasses, avatar_hat, avatar_skin, avatar_eyes, avatar_shirt, avatar_options, created_at").order("created_at"),
       supabase.from("packs").select("*").eq("published", true),
-      supabase.from("pack_ownership").select("pack_id").eq("account_id", account.id),
+      supabase.from("pack_ownership").select("pack_id, granted_at").eq("account_id", account.id),
       supabase.from("points_ledger").select("child_id, amount"),
       supabase.rpc("leaderboard_month"),
       supabase.from("reward_codes").select("*").order("min_points", { ascending: false }),
@@ -215,6 +216,13 @@ export async function loadDashboard() {
     doneByChild,
     nextStepByChild,
     activities: activityFeed(children, packs, steps, progress),
+    banners: clubPackBanners({
+      packs,
+      steps: steps as Array<{ id: string; pack_id: string; position: number; title: string }>,
+      owned: (ownershipRes.data ?? []) as Array<{ pack_id: string; granted_at?: string | null }>,
+      progress: progress as Array<{ child_id: string; step_id: string; status: string; completed_at?: string | null }>,
+      childIds: children.map((child) => child.id),
+    }),
     pointsByChild: Object.fromEntries(pointsByChild),
     rewardLadder: rewards
       .filter((reward) => reward.active)

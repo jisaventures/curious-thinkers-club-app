@@ -9,6 +9,7 @@ import { GROUP_ICONS, GroupIcon, type GroupIconId } from "@/components/brand/gro
 import { ChildForm } from "@/components/club/child-form";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { EmptyPackBanner, PackBanner } from "@/components/club/pack-banner";
 import { Scrapbook } from "@/components/club/scrapbook";
 import { shortName } from "@/lib/format";
 import { memberColour } from "@/lib/member-colour";
@@ -24,8 +25,6 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
   const [bookId, setBookId] = useState<string | null>(null);
   const focus = data.children.find((child) => child.id === focusId) ?? data.focus;
   const owned = data.packs.filter((pack) => pack.owned);
-  const spotlight = focus ? pickSpotlight(owned, data.doneByChild[focus.id] ?? {}) : null;
-
   function chooseChild(childId: string) {
     setFocusId(childId);
     const body = new FormData();
@@ -103,43 +102,27 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
 
       {notice && <p className="rounded-2xl bg-white px-4 py-3 text-sm font-bold text-[#306A51]">{notice}</p>}
 
-      {spotlight && focus ? (
-        <article className="rounded-[28px] bg-white p-4 shadow-[0_18px_50px_rgba(23,53,42,0.06)] sm:p-6">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-            <PackArt tone={spotlight.pack.cover_tone} title={spotlight.pack.title} className="mx-auto h-44 w-36 sm:mx-0 sm:h-48 sm:w-40" />
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-extrabold tracking-[0.16em] text-[#306A51]">UP NEXT</p>
-              <h2 className="mt-1 font-display text-2xl text-[#17352A] sm:text-3xl">{spotlight.pack.title}</h2>
-              <p className="mt-1 text-base text-[#3d5348]">
-                Next: {data.nextStepByChild[focus.id]?.[spotlight.pack.id] ?? "Keep going"}
-              </p>
-              <div className="mt-4">
-                <div className="mb-1.5 flex items-center justify-between gap-3 text-sm text-[#3d5348]">
-                  <span>
-                    {spotlight.done} of {spotlight.total} steps done
-                  </span>
-                  <span>{paceWord(spotlight.done, spotlight.total)}</span>
-                </div>
-                <Progress value={spotlight.done} total={spotlight.total} />
-              </div>
-              <Button asChild variant="mustard" size="md" className="mt-4 w-full sm:w-auto">
-                <Link href={`/club/packs/${spotlight.pack.slug}?mode=together&child=${focus.id}`}>
-                  Continue with {shortName(focus.nickname)}
-                </Link>
-              </Button>
-            </div>
-            <img src="/brand/mascot-spy.png" alt="" className="hidden h-40 w-auto shrink-0 md:block" />
-          </div>
-        </article>
-      ) : (
-        <article className="rounded-[28px] bg-white p-6 text-[#3d5348] shadow-[0_18px_50px_rgba(23,53,42,0.06)]">
-          <h2 className="font-display text-2xl text-[#17352A]">Nothing in progress yet</h2>
-          <p className="mt-2">When a child starts a pack, the next step will show up here.</p>
-          <Button asChild variant="mustard" size="md" className="mt-4">
-            <Link href="/club/shop">Find a pack</Link>
-          </Button>
-        </article>
-      )}
+      <section className="space-y-4">
+        {data.banners.length === 0 ? (
+          <EmptyPackBanner />
+        ) : (
+          data.banners.map((banner, index) => (
+            <PackBanner
+              key={banner.id}
+              state={banner.state}
+              title={banner.title}
+              tone={banner.coverTone}
+              clubName={account.group_name?.trim() || "Your club"}
+              done={banner.done}
+              total={banner.total}
+              nextStep={banner.nextStep}
+              members={data.children}
+              href={focus ? `/club/packs/${banner.slug}?mode=together&child=${focus.id}` : `/club/packs/${banner.slug}`}
+              featured={index === 0}
+            />
+          ))
+        )}
+      </section>
 
       <section>
         <div className="mb-4 flex items-end justify-between gap-3">
@@ -252,14 +235,6 @@ function memberRank(childId: string, children: DashboardData["children"], points
   return ordered.findIndex((child) => child.id === childId) + 1;
 }
 
-function pickSpotlight(packs: Pack[], doneByPack: Record<string, number>) {
-  const open = packs
-    .map((pack) => ({ pack, done: doneByPack[pack.id] ?? 0, total: pack.total || pack.step_count }))
-    .filter((item) => item.total > 0 && item.done < item.total && item.done > 0);
-  open.sort((a, b) => b.done / b.total - a.done / a.total);
-  return open[0] ?? null;
-}
-
 function currentPack(packs: Pack[], doneByPack: Record<string, number>) {
   const ranked = packs
     .map((pack) => ({ ...pack, done: doneByPack[pack.id] ?? 0, total: pack.total || pack.step_count }))
@@ -270,15 +245,6 @@ function currentPack(packs: Pack[], doneByPack: Record<string, number>) {
     return bOpen - aOpen || b.done / b.total - a.done / a.total;
   });
   return ranked[0] ?? null;
-}
-
-function paceWord(done: number, total: number) {
-  if (!total || done <= 0) return "Started";
-  const ratio = done / total;
-  if (ratio >= 1) return "Finished";
-  if (ratio >= 0.75) return "Almost done";
-  if (ratio >= 0.35) return "Halfway";
-  return "Started";
 }
 
 function statusWord(done: number, total: number) {

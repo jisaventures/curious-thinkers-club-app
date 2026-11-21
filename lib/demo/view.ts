@@ -2,6 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { levelProgress } from "@/lib/levels";
+import { clubPackBanners } from "@/lib/club/banners";
 import { catchUpNudge } from "@/lib/progress";
 import { detectVideoProvider, vimeoId, youtubeId, type AvatarKey } from "@/lib/validators";
 import type { AccountRecord } from "@/lib/auth/session";
@@ -74,7 +75,8 @@ export async function demoDashboard(account: AccountRecord) {
     .sort((a, b) => a.created_at.localeCompare(b.created_at));
   const jar = await cookies();
   const focus = children.find((child) => child.id === jar.get("ctc_focus_child")?.value) ?? children[0] ?? null;
-  const owned = new Set(db.ownership.filter((row) => row.account_id === account.id).map((row) => row.pack_id));
+  const ownership = db.ownership.filter((row) => row.account_id === account.id);
+  const owned = new Set(ownership.map((row) => row.pack_id));
   const packs = db.packs
     .filter((pack) => pack.published || account.role === "admin")
     .map((pack) => {
@@ -147,6 +149,13 @@ export async function demoDashboard(account: AccountRecord) {
     doneByChild,
     nextStepByChild: nextTitles(children, db),
     activities: activityFeed(children, db),
+    banners: clubPackBanners({
+      packs: db.packs,
+      steps: db.steps,
+      owned: ownership,
+      progress: db.progress,
+      childIds: children.map((child) => child.id),
+    }),
     pointsByChild,
     rewardLadder: rewards
       .filter((reward) => reward.active)
