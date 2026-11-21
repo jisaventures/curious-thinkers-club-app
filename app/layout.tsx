@@ -23,6 +23,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en-GB">
+      <head>
+        <link rel="preload" href="/brand/bulb.png" as="image" fetchPriority="high" />
+      </head>
       <body className={`${nunito.variable} ${fredoka.variable} isolate font-sans antialiased`}>
         <PlayBackdrop />
         {children}
