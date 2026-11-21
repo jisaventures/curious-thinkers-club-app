@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fredoka, Nunito } from "next/font/google";
 import { PlayBackdrop } from "@/components/brand/play-backdrop";
+import { ScrollToTop } from "@/components/scroll-to-top";
 import "./globals.css";
 
 const nunito = Nunito({
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link rel="preload" href="/brand/bulb.png" as="image" fetchPriority="high" />
       </head>
       <body className={`${nunito.variable} ${fredoka.variable} isolate font-sans antialiased`}>
+        <ScrollToTop />
         <PlayBackdrop />
         {children}
       </body>

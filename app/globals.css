@@ -375,6 +375,16 @@ select {
   box-shadow: 0 5px 0 var(--ctc-member-shadow), 0 8px 16px var(--ctc-member-glow);
 }
 
+.ctc-button.activity-log-button:hover:not(:disabled) {
+  transform: none;
+  filter: none;
+}
+
+.group-nav .ctc-button {
+  width: 100%;
+  justify-content: flex-start;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .ctc-button:hover:not(:disabled) {
     transform: translateY(-2px) rotate(-0.4deg);

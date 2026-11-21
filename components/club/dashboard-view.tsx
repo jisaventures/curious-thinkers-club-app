@@ -61,12 +61,12 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
 
   return (
     <div className="space-y-8 sm:space-y-10">
-      <section className="flex items-center justify-between gap-4">
-        <div className="relative min-w-0">
-          <h1 className="font-display text-3xl leading-tight text-[#306A51] sm:text-4xl">
+      <section className="flex flex-col items-center gap-6 text-center xl:flex-row xl:items-center xl:justify-between xl:gap-8 xl:text-left">
+        <div className="w-full min-w-0 xl:w-auto xl:flex-1">
+          <h1 className="text-balance font-display text-3xl leading-tight text-[#306A51] sm:text-4xl">
             Welcome back, <span className="text-[#e8a428]">{account.display_name}</span>
           </h1>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-2 xl:justify-start">
             <span className="font-display text-base text-[#306A51] sm:text-lg">Activity log</span>
             <div className="relative max-w-full" onMouseEnter={showLog} onMouseLeave={hideLogSoon}>
               <Button type="button" variant={latestColour ? "member" : "grey"} size="sm" className="activity-log-button max-w-full gap-1.5" style={latestColour ? memberButtonStyle(latestColour.dot) : undefined} aria-expanded={logOpen} onClick={() => (logOpen ? closeLog() : showLog())}>
@@ -104,9 +104,9 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
           </div>
         </div>
         {data.children.length > 0 && (
-          <div className="shrink-0">
+          <div className="w-full xl:w-auto xl:shrink-0">
             <p className="text-center font-display text-sm text-[#306A51]">Group Members</p>
-            <div className="mt-2 flex flex-wrap items-start justify-end gap-x-4 gap-y-3">
+            <div className="mt-2 flex flex-wrap items-start justify-center gap-x-4 gap-y-3 xl:justify-end">
               {data.children.map((child) => {
                 const name = memberName(child);
                 return (

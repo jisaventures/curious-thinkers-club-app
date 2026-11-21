@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ArrowLeft, BarChart3, ClipboardList, Users } from "lucide-react";
 import Link from "next/link";
 import { Avatar } from "@/components/brand/avatar";
 import { BirthdayPicker } from "@/components/onboarding/birthday-picker";
@@ -31,28 +32,42 @@ export function GroupView({ data }: { data: DashboardData }) {
   const maxScore = Math.max(1, ...data.children.map((child) => data.pointsByChild[child.id] ?? 0));
   const stamps = data.children.reduce((sum, child) => sum + finishedPacks(owned, data.doneByChild[child.id] ?? {}).length, 0);
 
+  const title = section === "activity" ? "Activity log" : section === "reports" ? "Reports" : "Users";
+
+  function choose(next: Section) {
+    setSection(next);
+    const url = `${window.location.pathname}${window.location.search}#${next}`;
+    window.history.replaceState(null, "", url);
+  }
+
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[15rem_minmax(0,1fr)]">
-      <nav className="rounded-[24px] bg-white p-3 shadow-[0_10px_30px_rgba(23,53,42,0.05)]" aria-label="My Group">
-        <SideLink href="#users" active={section === "users"} onClick={() => setSection("users")}>
+    <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-x-6 lg:gap-y-4">
+      <div className="flex items-center justify-between gap-4 lg:contents">
+        <Button asChild variant="grey" size="md" className="shrink-0 gap-2 lg:w-full">
+          <Link href="/club">
+            <ArrowLeft className="size-5 shrink-0" aria-hidden="true" />
+            Dashboard
+          </Link>
+        </Button>
+        <h1 className="min-w-0 text-right font-display text-3xl text-[#306A51] lg:self-center">{title}</h1>
+      </div>
+      <nav className="group-nav flex flex-col gap-2" aria-label="My Group">
+        <Button type="button" variant={section === "users" ? "green" : "grey"} size="md" onClick={() => choose("users")}>
+          <Users className="size-5 shrink-0" aria-hidden="true" />
           Users
-        </SideLink>
-        <div className="mb-3 flex flex-wrap gap-1 px-2">
-          {data.children.map((child) => (
-            <Avatar key={child.id} avatar={child.avatar_key} options={child.avatar_options} gender={child.gender === "girl" ? "girl" : "boy"} title={memberName(child)} className="size-8 rounded-full" />
-          ))}
-        </div>
-        <SideLink href="#activity" active={section === "activity"} onClick={() => setSection("activity")}>
+        </Button>
+        <Button type="button" variant={section === "activity" ? "green" : "grey"} size="md" onClick={() => choose("activity")}>
+          <ClipboardList className="size-5 shrink-0" aria-hidden="true" />
           Activity log
-        </SideLink>
-        <SideLink href="#reports" active={section === "reports"} onClick={() => setSection("reports")}>
+        </Button>
+        <Button type="button" variant={section === "reports" ? "green" : "grey"} size="md" onClick={() => choose("reports")}>
+          <BarChart3 className="size-5 shrink-0" aria-hidden="true" />
           Reports
-        </SideLink>
+        </Button>
       </nav>
 
       {section === "users" && (
         <section id="users" className="space-y-3">
-          <h1 className="font-display text-3xl text-[#306A51]">Users</h1>
           <ul className="space-y-3">
             {data.children.map((child, index) => {
               const goal = recommendedGoal(child, owned, data.doneByChild[child.id] ?? {});
@@ -80,9 +95,7 @@ export function GroupView({ data }: { data: DashboardData }) {
 
       {section === "activity" && (
         <section id="activity" className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="font-display text-3xl text-[#306A51]">Activity log</h1>
-            <div className="activity-filters flex flex-wrap items-center gap-2">
+          <div className="activity-filters flex flex-wrap items-center gap-2">
               <label className="sr-only" htmlFor="activity-name">Filter by name</label>
               <select id="activity-name" className="birthday-year h-11 px-4" value={nameFilter} onChange={(event) => setNameFilter(event.target.value)}>
                 <option value="all">All names</option>
@@ -103,7 +116,6 @@ export function GroupView({ data }: { data: DashboardData }) {
               <Button type="button" variant="grey" size="sm" disabled={nameFilter === "all" && !dateFilter} onClick={() => { setNameFilter("all"); setDateFilter(""); }}>
                 Clear filters
               </Button>
-            </div>
           </div>
           <ul className="space-y-2">
             {filteredActivities(data, nameFilter, dateFilter).length === 0 && <li className="rounded-2xl bg-white p-4 text-sm text-[#5e7266]">Nothing has been logged yet.</li>}
@@ -125,7 +137,6 @@ export function GroupView({ data }: { data: DashboardData }) {
 
       {section === "reports" && (
         <section id="reports" className="space-y-4">
-          <h1 className="font-display text-3xl text-[#306A51]">Reports</h1>
           <div className="grid grid-cols-3 gap-3">
             <Stat label="Children" value={String(data.children.length)} />
             <Stat label="Stamps" value={String(stamps)} />
@@ -153,14 +164,6 @@ export function GroupView({ data }: { data: DashboardData }) {
         </section>
       )}
     </div>
-  );
-}
-
-function SideLink({ href, active, onClick, children }: { href: string; active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <a href={href} onClick={onClick} className={`block rounded-2xl px-3 py-2 font-display text-lg no-underline ${active ? "bg-[#306A51] text-white" : "text-[#306A51] hover:bg-[#f6efe2]"}`}>
-      {children}
-    </a>
   );
 }
 
