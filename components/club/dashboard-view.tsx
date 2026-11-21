@@ -7,6 +7,7 @@ import { Avatar } from "@/components/brand/avatar";
 import { ChildForm } from "@/components/club/child-form";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Scrapbook } from "@/components/club/scrapbook";
 import { shortName } from "@/lib/format";
 import type { CoverTone } from "@/lib/validators";
 import type { loadDashboard } from "@/lib/club/data";
@@ -17,6 +18,7 @@ type Pack = DashboardData["packs"][number];
 export function DashboardView({ data, notice }: { data: DashboardData; notice?: string }) {
   const { account } = data;
   const [focusId, setFocusId] = useState(data.focus?.id ?? "");
+  const [bookId, setBookId] = useState<string | null>(null);
   const focus = data.children.find((child) => child.id === focusId) ?? data.focus;
   const owned = data.packs.filter((pack) => pack.owned);
   const spotlight = focus ? pickSpotlight(owned, data.doneByChild[focus.id] ?? {}) : null;
@@ -40,7 +42,38 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
           <h1 className="font-display text-3xl leading-tight text-[#17352A] sm:text-4xl">Welcome back, {account.display_name}</h1>
           <p className="mt-2 text-base text-[#3d5348] sm:text-lg">{welcome}</p>
         </div>
-        <img src="/brand/mascot-spy.png" alt="" className="h-16 w-auto shrink-0 sm:hidden" />
+        {data.children.length > 0 && (
+          <div className="shrink-0">
+            <p className="text-center font-display text-sm text-[#306A51]">Group Members</p>
+            <div className="mt-2 flex items-start justify-end gap-3">
+              {data.children.map((child) => {
+                const name = memberName(child);
+                return (
+                  <button key={child.id} type="button" className="w-16 text-center" onClick={() => setBookId(child.id)}>
+                    <Avatar
+                      avatar={child.avatar_key}
+                      colour={child.avatar_bg}
+                      face={child.avatar_face}
+                      hairStyle={child.avatar_hair_style}
+                      hairColour={child.avatar_hair_colour}
+                      glasses={child.avatar_glasses}
+                      hat={child.avatar_hat}
+                      gender={child.gender === "girl" ? "girl" : "boy"}
+                      skin={child.avatar_skin}
+                      eyeColour={child.avatar_eyes}
+                      shirt={child.avatar_shirt}
+                      options={child.avatar_options}
+                      title={name}
+                      className="mx-auto size-14 rounded-full"
+                    />
+                    <span className="mt-1 block truncate font-display text-sm leading-tight text-[#17352A]">{name}</span>
+                    <span className="block truncate text-[11px] font-extrabold text-[#5e7266]">@{child.nickname}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </section>
 
       {notice && <p className="rounded-2xl bg-white px-4 py-3 text-sm font-bold text-[#306A51]">{notice}</p>}
@@ -156,8 +189,27 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
           </Link>
         </div>
       </section>
+      {bookId && (
+        <Scrapbook
+          child={data.children.find((child) => child.id === bookId) ?? data.children[0]}
+          packs={owned}
+          doneByPack={data.doneByChild[bookId] ?? {}}
+          points={data.pointsByChild[bookId] ?? 0}
+          rank={memberRank(bookId, data.children, data.pointsByChild)}
+          onClose={() => setBookId(null)}
+        />
+      )}
     </div>
   );
+}
+
+function memberName(child: DashboardData["children"][number]) {
+  return child.first_name?.trim() || shortName(child.nickname);
+}
+
+function memberRank(childId: string, children: DashboardData["children"], pointsByChild: Record<string, number>) {
+  const ordered = [...children].sort((a, b) => (pointsByChild[b.id] ?? 0) - (pointsByChild[a.id] ?? 0) || a.nickname.localeCompare(b.nickname));
+  return ordered.findIndex((child) => child.id === childId) + 1;
 }
 
 function pickSpotlight(packs: Pack[], doneByPack: Record<string, number>) {

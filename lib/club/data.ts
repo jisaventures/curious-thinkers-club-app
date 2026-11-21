@@ -25,6 +25,7 @@ export type ClubChild = {
   avatar_eyes?: string | null;
   avatar_shirt?: string | null;
   avatar_options?: string | null;
+  created_at?: string | null;
 };
 
 export type ClubPack = {
