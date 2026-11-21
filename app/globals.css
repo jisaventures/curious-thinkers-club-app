@@ -409,23 +409,24 @@ select {
   letter-spacing: -0.02em;
   text-decoration: none;
   white-space: nowrap;
+  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1), filter 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .header-pill[data-variant="green"] {
   background: var(--ctc-green);
   box-shadow: 0 5px 0 var(--ctc-green-deeper);
+  transform: rotate(2.4deg);
 }
 
 .leaderboard-link {
   background: #e56b93;
   box-shadow: 0 5px 0 #c44b73, 0 8px 16px rgba(196, 75, 115, 0.25);
-  transform: rotate(-3deg);
+  transform: rotate(-3.2deg);
   transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1), filter 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.leaderboard-link:hover {
-  filter: brightness(1.05);
-  transform: rotate(-4deg) translateY(-2px);
+.header-shop.ctc-button {
+  transform: rotate(1.5deg);
 }
 
 .leaderboard-link:focus-visible {
@@ -447,6 +448,21 @@ select {
   .ctc-button:hover:not(:disabled) {
     transform: translateY(-2px) rotate(-0.4deg);
     filter: brightness(1.05);
+  }
+
+  .header-pill:hover {
+    filter: brightness(1.05);
+    transform: rotate(3deg) translateY(-2px);
+  }
+
+  .leaderboard-link:hover {
+    filter: brightness(1.05);
+    transform: rotate(-3.8deg) translateY(-2px);
+  }
+
+  .header-shop.ctc-button:hover:not(:disabled) {
+    filter: brightness(1.05);
+    transform: rotate(2deg) translateY(-2px);
   }
 
   .ctc-button.activity-log-button:hover:not(:disabled) {
