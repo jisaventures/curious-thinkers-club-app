@@ -713,7 +713,7 @@ function ColourRow({
     <fieldset className={`${compact ? "mt-1 flex flex-wrap items-center gap-x-2" : ""} ${className}`}>
       <legend className={`${compact ? "text-[11px]" : "text-sm"} font-extrabold text-[#1e4d3a]`}>{legend}</legend>
       {hint && <p className="basis-full text-[10px] leading-tight text-[#5e7266]">{hint}</p>}
-      <div className={`${compact ? "flex-nowrap gap-1" : "mt-2 flex-wrap gap-2"} flex`}>
+      <div className={`${compact ? "flex-nowrap gap-1" : "mt-2 flex-wrap gap-1 sm:gap-2"} flex`}>
         {colours.map((colour) => {
           const hex = colour.hex.replace("#", "");
           return (
@@ -723,7 +723,7 @@ function ColourRow({
               aria-label={colour.label}
               aria-pressed={value.toLowerCase() === hex.toLowerCase()}
               onClick={() => onChange(hex)}
-              className={`${compact ? "size-5 shrink-0" : "size-11"} rounded-full border-2 ${value.toLowerCase() === hex.toLowerCase() ? "border-[#173528]" : "border-white"}`}
+              className={`${compact ? "size-5 shrink-0" : "size-8 shrink-0 sm:size-11"} rounded-full border-2 ${value.toLowerCase() === hex.toLowerCase() ? "border-[#173528]" : "border-white"}`}
               style={{ background: colour.hex }}
             />
           );
