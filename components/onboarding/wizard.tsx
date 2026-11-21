@@ -360,7 +360,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
       {screen === "details" && child && (
         <section className={stepCard}>
           <h1 className="step-title text-4xl lg:text-3xl">{child.firstName.trim() || `Child ${editing + 1}`}</h1>
-          <div className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 sm:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] sm:gap-x-4 lg:mt-3 lg:grid-cols-[auto_auto_minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-4">
+          <div className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 sm:grid-cols-[auto_auto_minmax(0,1fr)] sm:gap-x-3 lg:mt-3 lg:grid-cols-[auto_auto_minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-4">
             <button
               type="button"
               onClick={openAvatarModal}
@@ -404,7 +404,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 ))}
               </div>
             </fieldset>
-            <div className="col-start-2 row-start-2 min-w-0 max-w-32 space-y-2 sm:col-start-3 sm:row-start-1 sm:max-w-40 lg:max-w-none">
+            <div className="col-start-2 row-start-2 min-w-0 max-w-32 space-y-2 sm:col-start-3 sm:row-start-1 sm:max-w-none lg:max-w-none">
               <Label htmlFor="firstName">First name only<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
               <Input
                 id="firstName"
@@ -414,7 +414,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 autoComplete="off"
               />
             </div>
-            <div className="col-span-2 min-w-0 space-y-2 sm:col-span-1 sm:col-start-2 sm:row-start-2 lg:col-start-4 lg:row-start-1">
+            <div className="col-span-2 min-w-0 space-y-2 sm:col-span-1 sm:col-start-2 sm:row-start-2 sm:w-[10rem] lg:w-auto lg:col-start-4 lg:row-start-1">
               <Label htmlFor="birthday">Birthday<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
               <BirthdayPicker id="birthday" value={child.birthday} onChange={(birthday) => patchChild({ birthday })} />
             </div>
@@ -425,7 +425,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                   <button type="button" className="inline-flex size-4 items-center justify-center rounded-full text-[#306a51]" aria-label="About usernames">
                     <Info className="size-4" strokeWidth={2.4} aria-hidden="true" />
                   </button>
-                  <span role="tooltip" className="pointer-events-none absolute bottom-[calc(100%+0.45rem)] left-0 z-20 hidden w-56 rounded-xl bg-[#1e4d3a] px-3 py-2 text-left text-xs leading-snug font-semibold text-white group-hover:block group-focus-within:block">
+                  <span role="tooltip" className="pointer-events-none absolute bottom-[calc(100%+0.45rem)] left-0 z-20 hidden w-56 max-w-[calc(100vw-2rem)] rounded-xl bg-[#1e4d3a] px-3 py-2 text-left text-xs leading-snug font-semibold text-white group-hover:block group-focus-within:block sm:right-0 sm:left-auto lg:right-auto lg:left-0">
                     A playful nickname is made for them. Re-generate it if you want a different one.
                   </span>
                 </span>

@@ -487,12 +487,12 @@ select {
   box-shadow: 0 16px 40px rgba(30, 77, 58, 0.14);
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1023px) {
   .birthday-panel {
     position: fixed;
     top: auto;
     right: auto;
-    bottom: 5.6rem;
+    bottom: 6.25rem;
     left: 50%;
     translate: -50% 0;
   }
