@@ -418,6 +418,12 @@ select {
   cursor: pointer;
 }
 
+@media (min-width: 1024px) {
+  .birthday-trigger {
+    height: 3.5rem;
+  }
+}
+
 @media (max-width: 639px) {
   .birthday-compact .birthday-trigger {
     padding-inline: 0.55rem;

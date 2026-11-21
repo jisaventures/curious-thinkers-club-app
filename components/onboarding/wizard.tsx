@@ -246,7 +246,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 {done && <Check className="mr-1 size-3.5 shrink-0" strokeWidth={3} aria-hidden="true" />}
                 {done ? "Completed" : `Step ${index + 1}`}
               </span>
-              <div className={`step-tab flex min-h-11 w-full items-center justify-center rounded-2xl px-2 py-2 text-center font-display text-base leading-tight font-bold lg:min-h-16 lg:py-3 lg:text-xl ${tabClass}`}>
+              <div className={`step-tab flex min-h-14 w-full items-center justify-center rounded-2xl px-2 pt-5 pb-2 text-center font-display text-base leading-tight font-bold lg:min-h-16 lg:px-2 lg:py-3 lg:text-xl ${tabClass}`}>
                 {label}
               </div>
             </li>
@@ -343,7 +343,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             <button
               type="button"
               onClick={openAvatarModal}
-              className="group relative size-36 shrink-0 self-center overflow-hidden rounded-[28px] bg-[#f6efe2] justify-self-center sm:row-span-2 sm:size-44 lg:size-36"
+              className="group relative size-40 shrink-0 self-center overflow-hidden rounded-[28px] bg-[#f6efe2] justify-self-center sm:row-span-2 sm:size-44 lg:size-36"
               aria-label="Edit avatar"
             >
               <FamilyAvatar build={child.avatar} className="size-full" title="Child avatar" />
@@ -396,8 +396,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                   </span>
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <Input id="nickname" value={child.nickname} disabled className="max-sm:h-10 max-sm:w-[7.25rem] max-sm:max-w-[7.25rem] max-sm:px-1.5 max-sm:text-xs" />
+              <div className="flex w-full items-center gap-2">
+                <Input id="nickname" value={child.nickname} disabled className="min-w-0 flex-1 max-sm:h-10 max-sm:px-1.5 max-sm:text-xs" />
                 <span className="inline-flex pb-[5px]">
                   <Button type="button" variant="green" size="sm" className="regen-button shrink-0" aria-label="Re-generate" onClick={regenerateNickname}>
                     <RefreshCw className="size-5 sm:size-6 lg:hidden" strokeWidth={3} aria-hidden="true" />
@@ -419,6 +419,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                   maxLength={15}
                   autoComplete="off"
                   aria-invalid={Boolean(childFirstNameProblem(child.firstName))}
+                  className="lg:h-14"
                 />
                 {childFirstNameProblem(child.firstName) && <p className="mt-1 text-sm font-bold text-[#8a4b3a]">{childFirstNameProblem(child.firstName)}</p>}
               </div>
