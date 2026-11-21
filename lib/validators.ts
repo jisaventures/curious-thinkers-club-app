@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { UNSAFE_NAME_MESSAGE, isUnsafeChildName } from "@/lib/unsafe-language";
 
 export const AVATARS = [
   "pirate",
@@ -32,7 +33,8 @@ export const childFirstNameSchema = z
   .trim()
   .min(1, "Add a first name")
   .max(15, "Use 15 characters or fewer")
-  .regex(/^[A-Za-z][A-Za-z'\-]{0,14}$/, "Use a first name, without spaces or a surname");
+  .regex(/^[A-Za-z][A-Za-z'\-]{0,14}$/, "Use a first name, without spaces or a surname")
+  .refine((value) => !isUnsafeChildName(value), UNSAFE_NAME_MESSAGE);
 
 export const nicknameSchema = z
   .string()

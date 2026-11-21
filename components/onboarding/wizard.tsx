@@ -21,6 +21,7 @@ import {
 import { BirthdayPicker } from "@/components/onboarding/birthday-picker";
 import { ageFromBirthday, isBirthdayAllowed } from "@/lib/birthday";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
+import { childFirstNameProblem, isUnsafeChildName } from "@/lib/unsafe-language";
 import { Check, ChevronLeft, ChevronRight, Info, Mars, RefreshCw, Rocket, Trophy, Venus, X } from "lucide-react";
 
 type Gender = "boy" | "girl" | "unspecified";
@@ -365,12 +366,12 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
       {screen === "details" && child && (
         <section className={stepCard}>
-          <h1 className="step-title text-4xl lg:text-3xl">{child.firstName.trim() || `Child ${editing + 1}`}</h1>
+          <h1 className="step-title text-4xl lg:text-3xl">{child.firstName.trim() && !isUnsafeChildName(child.firstName) ? child.firstName.trim() : `Child ${editing + 1}`}</h1>
           <div className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] items-stretch gap-x-3 gap-y-3 sm:grid-cols-[auto_auto_minmax(0,1fr)] sm:gap-x-3 lg:mt-3 lg:grid-cols-[auto_auto_minmax(0,1fr)_minmax(0,1fr)] lg:items-stretch lg:gap-4">
             <button
               type="button"
               onClick={openAvatarModal}
-              className="group relative row-span-2 size-40 shrink-0 self-center overflow-hidden rounded-[28px] bg-[#f6efe2] justify-self-center sm:size-44 lg:size-36"
+              className="group relative size-40 shrink-0 self-center overflow-hidden rounded-[28px] bg-[#f6efe2] justify-self-center sm:row-span-2 sm:size-44 lg:size-36"
               aria-label="Edit avatar"
             >
               <FamilyAvatar build={child.avatar} className="size-full" title="Child avatar" />
@@ -379,7 +380,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 Edit
               </span>
             </button>
-            <fieldset className="col-start-2 row-start-1 flex flex-col justify-self-start">
+            <fieldset className="col-start-2 row-start-1 flex flex-col justify-end justify-self-start sm:justify-start">
               <legend className="m-0 mb-2 flex h-5 items-center text-sm font-extrabold text-[#1e4d3a]">Gender<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></legend>
               <div className="flex gap-2">
                 {(
@@ -410,21 +411,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 ))}
               </div>
             </fieldset>
-            <div className="col-start-2 row-start-2 flex min-w-0 flex-col sm:col-start-3 sm:row-start-1">
-              <Label htmlFor="firstName" className="mb-2 flex h-5 items-center">First name only<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
-              <Input
-                id="firstName"
-                value={child.firstName}
-                onChange={(event) => patchChild({ firstName: event.target.value.replace(/\s+/g, "").slice(0, 15) })}
-                maxLength={15}
-                autoComplete="off"
-              />
-            </div>
-            <div className="col-span-2 flex min-w-0 flex-col sm:col-span-1 sm:col-start-2 sm:row-start-2 sm:w-[10rem] lg:w-auto lg:col-start-4 lg:row-start-1">
-              <Label htmlFor="birthday" className="mb-2 flex h-5 items-center">Birthday<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
-              <BirthdayPicker id="birthday" value={child.birthday} onChange={(birthday) => patchChild({ birthday })} />
-            </div>
-            <div className="col-span-2 flex flex-col sm:col-span-1 sm:col-start-3 sm:row-start-2 lg:col-span-3 lg:col-start-2">
+            <div className="col-span-2 row-start-2 flex min-w-0 flex-col sm:col-span-1 sm:col-start-3 sm:row-start-2 lg:col-span-3 lg:col-start-2">
               <div className="mb-2 flex h-5 items-center gap-1.5">
                 <Label htmlFor="nickname">Username<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
                 <span className="group relative inline-flex">
@@ -446,6 +433,24 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 </span>
               </div>
               {child.nicknameMessage && <p className="text-sm font-bold text-[#8a4b3a]">{child.nicknameMessage}</p>}
+            </div>
+            <div className="col-span-2 row-start-3 grid grid-cols-[minmax(0,1fr)_7.55rem] items-start gap-3 sm:contents">
+              <div className="flex min-w-0 flex-col sm:col-start-3 sm:row-start-1">
+                <Label htmlFor="firstName" className="mb-2 flex h-5 items-center whitespace-nowrap max-sm:!text-[12px]">First name only<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
+                <Input
+                  id="firstName"
+                  value={child.firstName}
+                  onChange={(event) => patchChild({ firstName: event.target.value.replace(/\s+/g, "").slice(0, 15) })}
+                  maxLength={15}
+                  autoComplete="off"
+                  aria-invalid={Boolean(childFirstNameProblem(child.firstName))}
+                />
+                {childFirstNameProblem(child.firstName) && <p className="mt-1 text-sm font-bold text-[#8a4b3a]">{childFirstNameProblem(child.firstName)}</p>}
+              </div>
+              <div className="birthday-compact flex min-w-0 flex-col sm:col-start-2 sm:row-start-2 sm:w-[10rem] lg:col-start-4 lg:row-start-1 lg:w-auto">
+                <Label htmlFor="birthday" className="mb-2 flex h-5 items-center whitespace-nowrap max-sm:!text-[12px]">Birthday<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
+                <BirthdayPicker id="birthday" value={child.birthday} onChange={(birthday) => patchChild({ birthday })} />
+              </div>
             </div>
           </div>
 
@@ -629,6 +634,8 @@ function ChoiceRow<T extends string>({
 
 function missingProfileHint(item: ChildDraft | undefined) {
   if (!item) return "Add this child's details to continue.";
+  const nameProblem = childFirstNameProblem(item.firstName);
+  if (nameProblem) return nameProblem;
   if (item.nicknameMessage && item.nicknameMessage !== "Making a nickname…") return item.nicknameMessage;
   if (item.nickname.trim() && isRudeNickname(item.nickname)) return "Choose a kinder nickname.";
   const missing: string[] = [];

@@ -466,6 +466,14 @@ select {
   cursor: pointer;
 }
 
+@media (max-width: 639px) {
+  .birthday-compact .birthday-trigger {
+    padding-inline: 0.55rem;
+    gap: 0.25rem;
+    font-size: 0.92rem;
+  }
+}
+
 .birthday-trigger:focus-visible,
 .birthday-year:focus-visible,
 .birthday-day:focus-visible,
