@@ -201,7 +201,7 @@
   line-height: 1;
   white-space: nowrap;
   color: var(--color-club);
-  font-size: clamp(22px, calc(22px + (100vw - 390px) * 0.095833), 45px);
+  font-size: clamp(16px, calc(16px + (100vw - 390px) * 0.068), 32px);
 }
 
 * {
@@ -210,6 +210,7 @@
 
 html {
   scroll-behavior: smooth;
+  --site-header-h: calc(3.25rem + 1px);
 }
 
 body {

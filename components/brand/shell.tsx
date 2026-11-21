@@ -50,9 +50,9 @@ function SiteHeader({
   const row = centered ? "mx-auto w-full max-w-6xl px-3 sm:px-4" : "w-full px-3 sm:px-4 lg:px-6";
   return (
     <header className="sticky top-0 z-50 w-full border-b border-dashed border-club/25 bg-header">
-      <div className={`flex items-center gap-3 py-2.5 ${row} ${onboarding ? "justify-center" : ""} ${!onboarding && isDemoMode() ? "pr-16 sm:pr-20" : ""}`}>
+      <div className={`flex items-center gap-2 py-1.5 ${row} ${onboarding ? "justify-center" : ""} ${!onboarding && isDemoMode() ? "pr-16 sm:pr-20" : ""}`}>
         <Link href={account ? "/club" : "/"} className="flex min-w-0 items-center gap-2">
-          <img src="/brand/bulb.png" alt="" className="h-14 w-auto shrink-0 bg-transparent" />
+          <img src="/brand/bulb.png" alt="" className="h-10 w-auto shrink-0 bg-transparent" />
           <span className="wordmark">Curious Thinkers Club</span>
         </Link>
         {!onboarding && (
