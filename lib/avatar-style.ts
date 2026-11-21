@@ -57,6 +57,28 @@ export const ACCESSORY_COLOURS = [
   { id: "gold", label: "Gold", hex: "#f0b429" },
 ] as const;
 
+export const GROUP_BACKGROUND_COLOURS = [
+  { id: "forest", label: "Forest", hex: "#1e4d3a" },
+  { id: "pine", label: "Pine", hex: "#143528" },
+  { id: "navy", label: "Navy", hex: "#1a365d" },
+  { id: "indigo", label: "Indigo", hex: "#2a2466" },
+  { id: "plum", label: "Plum", hex: "#4a2044" },
+  { id: "teal", label: "Teal", hex: "#0e4f4a" },
+  { id: "cocoa", label: "Cocoa", hex: "#4a2c18" },
+  { id: "slate", label: "Slate", hex: "#243038" },
+] as const;
+
+export const GROUP_ICON_COLOURS = [
+  { id: "cream", label: "Cream", hex: "#fff4dc" },
+  { id: "white", label: "White", hex: "#ffffff" },
+  { id: "gold", label: "Gold", hex: "#f0b429" },
+  { id: "lemon", label: "Lemon", hex: "#ffe27a" },
+  { id: "mint", label: "Mint", hex: "#c8f0b4" },
+  { id: "sky", label: "Sky", hex: "#9ad7f0" },
+  { id: "pink", label: "Pink", hex: "#ffc4e0" },
+  { id: "peach", label: "Peach", hex: "#ffc9a8" },
+] as const;
+
 export const CLOTHES_COLOURS = [
   { id: "white", label: "White", hex: "#ffffff" },
   { id: "black", label: "Black", hex: "#1c1c1c" },

@@ -7,7 +7,7 @@ import { GROUP_ICONS, GroupIcon, type GroupIconId } from "@/components/brand/gro
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ACCESSORY_COLOURS, AVATAR_COLOURS, CLOTHES_COLOURS, EYE_COLOURS, HAIR_COLOURS, SKIN_COLOURS } from "@/lib/avatar-style";
+import { ACCESSORY_COLOURS, AVATAR_COLOURS, CLOTHES_COLOURS, EYE_COLOURS, GROUP_BACKGROUND_COLOURS, GROUP_ICON_COLOURS, HAIR_COLOURS, SKIN_COLOURS } from "@/lib/avatar-style";
 import {
   AVATAAARS_ACCESSORIES,
   AVATAAARS_EYES,
@@ -90,7 +90,7 @@ export function OnboardingWizard({ shopFirstName, shopLocation }: { shopFirstNam
   const [groupName, setGroupName] = useState("");
   const [groupType, setGroupType] = useState<GroupType | "">("");
   const [leaderName, setLeaderName] = useState(shopFirstName ?? "");
-  const [groupIcon, setGroupIcon] = useState<GroupIconDraft>({ icon: "star", background: "8fce78", colour: "f0b429" });
+  const [groupIcon, setGroupIcon] = useState<GroupIconDraft>({ icon: "star", background: "1e4d3a", colour: "fff4dc" });
   const [groupAvatarOpen, setGroupAvatarOpen] = useState(false);
   const [groupAvatarDraft, setGroupAvatarDraft] = useState<GroupIconDraft | null>(null);
   const tabsRef = useRef<HTMLOListElement>(null);
@@ -605,12 +605,12 @@ export function OnboardingWizard({ shopFirstName, shopLocation }: { shopFirstNam
                   <div className="flex justify-center rounded-[24px] bg-[#f6efe2] p-3">
                     <GroupIcon icon={groupAvatarDraft.icon} background={groupAvatarDraft.background} colour={groupAvatarDraft.colour} className="h-40 w-40 rounded-[24px]" title="Group icon preview" />
                   </div>
-                  <ColourRow legend="Background" value={groupAvatarDraft.background} colours={AVATAR_COLOURS} onChange={(background) => setGroupAvatarDraft({ ...groupAvatarDraft, background })} className="mt-3" />
-                  <ColourRow legend="Icon colour" value={groupAvatarDraft.colour} colours={CLOTHES_COLOURS} onChange={(colour) => setGroupAvatarDraft({ ...groupAvatarDraft, colour })} className="mt-3" />
+                  <ColourRow legend="Background" value={groupAvatarDraft.background} colours={GROUP_BACKGROUND_COLOURS} onChange={(background) => setGroupAvatarDraft({ ...groupAvatarDraft, background })} className="mt-3" />
+                  <ColourRow legend="Icon colour" value={groupAvatarDraft.colour} colours={GROUP_ICON_COLOURS} onChange={(colour) => setGroupAvatarDraft({ ...groupAvatarDraft, colour })} className="mt-3" />
                 </div>
                 <fieldset>
                   <legend className="text-sm font-extrabold text-[#1e4d3a]">Icon</legend>
-                  <div className="mt-2 flex flex-wrap gap-2">
+                  <div className="mt-2 grid max-h-[46vh] grid-cols-4 gap-2 overflow-y-auto pr-1 sm:grid-cols-6 lg:grid-cols-8">
                     {GROUP_ICONS.map((icon) => (
                       <button
                         key={icon}
@@ -618,7 +618,7 @@ export function OnboardingWizard({ shopFirstName, shopLocation }: { shopFirstNam
                         aria-label={icon}
                         aria-pressed={groupAvatarDraft.icon === icon}
                         onClick={() => setGroupAvatarDraft({ ...groupAvatarDraft, icon })}
-                        className={`size-16 overflow-hidden rounded-2xl ${groupAvatarDraft.icon === icon ? "ring-2 ring-[#173528]" : ""}`}
+                        className={`size-12 overflow-hidden rounded-2xl sm:size-14 ${groupAvatarDraft.icon === icon ? "ring-2 ring-[#173528]" : ""}`}
                       >
                         <GroupIcon icon={icon} background={groupAvatarDraft.background} colour={groupAvatarDraft.colour} className="size-full" />
                       </button>
@@ -899,7 +899,7 @@ function ColourRow({
               aria-label={colour.label}
               aria-pressed={value.toLowerCase() === hex.toLowerCase()}
               onClick={() => onChange(hex)}
-              className={`${compact ? "size-5 shrink-0" : "size-8 shrink-0 sm:size-11"} rounded-full border-2 ${value.toLowerCase() === hex.toLowerCase() ? "border-[#173528]" : "border-white"}`}
+              className={`${compact ? "size-5 shrink-0" : "size-8 shrink-0 sm:size-11"} rounded-full border-2 ${value.toLowerCase() === hex.toLowerCase() ? "border-[#173528]" : "border-[#eadfce]"}`}
               style={{ background: colour.hex }}
             />
           );
