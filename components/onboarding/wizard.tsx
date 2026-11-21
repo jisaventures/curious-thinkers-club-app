@@ -82,6 +82,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [avatarDraft, setAvatarDraft] = useState<AvatarBuild | null>(null);
   const tabsRef = useRef<HTMLOListElement>(null);
+  const tabsBarRef = useRef<HTMLDivElement>(null);
+  const [tabsCollapsed, setTabsCollapsed] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
@@ -173,6 +175,27 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   const hairValue = avatarDraft && new Set<string>(hairOptions).has(avatarDraft.top) ? avatarDraft.top : hairOptions[0];
 
   useEffect(() => {
+    const bar = tabsBarRef.current;
+    const syncCollapsed = () => {
+      if (!bar || window.innerWidth >= 640) {
+        setTabsCollapsed(false);
+        return;
+      }
+      const header = document.querySelector("header");
+      const headerBottom = header?.getBoundingClientRect().bottom ?? 0;
+      const stuck = bar.getBoundingClientRect().top <= headerBottom + 1 && window.scrollY > 12;
+      setTabsCollapsed(stuck);
+    };
+    syncCollapsed();
+    window.addEventListener("scroll", syncCollapsed, { passive: true });
+    window.addEventListener("resize", syncCollapsed);
+    return () => {
+      window.removeEventListener("scroll", syncCollapsed);
+      window.removeEventListener("resize", syncCollapsed);
+    };
+  }, [screen, progressLabels.length]);
+
+  useEffect(() => {
     const el = tabsRef.current;
     if (!el) return;
     const sync = () => {
@@ -224,7 +247,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
   return (
     <div className="w-full">
-      <div className="relative mb-5 max-lg:sticky max-lg:top-[var(--site-header-h)] max-lg:z-30 max-lg:-mx-3 max-lg:bg-[#fffdf8] max-lg:px-3 max-lg:pb-3 sm:max-lg:-mx-5 sm:max-lg:px-5 md:max-lg:-mx-7 md:max-lg:px-7">
+      <div ref={tabsBarRef} className={`step-tabs relative mb-5 max-lg:sticky max-lg:top-[var(--site-header-h)] max-lg:z-30 max-lg:-mx-3 max-lg:bg-[#fffdf8] max-lg:px-3 max-lg:pb-3 sm:max-lg:-mx-5 sm:max-lg:px-5 md:max-lg:-mx-7 md:max-lg:px-7 ${tabsCollapsed ? "is-collapsed" : ""}`}>
       <ol ref={tabsRef} className="tab-scroll flex gap-2 overflow-x-auto px-1 pt-2" aria-label="Onboarding progress">
         {progressLabels.map((label, index) => {
           const done = index < progress;
@@ -238,14 +261,14 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
           return (
             <li key={label} className="relative flex min-w-36 shrink-0 flex-1 flex-col items-center" aria-current={current ? "step" : undefined}>
               <span
-                className="ctc-button pointer-events-none relative z-10 -mb-3"
+                className="step-pill ctc-button pointer-events-none relative z-10 -mb-3"
                 data-variant={done ? "green" : current ? "mustard" : "grey"}
                 data-size="sm"
               >
                 {done && <Check className="mr-1 size-3.5 shrink-0" strokeWidth={3} aria-hidden="true" />}
                 {done ? "Completed" : `Step ${index + 1}`}
               </span>
-              <div className={`flex min-h-16 w-full items-center justify-center rounded-2xl px-2 py-3 text-center font-display text-lg leading-tight font-bold md:text-xl ${tabClass}`}>
+              <div className={`step-tab flex min-h-16 w-full items-center justify-center rounded-2xl px-2 py-3 text-center font-display text-lg leading-tight font-bold md:text-xl ${tabClass}`}>
                 {label}
               </div>
             </li>
