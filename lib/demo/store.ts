@@ -6,6 +6,8 @@ export const ADMIN_ID = "a1000000-0000-4000-8000-000000000002";
 export const PIP_ID = "c1000000-0000-4000-8000-000000000001";
 export const LOU_ID = "c1000000-0000-4000-8000-000000000002";
 export const MO_ID = "c1000000-0000-4000-8000-000000000003";
+export const ARIA_ID = "c1000000-0000-4000-8000-000000000007";
+export const NOAH_ID = "c1000000-0000-4000-8000-000000000008";
 export const PIRATE_ID = "b1000000-0000-4000-8000-000000000001";
 
 export type DemoAccount = {
@@ -276,25 +278,30 @@ export function createSeed(): DemoDb {
     points_awarded: 10,
   });
 
+  const packPrefixes = [
+    ["51100000-0000-4000-8000-000000000", pirate],
+    ["51200000-0000-4000-8000-000000000", egypt],
+    ["51300000-0000-4000-8000-000000000", spy],
+    ["51400000-0000-4000-8000-000000000", knight],
+    ["51500000-0000-4000-8000-000000000", space],
+  ] as const;
   const progress: DemoProgress[] = [];
-  for (let n = 1; n <= 4; n += 1) progress.push(complete(PIP_ID, pirateSteps[n - 1].id));
-  progress.push({
-    child_id: PIP_ID,
-    step_id: pirateSteps[4].id,
-    status: "in_progress",
-    video_position_seconds: 0,
-    points_awarded: 0,
-  });
-  for (let n = 1; n <= 2; n += 1) progress.push(complete(PIP_ID, `51200000-0000-4000-8000-000000000${String(n).padStart(3, "0")}`));
-  for (let n = 1; n <= 5; n += 1) progress.push(complete(PIP_ID, `51300000-0000-4000-8000-000000000${String(n).padStart(3, "0")}`));
-  progress.push(complete(LOU_ID, pirateSteps[0].id));
-  progress.push({
-    child_id: LOU_ID,
-    step_id: pirateSteps[1].id,
-    status: "in_progress",
-    video_position_seconds: 134,
-    points_awarded: 0,
-  });
+  const certificates: Array<{ child_id: string; pack_id: string }> = [];
+  const finish = (childId: string, prefix: string, packId: string) => {
+    for (let n = 1; n <= 8; n += 1) {
+      progress.push(complete(childId, `${prefix}${String(n).padStart(3, "0")}`));
+    }
+    certificates.push({ child_id: childId, pack_id: packId });
+  };
+  for (const [prefix, packId] of packPrefixes) finish(PIP_ID, prefix, packId);
+  finish(LOU_ID, packPrefixes[0][0], pirate);
+  for (let n = 1; n <= 3; n += 1) progress.push(complete(LOU_ID, `51200000-0000-4000-8000-000000000${String(n).padStart(3, "0")}`));
+  finish(MO_ID, packPrefixes[1][0], egypt);
+  finish(MO_ID, packPrefixes[2][0], spy);
+  finish(ARIA_ID, packPrefixes[0][0], pirate);
+  finish(ARIA_ID, packPrefixes[3][0], knight);
+  finish(ARIA_ID, packPrefixes[4][0], space);
+  for (let n = 1; n <= 2; n += 1) progress.push(complete(NOAH_ID, `51500000-0000-4000-8000-000000000${String(n).padStart(3, "0")}`));
 
   const ledger: DemoLedger[] = [
     ...progress
@@ -306,8 +313,13 @@ export function createSeed(): DemoDb {
         reason: "step_complete" as const,
         ref_id: row.step_id,
       })),
-    { child_id: PIP_ID, account_id: SAM_ID, amount: 230, reason: "opening_balance", ref_id: PIP_ID },
-    { child_id: MO_ID, account_id: SAM_ID, amount: 210, reason: "opening_balance", ref_id: MO_ID },
+    ...certificates.map((row) => ({
+      child_id: row.child_id,
+      account_id: SAM_ID,
+      amount: 50,
+      reason: "pack_certificate" as const,
+      ref_id: row.pack_id,
+    })),
     { child_id: "c1000000-0000-4000-8000-000000000004", account_id: "a1000000-0000-4000-8000-000000000003", amount: 512, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000004" },
     { child_id: "c1000000-0000-4000-8000-000000000005", account_id: "a1000000-0000-4000-8000-000000000004", amount: 480, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000005" },
     { child_id: "c1000000-0000-4000-8000-000000000006", account_id: "a1000000-0000-4000-8000-000000000005", amount: 175, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000006" },
@@ -322,9 +334,11 @@ export function createSeed(): DemoDb {
       { id: "a1000000-0000-4000-8000-000000000005", display_name: "Bea", email: "bea@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null },
     ],
     children: [
-      { id: PIP_ID, account_id: SAM_ID, nickname: "Pirate Pip", avatar_key: "pirate", age_years: 7, created_at: "2026-11-17T00:00:00.000Z" },
-      { id: LOU_ID, account_id: SAM_ID, nickname: "Captain Lou", avatar_key: "captain", age_years: 4, created_at: "2026-11-18T00:00:00.000Z" },
-      { id: MO_ID, account_id: SAM_ID, nickname: "Magpie Mo", avatar_key: "magpie", age_years: 5, created_at: "2026-11-19T00:00:00.000Z" },
+      { id: LOU_ID, account_id: SAM_ID, first_name: "Lou", nickname: "wigglyfrog44", avatar_key: "captain", age_years: 4, created_at: "2026-01-15T00:00:00.000Z" },
+      { id: MO_ID, account_id: SAM_ID, first_name: "Mo", nickname: "zestyowl21", avatar_key: "owl", age_years: 5, created_at: "2026-04-11T00:00:00.000Z" },
+      { id: ARIA_ID, account_id: SAM_ID, first_name: "Aria", nickname: "sparklybee18", avatar_key: "astronaut", age_years: 9, created_at: "2026-05-20T00:00:00.000Z" },
+      { id: NOAH_ID, account_id: SAM_ID, first_name: "Noah", nickname: "zippykiwi10", avatar_key: "dino", age_years: 6, created_at: "2026-06-08T00:00:00.000Z" },
+      { id: PIP_ID, account_id: SAM_ID, first_name: "Pip", nickname: "sunnycomet12", avatar_key: "explorer", age_years: 7, created_at: "2026-02-01T00:00:00.000Z" },
       { id: "c1000000-0000-4000-8000-000000000004", account_id: "a1000000-0000-4000-8000-000000000003", nickname: "Star Scout", avatar_key: "star", age_years: 8, created_at: "2026-11-10T00:00:00.000Z" },
       { id: "c1000000-0000-4000-8000-000000000005", account_id: "a1000000-0000-4000-8000-000000000004", nickname: "Dino Dex", avatar_key: "dino", age_years: 6, created_at: "2026-11-11T00:00:00.000Z" },
       { id: "c1000000-0000-4000-8000-000000000006", account_id: "a1000000-0000-4000-8000-000000000005", nickname: "Cosmic Bea", avatar_key: "astronaut", age_years: 5, created_at: "2026-11-12T00:00:00.000Z" },
@@ -361,21 +375,26 @@ export function createSeed(): DemoDb {
       { id: "z2", title: "50% off a pack", detail: "A code in the shop", sort_order: 2 },
       { id: "z3", title: "Certificate + stickers", detail: "Posted to your door", sort_order: 3 },
     ],
-    ownership: [
-      { account_id: SAM_ID, pack_id: pirate, source: "seed", granted_at: new Date().toISOString() },
-      { account_id: SAM_ID, pack_id: egypt, source: "seed", granted_at: new Date().toISOString() },
-      { account_id: SAM_ID, pack_id: spy, source: "seed", granted_at: new Date().toISOString() },
-    ],
+    ownership: [pirate, egypt, spy, knight, space].map((packId) => ({
+      account_id: SAM_ID,
+      pack_id: packId,
+      source: "seed",
+      granted_at: new Date().toISOString(),
+    })),
     events: [],
-    certificates: [],
+    certificates,
   };
 }
 
-type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb };
+const SEED_VERSION = 2;
+type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {
   const g = globalThis as GlobalDemo;
-  if (!g.__ctcDemo) g.__ctcDemo = createSeed();
+  if (!g.__ctcDemo || g.__ctcDemoVersion !== SEED_VERSION) {
+    g.__ctcDemo = createSeed();
+    g.__ctcDemoVersion = SEED_VERSION;
+  }
   return g.__ctcDemo;
 }
 
