@@ -534,7 +534,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                   <ChoiceRow legend="Mouth" value={avatarDraft.mouth} options={AVATAAARS_MOUTHS} onChange={(mouth) => setAvatarDraft({ ...avatarDraft, mouth })} className="mt-3" />
                   <ChoiceRow legend="Glasses" value={avatarDraft.accessory} options={AVATAAARS_ACCESSORIES} onChange={(accessory) => setAvatarDraft({ ...avatarDraft, accessory })} className="mt-3" />
                   {avatarDraft.accessory !== "none" && (
-                    <ColourRow legend="Glasses colour" value={avatarDraft.accessoryColor} colours={ACCESSORY_COLOURS} onChange={(accessoryColor) => setAvatarDraft({ ...avatarDraft, accessoryColor })} className="mt-3" />
+                    <ColourRow legend={avatarDraft.accessory === "eyepatch" ? "Eye patch colour" : "Glasses colour"} value={avatarDraft.accessoryColor} colours={ACCESSORY_COLOURS} onChange={(accessoryColor) => setAvatarDraft({ ...avatarDraft, accessoryColor })} className="mt-3" />
                   )}
                   <ColourRow legend="Clothes colour" value={avatarDraft.clothesColor} colours={CLOTHES_COLOURS} onChange={(clothesColor) => setAvatarDraft({ ...avatarDraft, clothesColor })} className="mt-3" />
                 </div>
