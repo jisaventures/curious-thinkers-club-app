@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { checkNickname, completeOnboarding } from "@/app/onboarding/actions";
 import { FamilyAvatar } from "@/components/brand/family-avatar";
+import { GROUP_ICONS, GroupIcon, type GroupIconId } from "@/components/brand/group-icon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +22,7 @@ import {
 import { BirthdayPicker } from "@/components/onboarding/birthday-picker";
 import { ageFromBirthday, isBirthdayAllowed } from "@/lib/birthday";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
-import { childFirstNameProblem, isUnsafeChildName } from "@/lib/unsafe-language";
+import { childFirstNameProblem, groupNameProblem, isUnsafeChildName } from "@/lib/unsafe-language";
 import { Check, ChevronLeft, ChevronRight, Info, Mars, RefreshCw, Rocket, Trophy, Venus, X } from "lucide-react";
 
 type Gender = "boy" | "girl" | "unspecified";
@@ -37,6 +38,10 @@ type ChildDraft = {
 };
 
 type Screen = "welcome" | "family" | "details";
+type GroupType = "Family" | "School" | "Team" | "Club" | "Homeschool" | "Other";
+type GroupIconDraft = { icon: GroupIconId; background: string; colour: string };
+
+const GROUP_TYPES: GroupType[] = ["Family", "School", "Team", "Club", "Homeschool", "Other"];
 
 const stepCard = "mx-auto w-full rounded-[28px] bg-white p-5 shadow-sm sm:p-7";
 
@@ -71,7 +76,7 @@ const emptyChild = (): ChildDraft => ({
   nicknameMessage: "",
 });
 
-export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | null }) {
+export function OnboardingWizard({ shopFirstName, shopLocation }: { shopFirstName: string | null; shopLocation: string }) {
   const [screen, setScreen] = useState<Screen>("welcome");
   const [terms, setTerms] = useState(true);
   const [count, setCount] = useState(1);
@@ -82,12 +87,18 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   const [celebrating, setCelebrating] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [avatarDraft, setAvatarDraft] = useState<AvatarBuild | null>(null);
+  const [groupName, setGroupName] = useState("");
+  const [groupType, setGroupType] = useState<GroupType | "">("");
+  const [leaderName, setLeaderName] = useState(shopFirstName ?? "");
+  const [groupIcon, setGroupIcon] = useState<GroupIconDraft>({ icon: "star", background: "8fce78", colour: "f0b429" });
+  const [groupAvatarOpen, setGroupAvatarOpen] = useState(false);
+  const [groupAvatarDraft, setGroupAvatarDraft] = useState<GroupIconDraft | null>(null);
   const tabsRef = useRef<HTMLOListElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
   const child = children[editing];
-  const progressLabels = ["Welcome", "Create Family", ...Array.from({ length: count }, (_, index) => `Child ${index + 1} Profile`)];
+  const progressLabels = ["Welcome", "Create Group", ...Array.from({ length: count }, (_, index) => `Child ${index + 1} Profile`)];
   const progress = screen === "welcome" ? 0 : screen === "family" ? 1 : 2 + editing;
 
   const siblingNames = useMemo(
@@ -205,7 +216,16 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
     setMessage(null);
     const result = await completeOnboarding({
       adult: true,
-      children: children.slice(0, count).map((item) => ({
+        group: {
+          name: groupName.trim(),
+          type: groupType,
+          location: shopLocation,
+          leaderName: leaderName.trim(),
+          icon: groupIcon.icon,
+          background: groupIcon.background,
+          colour: groupIcon.colour,
+        },
+        children: children.slice(0, count).map((item) => ({
         firstName: item.firstName.trim().slice(0, 15),
         nickname: item.nickname.trim(),
         ageYears: ageFromBirthday(item.birthday) ?? 0,
@@ -315,22 +335,62 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
       {screen === "family" && (
         <section className={stepCard}>
-          <h1 className="step-title text-4xl">How many children are in the group?</h1>
-          <p className="mt-3 text-base leading-relaxed text-[#5e7266] lg:text-xl">
-            You can add up to 5 children on this account. You don&apos;t have to add everyone now. More can be added later.
-          </p>
-          <div className="mt-5 grid grid-cols-5 gap-2">
-            {[1, 2, 3, 4, 5].map((value) => (
-              <button
-                key={value}
-                type="button"
-                aria-pressed={count === value}
-                onClick={() => resize(value)}
-                className={`count-pick flex h-16 items-center justify-center rounded-2xl sm:h-24 ${count === value ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
-              >
-                {value}
-              </button>
-            ))}
+          <h1 className="step-title text-4xl lg:text-3xl">{groupName.trim() && !groupNameProblem(groupName) ? groupName.trim() : "Create group"}</h1>
+          <div className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 lg:mt-3 lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] lg:gap-4">
+            <button
+              type="button"
+              onClick={() => {
+                setGroupAvatarDraft(groupIcon);
+                setGroupAvatarOpen(true);
+              }}
+              className="group relative size-40 shrink-0 overflow-hidden rounded-[28px] justify-self-center sm:size-44 lg:row-span-2 lg:size-50"
+              aria-label="Edit group icon"
+            >
+              <GroupIcon icon={groupIcon.icon} background={groupIcon.background} colour={groupIcon.colour} className="size-full" title="Group icon" />
+              <span className="pointer-events-none absolute inset-0 bg-black/0 transition group-hover:bg-black/45" />
+              <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent pt-6 pb-2 text-center text-sm font-extrabold text-white">
+                Edit
+              </span>
+            </button>
+            <div className="flex min-w-0 flex-col">
+              <Label htmlFor="groupName" className="mb-2 flex h-5 items-center">Group name<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
+              <Input id="groupName" value={groupName} onChange={(event) => setGroupName(event.target.value.replace(/\s+/g, " ").slice(0, 32))} maxLength={32} autoComplete="off" aria-invalid={Boolean(groupNameProblem(groupName))} className="lg:h-14" />
+              {groupNameProblem(groupName) && <p className="mt-1 text-sm font-bold text-[#8a4b3a]">{groupNameProblem(groupName)}</p>}
+            </div>
+            <div className="col-span-2 flex min-w-0 flex-col lg:col-span-1 lg:col-start-2 lg:row-start-2">
+              <Label htmlFor="groupLocation" className="mb-2 flex h-5 items-center">Location</Label>
+              <Input id="groupLocation" value={shopLocation} disabled />
+            </div>
+            <div className="col-span-2 flex min-w-0 flex-col lg:col-span-1 lg:col-start-3 lg:row-start-1">
+              <Label htmlFor="groupType" className="mb-2 flex h-5 items-center">Group type<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
+              <select id="groupType" value={groupType} onChange={(event) => setGroupType(event.target.value as GroupType)} className="h-12 w-full rounded-2xl border border-[#eadfce] bg-white px-4 text-base text-[#173528] outline-none focus:border-[#1e4d3a] focus:ring-2 focus:ring-[#1e4d3a]/20 lg:h-14">
+                <option value="">Choose a type</option>
+                {GROUP_TYPES.map((type) => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+            <div className="col-span-2 flex min-w-0 flex-col lg:col-span-1 lg:col-start-3 lg:row-start-2">
+              <Label htmlFor="leaderName" className="mb-2 flex h-5 items-center">Group leader name<span className="ml-0.5 text-xs text-[#c45b73]" aria-hidden="true">*</span></Label>
+              <Input id="leaderName" value={leaderName} onChange={(event) => setLeaderName(event.target.value.replace(/\s+/g, "").slice(0, 15))} maxLength={15} autoComplete="off" aria-invalid={Boolean(childFirstNameProblem(leaderName))} className="lg:h-14" />
+              {childFirstNameProblem(leaderName) && <p className="mt-1 text-sm font-bold text-[#8a4b3a]">{childFirstNameProblem(leaderName)}</p>}
+            </div>
+          </div>
+          <div className="mt-5">
+            <p className="text-sm font-extrabold text-[#1e4d3a]">How many children are in the group?</p>
+            <div className="mt-2 grid grid-cols-5 gap-2">
+              {[1, 2, 3, 4, 5].map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={count === value}
+                  onClick={() => resize(value)}
+                  className={`count-pick flex h-12 items-center justify-center rounded-2xl sm:h-14 ${count === value ? "bg-[#1e4d3a] text-white" : "bg-[#f6efe2] text-[#1e4d3a]"}`}
+                >
+                  {value}
+                </button>
+              ))}
+            </div>
           </div>
         </section>
       )}
@@ -464,6 +524,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               variant="mustard"
               size="lg"
               className="footer-cta gap-2"
+              disabled={!groupName.trim() || Boolean(groupNameProblem(groupName)) || !groupType || !leaderName.trim() || Boolean(childFirstNameProblem(leaderName))}
               onClick={() => {
                 setEditing(0);
                 setMessage(null);
@@ -496,6 +557,66 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             avatar: item.avatar,
           }))}
         />
+      )}
+
+      {groupAvatarOpen && groupAvatarDraft && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setGroupAvatarOpen(false);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="group-avatar-title"
+            className="relative flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-[28px] bg-white shadow-xl"
+            onKeyDown={(event) => {
+              if (event.key === "Escape") setGroupAvatarOpen(false);
+            }}
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-[#eadfce] bg-white px-5 py-4 sm:px-6">
+              <h2 id="group-avatar-title" className="step-title text-3xl">Edit group icon</h2>
+              <button type="button" onClick={() => setGroupAvatarOpen(false)} className="rounded-full p-2 text-[#1e4d3a] hover:bg-[#f6efe2]" aria-label="Close">
+                <X className="size-5" />
+              </button>
+            </div>
+            <div className="avatar-modal-scroll min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6">
+              <div className="grid items-start gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+                <div className="lg:self-stretch lg:border-r lg:border-[#b9b5ad] lg:pr-5">
+                  <div className="flex justify-center rounded-[24px] bg-[#f6efe2] p-3">
+                    <GroupIcon icon={groupAvatarDraft.icon} background={groupAvatarDraft.background} colour={groupAvatarDraft.colour} className="h-40 w-40 rounded-[24px]" title="Group icon preview" />
+                  </div>
+                  <ColourRow legend="Background" value={groupAvatarDraft.background} colours={AVATAR_COLOURS} onChange={(background) => setGroupAvatarDraft({ ...groupAvatarDraft, background })} className="mt-3" />
+                  <ColourRow legend="Icon colour" value={groupAvatarDraft.colour} colours={CLOTHES_COLOURS} onChange={(colour) => setGroupAvatarDraft({ ...groupAvatarDraft, colour })} className="mt-3" />
+                </div>
+                <fieldset>
+                  <legend className="text-sm font-extrabold text-[#1e4d3a]">Icon</legend>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {GROUP_ICONS.map((icon) => (
+                      <button
+                        key={icon}
+                        type="button"
+                        aria-label={icon}
+                        aria-pressed={groupAvatarDraft.icon === icon}
+                        onClick={() => setGroupAvatarDraft({ ...groupAvatarDraft, icon })}
+                        className={`size-16 overflow-hidden rounded-2xl ${groupAvatarDraft.icon === icon ? "ring-2 ring-[#173528]" : ""}`}
+                      >
+                        <GroupIcon icon={icon} background={groupAvatarDraft.background} colour={groupAvatarDraft.colour} className="size-full" />
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+            <div className="border-t border-[#eadfce] bg-white px-5 py-4 sm:px-6">
+              <Button type="button" variant="mustard" size="lg" className="w-full" onClick={() => { setGroupIcon(groupAvatarDraft); setGroupAvatarOpen(false); }}>
+                Save
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {avatarOpen && avatarDraft && (

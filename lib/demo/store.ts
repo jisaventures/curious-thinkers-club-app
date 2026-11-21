@@ -19,6 +19,12 @@ export type DemoAccount = {
   role: "member" | "admin";
   shopify_customer_id: string | null;
   region?: string;
+  group_name?: string;
+  group_type?: string;
+  group_location?: string;
+  group_icon?: string;
+  group_icon_colour?: string;
+  group_bg?: string;
 };
 
 export type DemoChild = {
@@ -601,6 +607,14 @@ export function nicknameTaken(nickname: string) {
 
 export function createDemoFamily(input: {
   parentName: string;
+  group?: {
+    name: string;
+    type: string;
+    location: string;
+    icon: string;
+    background: string;
+    colour: string;
+  };
   children: Array<{
     firstName: string;
     nickname: string;
@@ -635,6 +649,12 @@ export function createDemoFamily(input: {
     is_adult_confirmed: true,
     role: "member",
     shopify_customer_id: null,
+    group_name: input.group?.name,
+    group_type: input.group?.type,
+    group_location: input.group?.location,
+    group_icon: input.group?.icon,
+    group_icon_colour: input.group?.colour,
+    group_bg: input.group?.background,
   });
   const childIds = input.children.map((child) => {
     const id = crypto.randomUUID();

@@ -4,7 +4,7 @@ import { OnboardingWizard } from "@/components/onboarding/wizard";
 import { AppShell } from "@/components/brand/shell";
 import { requireUser } from "@/lib/auth/session";
 import { isDemoMode } from "@/lib/demo/mode";
-import { firstNameFromShopAccount } from "@/lib/auth/shopify";
+import { firstNameFromShopAccount, locationFromShopifyAddress } from "@/lib/auth/shopify";
 import { demoAccountFromCookie } from "@/lib/demo/view";
 
 export default async function OnboardingPage() {
@@ -14,7 +14,7 @@ export default async function OnboardingPage() {
     if (account?.is_adult_confirmed) redirect(account.role === "admin" ? "/admin" : "/club");
     return (
       <AppShell account={null} hideShop centered onboarding>
-        <OnboardingWizard shopFirstName={firstNameFromShopAccount(account?.display_name)} />
+        <OnboardingWizard shopFirstName={firstNameFromShopAccount(account?.display_name)} shopLocation={locationFromShopifyAddress(null)} />
       </AppShell>
     );
   }
@@ -24,7 +24,7 @@ export default async function OnboardingPage() {
   if (account?.is_adult_confirmed) redirect("/club");
   return (
     <AppShell account={account} hideShop centered onboarding>
-      <OnboardingWizard shopFirstName={firstNameFromShopAccount(account?.display_name)} />
+      <OnboardingWizard shopFirstName={firstNameFromShopAccount(account?.display_name)} shopLocation={locationFromShopifyAddress(null)} />
     </AppShell>
   );
 }

@@ -146,3 +146,11 @@ export function childFirstNameProblem(value: string) {
   if (!/^[A-Za-z][A-Za-z'-]{0,14}$/.test(name)) return "Use a first name, without spaces or a surname.";
   return "";
 }
+
+export function groupNameProblem(value: string) {
+  const name = value.trim();
+  if (!name) return "";
+  if (isUnsafeChildName(name)) return "Choose a kinder group name.";
+  if (!/^[A-Za-z][A-Za-z' -]{1,31}$/.test(name)) return "Use letters only, up to 32 characters.";
+  return "";
+}
