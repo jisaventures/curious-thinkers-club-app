@@ -9,6 +9,7 @@ import { isDemoMode } from "@/lib/demo/mode";
 import {
   demoAddChild,
   demoDeleteChild,
+  demoUpdateGroupProfile,
   demoMark,
   demoMarkNext,
   demoMarkNextResult,
@@ -20,11 +21,34 @@ import {
 import { authCookieOptions } from "@/lib/env";
 import { nextStepPosition } from "@/lib/progress";
 import { friendlyError } from "@/lib/utils";
+import { groupNameProblem, childFirstNameProblem } from "@/lib/unsafe-language";
 import { childInputSchema, uuidSchema } from "@/lib/validators";
 
 function text(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value : "";
+}
+
+export async function updateGroupProfile(formData: FormData) {
+  const { account } = await requireAdult();
+  const groupName = text(formData, "groupName").replace(/\s+/g, " ").trim().slice(0, 32);
+  const leaderName = text(formData, "leaderName").replace(/\s+/g, "").trim().slice(0, 15);
+  if (!groupName || groupNameProblem(groupName)) {
+    return { error: groupNameProblem(groupName) || "Add a group name." };
+  }
+  if (!leaderName || childFirstNameProblem(leaderName)) {
+    return { error: childFirstNameProblem(leaderName) || "Add the group leader's first name." };
+  }
+  if (isDemoMode()) return demoUpdateGroupProfile(account.id, groupName, leaderName);
+  const { supabase } = await requireAdult();
+  const { error } = await supabase
+    .from("accounts")
+    .update({ group_name: groupName, display_name: leaderName })
+    .eq("id", account.id);
+  if (error) return { error: friendlyError(error.message) };
+  revalidatePath("/club");
+  revalidatePath("/club/group");
+  return { ok: true as const, groupName, leaderName };
 }
 
 export async function addChild(formData: FormData) {

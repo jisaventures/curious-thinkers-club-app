@@ -129,6 +129,26 @@ export type DemoOwnership = {
   granted_at: string;
 };
 
+export type DemoOrderItem = {
+  title: string;
+  quantity: number;
+  price: string;
+};
+
+export type DemoOrder = {
+  id: string;
+  account_id: string;
+  name: string;
+  created_at: string;
+  financial_status: "paid" | "refunded";
+  fulfillment_status: "fulfilled" | "unfulfilled" | "partial";
+  currency: "GBP";
+  total: string;
+  email: string;
+  shipping_country: string;
+  items: DemoOrderItem[];
+};
+
 export type DemoEvent = {
   id: string;
   email: string | null;
@@ -151,6 +171,7 @@ export type DemoDb = {
   prizes: DemoPrize[];
   ownership: DemoOwnership[];
   events: DemoEvent[];
+  orders: DemoOrder[];
   certificates: Array<{ child_id: string; pack_id: string }>;
 };
 
@@ -436,7 +457,7 @@ export function createSeed(): DemoDb {
         email: "sam@demo.curiousthinkersclub.test",
         is_adult_confirmed: true,
         role: "member",
-        shopify_customer_id: null,
+        shopify_customer_id: "1001",
         region: "Europe",
         group_name: "Sam's Club",
         group_type: "Family",
@@ -501,11 +522,55 @@ export function createSeed(): DemoDb {
       granted_at: new Date().toISOString(),
     })),
     events: [],
+    orders: [
+      {
+        id: "1048",
+        account_id: SAM_ID,
+        name: "#1048",
+        created_at: "2026-10-12T11:20:00.000Z",
+        financial_status: "paid",
+        fulfillment_status: "fulfilled",
+        currency: "GBP",
+        total: "12.00",
+        email: "sam@demo.curiousthinkersclub.test",
+        shipping_country: "United Kingdom",
+        items: [{ title: "Be a pirate for the day", quantity: 1, price: "12.00" }],
+      },
+      {
+        id: "1062",
+        account_id: SAM_ID,
+        name: "#1062",
+        created_at: "2026-11-02T15:05:00.000Z",
+        financial_status: "paid",
+        fulfillment_status: "fulfilled",
+        currency: "GBP",
+        total: "12.00",
+        email: "sam@demo.curiousthinkersclub.test",
+        shipping_country: "United Kingdom",
+        items: [{ title: "Be an Egyptian explorer", quantity: 1, price: "12.00" }],
+      },
+      {
+        id: "1081",
+        account_id: SAM_ID,
+        name: "#1081",
+        created_at: "2026-11-18T09:40:00.000Z",
+        financial_status: "paid",
+        fulfillment_status: "unfulfilled",
+        currency: "GBP",
+        total: "24.00",
+        email: "sam@demo.curiousthinkersclub.test",
+        shipping_country: "United Kingdom",
+        items: [
+          { title: "Be a space explorer", quantity: 1, price: "12.00" },
+          { title: "Become a spy", quantity: 1, price: "12.00" },
+        ],
+      },
+    ],
     certificates,
   };
 }
 
-const SEED_VERSION = 7;
+const SEED_VERSION = 8;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {

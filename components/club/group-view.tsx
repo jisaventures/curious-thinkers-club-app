@@ -1,27 +1,45 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ArrowLeft, BarChart3, ClipboardList, Users } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, BarChart3, ClipboardList, Lock, ShoppingBag, UserRound, Users } from "lucide-react";
 import Link from "next/link";
+import { updateGroupProfile } from "@/app/club/actions";
 import { Avatar } from "@/components/brand/avatar";
 import { BirthdayPicker } from "@/components/onboarding/birthday-picker";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { formatWhen, shortName } from "@/lib/format";
 import { toIsoDate } from "@/lib/birthday";
 import { colourForChild, memberColour } from "@/lib/member-colour";
 import type { loadDashboard } from "@/lib/club/data";
 
 type DashboardData = Awaited<ReturnType<typeof loadDashboard>>;
-type Section = "users" | "activity" | "reports";
+type Section = "profile" | "orders" | "users" | "activity" | "reports";
+
+type ClubOrder = {
+  id: string;
+  name: string;
+  createdAt: string;
+  financialStatus: string;
+  fulfillmentStatus: string;
+  currency: string;
+  total: string;
+  email: string;
+  shippingCountry: string;
+  items: { title: string; quantity: number; price: string }[];
+  shopUrl: string;
+};
 
 export function GroupView({ data }: { data: DashboardData }) {
-  const [section, setSection] = useState<Section>("users");
+  const [section, setSection] = useState<Section>("profile");
   const [nameFilter, setNameFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("");
   useEffect(() => {
     const read = () => {
       const hash = window.location.hash.replace("#", "");
-      if (hash === "users" || hash === "activity" || hash === "reports") setSection(hash);
+      if (hash === "profile" || hash === "orders" || hash === "users" || hash === "activity" || hash === "reports") setSection(hash);
     };
     read();
     window.addEventListener("hashchange", read);
@@ -47,6 +65,14 @@ export function GroupView({ data }: { data: DashboardData }) {
         </Link>
         <hr className="my-3 h-px border-0 bg-[#306A51]/30" />
         <nav className="group-nav flex flex-col gap-2" aria-label="My Group">
+          <Button type="button" variant={section === "profile" ? "green" : "white"} size="md" onClick={() => choose("profile")}>
+            <UserRound className="size-5 shrink-0" aria-hidden="true" />
+            Profile
+          </Button>
+          <Button type="button" variant={section === "orders" ? "green" : "white"} size="md" onClick={() => choose("orders")}>
+            <ShoppingBag className="size-5 shrink-0" aria-hidden="true" />
+            Orders
+          </Button>
           <Button type="button" variant={section === "users" ? "green" : "white"} size="md" onClick={() => choose("users")}>
             <Users className="size-5 shrink-0" aria-hidden="true" />
             Members
@@ -61,6 +87,10 @@ export function GroupView({ data }: { data: DashboardData }) {
           </Button>
         </nav>
       </div>
+
+      {section === "profile" && <ProfileSection data={data} />}
+
+      {section === "orders" && <OrdersSection />}
 
       {section === "users" && (
         <section id="users" className="space-y-3">
@@ -161,6 +191,164 @@ export function GroupView({ data }: { data: DashboardData }) {
       )}
     </div>
   );
+}
+
+function ProfileSection({ data }: { data: DashboardData }) {
+  const router = useRouter();
+  const { account } = data;
+  const [groupName, setGroupName] = useState(account.group_name || "");
+  const [leaderName, setLeaderName] = useState(account.display_name);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+
+  async function save(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPending(true);
+    setMessage(null);
+    setError(null);
+    const body = new FormData();
+    body.set("groupName", groupName);
+    body.set("leaderName", leaderName);
+    const result = await updateGroupProfile(body);
+    setPending(false);
+    if ("error" in result && result.error) {
+      setError(result.error);
+      return;
+    }
+    if (result.ok) {
+      setGroupName(result.groupName);
+      setLeaderName(result.leaderName);
+      setMessage("Saved");
+      router.refresh();
+    }
+  }
+
+  return (
+    <section id="profile" className="rounded-[22px] bg-white p-5 sm:p-6">
+      <form className="space-y-4" onSubmit={save}>
+        <div>
+          <Label htmlFor="groupName">Group name</Label>
+          <Input id="groupName" className="mt-1" value={groupName} onChange={(event) => setGroupName(event.target.value.replace(/\s+/g, " ").slice(0, 32))} maxLength={32} autoComplete="off" />
+        </div>
+        <div>
+          <Label htmlFor="leaderName">Group leader first name</Label>
+          <Input id="leaderName" className="mt-1" value={leaderName} onChange={(event) => setLeaderName(event.target.value.replace(/\s+/g, "").slice(0, 15))} maxLength={15} autoComplete="given-name" />
+        </div>
+        <div>
+          <Label htmlFor="shopEmail" className="flex items-center gap-1.5">
+            <Lock className="size-3.5" aria-hidden="true" />
+            Shop email
+          </Label>
+          <Input id="shopEmail" className="mt-1" value={account.email} disabled readOnly />
+          <p className="mt-1 text-xs font-semibold text-[#5e7266]">This is the email on the Shopify account. It cannot be changed here.</p>
+        </div>
+        {error && <p className="text-sm font-bold text-[#8a4b3a]">{error}</p>}
+        {message && <p className="text-sm font-bold text-[#306A51]">{message}</p>}
+        <Button type="submit" variant="mustard" size="lg" disabled={pending}>
+          {pending ? "Saving…" : "Save profile"}
+        </Button>
+      </form>
+    </section>
+  );
+}
+
+function OrdersSection() {
+  const [orders, setOrders] = useState<ClubOrder[] | null>(null);
+  const [shopAccountUrl, setShopAccountUrl] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/club/orders")
+      .then((response) => {
+        if (!response.ok) throw new Error("orders");
+        return response.json() as Promise<{ orders: ClubOrder[]; shopAccountUrl?: string }>;
+      })
+      .then((body) => {
+        if (cancelled) return;
+        setOrders(body.orders);
+        setShopAccountUrl(body.shopAccountUrl ?? "");
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const open = orders?.find((order) => order.id === openId) ?? null;
+
+  return (
+    <section id="orders" className="space-y-3">
+      {failed && <p className="rounded-2xl bg-white p-4 text-sm text-[#5e7266]">Orders could not be loaded.</p>}
+      {orders && orders.length === 0 && <p className="rounded-2xl bg-white p-4 text-sm text-[#5e7266]">No shop orders yet.</p>}
+      {orders === null && !failed && <p className="rounded-2xl bg-white p-4 text-sm text-[#5e7266]">Loading orders…</p>}
+      <ul className="space-y-3">
+        {orders?.map((order) => (
+          <li key={order.id} className="rounded-[22px] bg-white p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="font-display text-xl text-[#17352A]">{order.name}</p>
+                <p className="text-sm font-semibold text-[#5e7266]">{formatWhen(order.createdAt)} · {money(order.currency, order.total)} · {order.fulfillmentStatus}</p>
+              </div>
+              <Button type="button" variant={openId === order.id ? "green" : "white"} size="sm" onClick={() => setOpenId(openId === order.id ? null : order.id)}>
+                View order
+              </Button>
+            </div>
+          </li>
+        ))}
+      </ul>
+      {open && (
+        <article className="rounded-[22px] bg-white p-5">
+          <h2 className="font-display text-2xl text-[#17352A]">{open.name}</h2>
+          <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+            <Detail label="Placed" value={formatWhen(open.createdAt)} />
+            <Detail label="Payment" value={open.financialStatus} />
+            <Detail label="Delivery" value={open.fulfillmentStatus} />
+            <Detail label="Total" value={money(open.currency, open.total)} />
+            <Detail label="Ship to" value={open.shippingCountry} />
+            <Detail label="Shop email" value={open.email} />
+          </dl>
+          <ul className="mt-4 space-y-2">
+            {open.items.map((item) => (
+              <li key={item.title} className="flex items-center justify-between gap-3 rounded-2xl bg-[#f6efe2] px-3 py-2 text-sm font-bold text-[#17352A]">
+                <span>{item.title} × {item.quantity}</span>
+                <span>{money(open.currency, item.price)}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <a href={open.shopUrl} target="_blank" rel="noreferrer" data-variant="mustard" data-size="md" className="ctc-button">
+              Open in Shopify
+            </a>
+            {shopAccountUrl && (
+              <a href={shopAccountUrl} target="_blank" rel="noreferrer" data-variant="white" data-size="md" className="ctc-button">
+                Shopify account
+              </a>
+            )}
+          </div>
+        </article>
+      )}
+    </section>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-xs font-extrabold tracking-wide text-[#306A51] uppercase">{label}</dt>
+      <dd className="font-bold text-[#17352A]">{value}</dd>
+    </div>
+  );
+}
+
+function money(currency: string, amount: string) {
+  const value = Number(amount);
+  if (!Number.isFinite(value)) return amount;
+  return new Intl.NumberFormat("en-GB", { style: "currency", currency }).format(value);
 }
 
 function Stat({ label, value }: { label: string; value: string }) {

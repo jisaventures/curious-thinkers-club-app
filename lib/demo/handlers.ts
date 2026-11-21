@@ -16,6 +16,16 @@ function fail(path: string, message: string): never {
   redirect(`${path}?error=${encodeURIComponent(message)}`);
 }
 
+export async function demoUpdateGroupProfile(accountId: string, groupName: string, leaderName: string) {
+  const account = demoDb().accounts.find((item) => item.id === accountId);
+  if (!account) return { error: "Unknown account." };
+  account.group_name = groupName;
+  account.display_name = leaderName;
+  revalidatePath("/club");
+  revalidatePath("/club/group");
+  return { ok: true as const, groupName, leaderName };
+}
+
 export async function demoAddChild(accountId: string, formData: FormData) {
   const parsed = childInputSchema.safeParse({
     nickname: text(formData, "nickname"),
