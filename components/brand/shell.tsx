@@ -4,6 +4,7 @@ import { signOut } from "@/app/login/actions";
 import { isDemoMode } from "@/lib/demo/mode";
 import { shopUrl } from "@/lib/env";
 import type { AccountRecord } from "@/lib/auth/session";
+import { AccountMenu } from "@/components/brand/account-menu";
 import { LogoMark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 
@@ -51,7 +52,6 @@ export function AppShell({
 
 function ParentHeader({ account }: { account: AccountRecord | null }) {
   const name = account?.display_name?.trim() || "Parent";
-  const initial = name.slice(0, 1).toUpperCase();
   return (
     <header className="sticky top-0 z-40 bg-[#f6f1e6]">
       <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 sm:px-6">
@@ -83,40 +83,7 @@ function ParentHeader({ account }: { account: AccountRecord | null }) {
               Club shop
             </Link>
           </Button>
-          <details className="relative">
-            <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-[#eadfce] bg-white py-1 pr-2 pl-1 shadow-sm sm:pr-3 [&::-webkit-details-marker]:hidden">
-              <span className="flex size-8 items-center justify-center rounded-full bg-[#306A51] font-display text-sm font-bold text-white">{initial}</span>
-              <span className="hidden font-display text-base text-[#17352A] sm:inline">{name}</span>
-              <svg viewBox="0 0 20 20" className="size-4 text-[#306A51]" aria-hidden="true">
-                <path d="M5 7.5 10 12.5 15 7.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </summary>
-            <div className="absolute right-0 z-30 mt-2 w-48 rounded-2xl border border-[#eadfce] bg-white p-2 shadow-lg">
-              <Link href="/club/group" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
-                My Group
-              </Link>
-              <Link href="/club/leaderboard" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
-                Leaderboards
-              </Link>
-              <Link href="/club/rewards" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
-                Rewards
-              </Link>
-              <Link href="/club/uploads" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
-                Uploads
-              </Link>
-              <Link href="/club/children" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
-                Children
-              </Link>
-              {account?.role === "admin" && (
-                <Link href="/admin" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
-                  Admin
-                </Link>
-              )}
-              <form action={signOut}>
-                <button className="w-full rounded-xl px-3 py-2 text-left text-sm font-bold text-[#17352A] hover:bg-[#f6efe2]">Sign out</button>
-              </form>
-            </div>
-          </details>
+          <AccountMenu name={name} isAdmin={account?.role === "admin"} />
         </div>
       </div>
       <div className="border-b border-dashed border-[#306A51]/25" />

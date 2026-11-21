@@ -67,7 +67,7 @@ export function GroupView({ data }: { data: DashboardData }) {
           Dashboard
         </Link>
         <hr className="my-3 h-px border-0 bg-[#306A51]/30" />
-        <nav className="group-nav flex flex-col gap-2" aria-label="My Group">
+        <nav className="group-nav flex flex-col gap-4" aria-label="My Group">
           <Button type="button" variant={section === "profile" ? "green" : "white"} size="md" onClick={() => choose("profile")}>
             <UserRound className="size-5 shrink-0" aria-hidden="true" />
             Profile
