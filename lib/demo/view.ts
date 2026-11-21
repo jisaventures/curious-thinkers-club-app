@@ -19,6 +19,30 @@ const PACK_ORDER = [
   "be-a-space-explorer",
 ];
 
+function activityFeed(children: Array<{ id: string; first_name?: string; nickname: string }>, db: ReturnType<typeof demoDb>) {
+  const family = new Set(children.map((child) => child.id));
+  const names = new Map(children.map((child) => [child.id, child.first_name?.trim() || child.nickname.split(/\s+/).at(-1) || child.nickname]));
+  return db.progress
+    .filter((row) => row.status === "complete" && family.has(row.child_id))
+    .map((row) => {
+      const step = db.steps.find((item) => item.id === row.step_id);
+      const pack = db.packs.find((item) => item.id === step?.pack_id);
+      const name = names.get(row.child_id) ?? "Someone";
+      const finishedPack = step && pack && !db.steps.some((item) => item.pack_id === pack.id && item.position > step.position);
+      const summary = finishedPack
+        ? `${name} earned a stamp for the ${pack.title}.`
+        : `${name} finished ${step?.title ?? "a step"}${pack ? ` in ${pack.title}` : ""}.`;
+      return {
+        id: `${row.child_id}-${row.step_id}`,
+        childId: row.child_id,
+        childName: name,
+        summary,
+        at: row.completed_at ?? "",
+      };
+    })
+    .sort((a, b) => b.at.localeCompare(a.at));
+}
+
 function asAccount(account: DemoAccount): AccountRecord {
   return account;
 }
@@ -122,6 +146,7 @@ export async function demoDashboard(account: AccountRecord) {
     partial: null,
     doneByChild,
     nextStepByChild: nextTitles(children, db),
+    activities: activityFeed(children, db),
     pointsByChild,
     rewardLadder: rewards
       .filter((reward) => reward.active)
