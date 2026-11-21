@@ -343,12 +343,12 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             <button
               type="button"
               onClick={openAvatarModal}
-              className="group relative size-40 shrink-0 self-center overflow-hidden rounded-[28px] bg-[#f6efe2] justify-self-center sm:row-span-2 sm:size-44 lg:size-[50px] lg:rounded-xl"
+              className="group relative size-40 shrink-0 self-center overflow-hidden rounded-[28px] bg-[#f6efe2] justify-self-center sm:row-span-2 sm:size-44 lg:size-50"
               aria-label="Edit avatar"
             >
               <FamilyAvatar build={child.avatar} className="size-full" title="Child avatar" />
               <span className="pointer-events-none absolute inset-0 bg-black/0 transition group-hover:bg-black/45" />
-              <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent pt-6 pb-2 text-center text-sm font-extrabold text-white lg:pt-2 lg:pb-0.5 lg:text-[9px]">
+              <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent pt-6 pb-2 text-center text-sm font-extrabold text-white">
                 Edit
               </span>
             </button>
