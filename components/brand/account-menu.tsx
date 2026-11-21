@@ -53,7 +53,7 @@ export function AccountMenu({ name, isAdmin }: { name: string; isAdmin: boolean 
               </Link>
             )}
             <form action={signOut}>
-              <button type="submit" onClick={close} className="w-full rounded-xl px-3 py-2 text-left text-sm font-bold text-[#17352A] hover:bg-[#f6efe2]" role="menuitem">
+              <button type="submit" className="w-full rounded-xl px-3 py-2 text-left text-sm font-bold text-[#17352A] hover:bg-[#f6efe2]" role="menuitem">
                 Sign out
               </button>
             </form>

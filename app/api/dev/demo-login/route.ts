@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { authCookieOptions, demoLoginEnabled, siteUrl } from "@/lib/env";
 import { isDemoMode } from "@/lib/demo/mode";
+import { restoreSamDemo } from "@/lib/demo/store";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -24,6 +25,7 @@ export async function POST(request: Request) {
     if (persona !== "admin" && persona !== "guardian") {
       return NextResponse.json({ error: "Unknown demo." }, { status: 400 });
     }
+    if (persona === "guardian") restoreSamDemo();
     const next = persona === "admin" ? "/admin" : "/club";
     const response = NextResponse.redirect(`${siteUrl()}${next}`, { status: 303 });
     response.cookies.set("ctc_demo_persona", persona === "admin" ? "admin" : "sam", {

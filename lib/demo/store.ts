@@ -570,7 +570,7 @@ export function createSeed(): DemoDb {
   };
 }
 
-const SEED_VERSION = 8;
+const SEED_VERSION = 9;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {
@@ -582,8 +582,32 @@ export function demoDb() {
   return g.__ctcDemo;
 }
 
+const SAM_CHILD_IDS = new Set([PIP_ID, LOU_ID, MO_ID, ARIA_ID, NOAH_ID]);
+
 export function resetDemoDb() {
   (globalThis as GlobalDemo).__ctcDemo = createSeed();
+}
+
+/** Put the sample Sam family back without removing groups created afterwards. */
+export function restoreSamDemo() {
+  const fresh = createSeed();
+  const db = demoDb();
+  const sam = fresh.accounts.find((account) => account.id === SAM_ID);
+  if (!sam) return;
+  const index = db.accounts.findIndex((account) => account.id === SAM_ID);
+  if (index >= 0) db.accounts[index] = structuredClone(sam);
+  else db.accounts.unshift(structuredClone(sam));
+  const replace = <T extends { account_id?: string; child_id?: string }>(rows: T[], next: T[], owns: (row: T) => boolean) => [
+    ...next.filter(owns).map((row) => structuredClone(row)),
+    ...rows.filter((row) => !owns(row)),
+  ];
+  db.children = replace(db.children, fresh.children, (row) => row.account_id === SAM_ID);
+  db.orders = replace(db.orders, fresh.orders, (row) => row.account_id === SAM_ID);
+  db.ownership = replace(db.ownership, fresh.ownership, (row) => row.account_id === SAM_ID);
+  db.submissions = replace(db.submissions, fresh.submissions, (row) => row.account_id === SAM_ID);
+  db.progress = replace(db.progress, fresh.progress, (row) => SAM_CHILD_IDS.has(row.child_id ?? ""));
+  db.ledger = replace(db.ledger, fresh.ledger, (row) => row.account_id === SAM_ID || SAM_CHILD_IDS.has(row.child_id ?? ""));
+  db.certificates = replace(db.certificates, fresh.certificates, (row) => SAM_CHILD_IDS.has(row.child_id ?? ""));
 }
 
 export function accountById(id: string) {
