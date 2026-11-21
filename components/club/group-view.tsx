@@ -8,6 +8,7 @@ import { updateGroupProfile } from "@/app/club/actions";
 import { Avatar } from "@/components/brand/avatar";
 import { BirthdayPicker } from "@/components/onboarding/birthday-picker";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatWhen, shortName } from "@/lib/format";
@@ -294,44 +295,48 @@ function OrdersSection() {
                 <p className="font-display text-xl text-[#17352A]">{order.name}</p>
                 <p className="text-sm font-semibold text-[#5e7266]">{formatWhen(order.createdAt)} · {money(order.currency, order.total)} · {order.fulfillmentStatus}</p>
               </div>
-              <Button type="button" variant={openId === order.id ? "green" : "white"} size="sm" onClick={() => setOpenId(openId === order.id ? null : order.id)}>
+              <Button type="button" variant="white" size="sm" onClick={() => setOpenId(order.id)}>
                 View order
               </Button>
             </div>
           </li>
         ))}
       </ul>
-      {open && (
-        <article className="rounded-[22px] bg-white p-5">
-          <h2 className="font-display text-2xl text-[#17352A]">{open.name}</h2>
-          <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
-            <Detail label="Placed" value={formatWhen(open.createdAt)} />
-            <Detail label="Payment" value={open.financialStatus} />
-            <Detail label="Delivery" value={open.fulfillmentStatus} />
-            <Detail label="Total" value={money(open.currency, open.total)} />
-            <Detail label="Ship to" value={open.shippingCountry} />
-            <Detail label="Shop email" value={open.email} />
-          </dl>
-          <ul className="mt-4 space-y-2">
-            {open.items.map((item) => (
-              <li key={item.title} className="flex items-center justify-between gap-3 rounded-2xl bg-[#f6efe2] px-3 py-2 text-sm font-bold text-[#17352A]">
-                <span>{item.title} × {item.quantity}</span>
-                <span>{money(open.currency, item.price)}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <a href={open.shopUrl} target="_blank" rel="noreferrer" data-variant="mustard" data-size="md" className="ctc-button">
-              Open in Shopify
-            </a>
-            {shopAccountUrl && (
-              <a href={shopAccountUrl} target="_blank" rel="noreferrer" data-variant="white" data-size="md" className="ctc-button">
-                Shopify account
-              </a>
-            )}
-          </div>
-        </article>
-      )}
+      <Dialog open={Boolean(open)} onOpenChange={(next) => { if (!next) setOpenId(null); }}>
+        <DialogContent className="w-[min(100%-1.5rem,36rem)]" aria-describedby={undefined}>
+          {open && (
+            <>
+              <DialogTitle>{open.name}</DialogTitle>
+              <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
+                <Detail label="Placed" value={formatWhen(open.createdAt)} />
+                <Detail label="Payment" value={open.financialStatus} />
+                <Detail label="Delivery" value={open.fulfillmentStatus} />
+                <Detail label="Total" value={money(open.currency, open.total)} />
+                <Detail label="Ship to" value={open.shippingCountry} />
+                <Detail label="Shop email" value={open.email} />
+              </dl>
+              <ul className="mt-4 space-y-2">
+                {open.items.map((item) => (
+                  <li key={item.title} className="flex items-center justify-between gap-3 rounded-2xl bg-[#f6efe2] px-3 py-2 text-sm font-bold text-[#17352A]">
+                    <span>{item.title} × {item.quantity}</span>
+                    <span>{money(open.currency, item.price)}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <a href={open.shopUrl} target="_blank" rel="noreferrer" data-variant="mustard" data-size="md" className="ctc-button">
+                  Open in Shopify
+                </a>
+                {shopAccountUrl && (
+                  <a href={shopAccountUrl} target="_blank" rel="noreferrer" data-variant="white" data-size="md" className="ctc-button">
+                    Shopify account
+                  </a>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

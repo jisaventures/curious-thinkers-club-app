@@ -441,17 +441,11 @@ select {
 .header-pill[data-variant="green"] {
   background: var(--ctc-green);
   box-shadow: 0 5px 0 var(--ctc-green-deeper);
-  transform: rotate(2.4deg);
 }
 
 .leaderboard-link {
   background: #e56b93;
   box-shadow: 0 5px 0 #c44b73, 0 8px 16px rgba(196, 75, 115, 0.25);
-  transform: rotate(-3.2deg);
-}
-
-.header-shop.ctc-button {
-  transform: rotate(1.5deg);
 }
 
 .leaderboard-link:focus-visible {
