@@ -70,6 +70,10 @@ export function monthLabel(date: Date) {
   return MONTHS[date.getMonth()];
 }
 
+export function birthdayMonths() {
+  return MONTHS;
+}
+
 export function birthdayYears(today = new Date()) {
   const { earliest, latest } = birthdayBounds(today);
   const years: number[] = [];
