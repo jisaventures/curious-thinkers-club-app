@@ -341,7 +341,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             <button
               type="button"
               onClick={openAvatarModal}
-              className="group relative mx-auto size-40 shrink-0 overflow-hidden rounded-[28px] bg-[#f6efe2] lg:mx-0 lg:size-36 lg:translate-y-4"
+              className="group relative mx-auto size-40 shrink-0 overflow-hidden rounded-[28px] bg-[#f6efe2] lg:mx-0 lg:size-36"
               aria-label="Edit avatar"
             >
               <FamilyAvatar build={child.avatar} className="size-full" title="Child avatar" />
@@ -351,21 +351,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               </span>
             </button>
             <div className="min-w-0 flex-1 space-y-3">
-              <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First name only</Label>
-                  <Input
-                    id="firstName"
-                    value={child.firstName}
-                    onChange={(event) => patchChild({ firstName: event.target.value.slice(0, 15) })}
-                    maxLength={15}
-                    autoComplete="off"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="birthday">Birthday</Label>
-                  <BirthdayPicker id="birthday" value={child.birthday} onChange={(birthday) => patchChild({ birthday })} />
-                </div>
+              <div className="grid gap-3 lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] lg:items-end">
                 <fieldset className="space-y-2">
                   <legend className="text-sm font-extrabold text-[#1e4d3a]">Gender</legend>
                   <div className="flex gap-2">
@@ -397,11 +383,23 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                     ))}
                   </div>
                 </fieldset>
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First name only</Label>
+                  <Input
+                    id="firstName"
+                    value={child.firstName}
+                    onChange={(event) => patchChild({ firstName: event.target.value.slice(0, 15) })}
+                    maxLength={15}
+                    autoComplete="off"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="birthday">Birthday</Label>
+                  <BirthdayPicker id="birthday" value={child.birthday} onChange={(birthday) => patchChild({ birthday })} />
+                </div>
               </div>
-            </div>
-          </div>
-          <div className="mt-3 space-y-2 lg:ml-[calc(9rem+1rem)]">
-            <Label htmlFor="nickname">Nickname</Label>
+              <div className="space-y-2">
+                <Label htmlFor="nickname">Nickname</Label>
             <div className="flex gap-2">
               <Input id="nickname" value={child.nickname} disabled />
               <Button type="button" variant="green" size="sm" className="shrink-0" onClick={regenerateNickname}>
@@ -412,6 +410,8 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               A playful nickname is made for them. Re-generate it if you want a different one.
             </p>
             {child.nicknameMessage && <p className="text-sm font-bold text-[#8a4b3a]">{child.nicknameMessage}</p>}
+              </div>
+            </div>
           </div>
 
           {message && <p className="mt-4 text-sm font-bold text-[#8a4b3a]">{message}</p>}
