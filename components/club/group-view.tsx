@@ -32,8 +32,6 @@ export function GroupView({ data }: { data: DashboardData }) {
   const maxScore = Math.max(1, ...data.children.map((child) => data.pointsByChild[child.id] ?? 0));
   const stamps = data.children.reduce((sum, child) => sum + finishedPacks(owned, data.doneByChild[child.id] ?? {}).length, 0);
 
-  const title = section === "activity" ? "Activity log" : section === "reports" ? "Reports" : "Users";
-
   function choose(next: Section) {
     setSection(next);
     const url = `${window.location.pathname}${window.location.search}#${next}`;
@@ -41,30 +39,29 @@ export function GroupView({ data }: { data: DashboardData }) {
   }
 
   return (
-    <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-x-6 lg:gap-y-4">
-      <div className="flex items-center justify-between gap-4 lg:contents">
-        <Button asChild variant="grey" size="md" className="shrink-0 gap-2 lg:w-full">
+    <div className="grid items-start gap-4 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-x-6">
+      <div className="flex flex-col gap-3">
+        <Button asChild variant="mustard" size="md" className="w-full gap-3">
           <Link href="/club">
             <ArrowLeft className="size-5 shrink-0" aria-hidden="true" />
             Dashboard
           </Link>
         </Button>
-        <h1 className="min-w-0 text-right font-display text-3xl text-[#306A51] lg:self-center">{title}</h1>
+        <nav className="group-nav flex flex-col gap-2" aria-label="My Group">
+          <Button type="button" variant={section === "users" ? "green" : "white"} size="md" onClick={() => choose("users")}>
+            <Users className="size-5 shrink-0" aria-hidden="true" />
+            Users
+          </Button>
+          <Button type="button" variant={section === "activity" ? "green" : "white"} size="md" onClick={() => choose("activity")}>
+            <ClipboardList className="size-5 shrink-0" aria-hidden="true" />
+            Activity log
+          </Button>
+          <Button type="button" variant={section === "reports" ? "green" : "white"} size="md" onClick={() => choose("reports")}>
+            <BarChart3 className="size-5 shrink-0" aria-hidden="true" />
+            Reports
+          </Button>
+        </nav>
       </div>
-      <nav className="group-nav flex flex-col gap-2" aria-label="My Group">
-        <Button type="button" variant={section === "users" ? "green" : "grey"} size="md" onClick={() => choose("users")}>
-          <Users className="size-5 shrink-0" aria-hidden="true" />
-          Users
-        </Button>
-        <Button type="button" variant={section === "activity" ? "green" : "grey"} size="md" onClick={() => choose("activity")}>
-          <ClipboardList className="size-5 shrink-0" aria-hidden="true" />
-          Activity log
-        </Button>
-        <Button type="button" variant={section === "reports" ? "green" : "grey"} size="md" onClick={() => choose("reports")}>
-          <BarChart3 className="size-5 shrink-0" aria-hidden="true" />
-          Reports
-        </Button>
-      </nav>
 
       {section === "users" && (
         <section id="users" className="space-y-3">
