@@ -114,7 +114,7 @@ export async function loadDashboard() {
   const progressRes = children.length
     ? await supabase
         .from("step_progress")
-        .select("child_id, step_id, status")
+        .select("id, child_id, step_id, status, completed_at")
         .in(
           "child_id",
           children.map((child) => child.id),
@@ -214,6 +214,7 @@ export async function loadDashboard() {
     partial: packCards.find((pack) => pack.owned && pack.done > 0 && pack.total > 0 && pack.done < pack.total) ?? null,
     doneByChild,
     nextStepByChild,
+    activities: activityFeed(children, packs, steps, progress),
     pointsByChild: Object.fromEntries(pointsByChild),
     rewardLadder: rewards
       .filter((reward) => reward.active)
@@ -367,6 +368,34 @@ export async function loadPackPage(slug: string, modeRaw?: string, childRaw?: st
     certificates: (certificateRows ?? []).map((row) => row.child_id as string),
     progress,
   };
+}
+
+function activityFeed(
+  children: ClubChild[],
+  packs: Array<{ id: string; title: string }>,
+  steps: Array<{ id: string; pack_id: string; position: number; title?: string }>,
+  progress: Array<{ id?: string; child_id: string; step_id: string; status: string; completed_at?: string | null }>,
+) {
+  const names = new Map(children.map((child) => [child.id, child.first_name?.trim() || child.nickname.split(/\s+/).at(-1) || child.nickname]));
+  return progress
+    .filter((row) => row.status === "complete" && names.has(row.child_id))
+    .map((row) => {
+      const step = steps.find((item) => item.id === row.step_id);
+      const pack = packs.find((item) => item.id === step?.pack_id);
+      const name = names.get(row.child_id) ?? "Someone";
+      const finishedPack = step && pack && !steps.some((item) => item.pack_id === pack.id && item.position > step.position);
+      const summary = finishedPack
+        ? `${name} earned a stamp for the ${pack.title}.`
+        : `${name} finished ${step?.title ?? "a step"}${pack ? ` in ${pack.title}` : ""}.`;
+      return {
+        id: row.id ?? `${row.child_id}-${row.step_id}`,
+        childId: row.child_id,
+        childName: name,
+        summary,
+        at: row.completed_at ?? "",
+      };
+    })
+    .sort((a, b) => b.at.localeCompare(a.at));
 }
 
 async function resolveVideo(

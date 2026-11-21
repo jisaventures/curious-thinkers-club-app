@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { setFocusChild } from "@/app/club/actions";
 import { Avatar } from "@/components/brand/avatar";
@@ -19,14 +20,16 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
   const { account } = data;
   const [focusId, setFocusId] = useState(data.focus?.id ?? "");
   const [bookId, setBookId] = useState<string | null>(null);
+  const [logOpen, setLogOpen] = useState(false);
   const focus = data.children.find((child) => child.id === focusId) ?? data.focus;
   const owned = data.packs.filter((pack) => pack.owned);
   const spotlight = focus ? pickSpotlight(owned, data.doneByChild[focus.id] ?? {}) : null;
   const welcome = spotlight && focus
-    ? activityLine(shortName(focus.nickname), spotlight.pack.title, spotlight.done, spotlight.total)
+    ? activityLine(memberName(focus), spotlight.pack.title, spotlight.done, spotlight.total)
     : focus
-      ? `${shortName(focus.nickname)} is ready for a new pack.`
+      ? `${memberName(focus)} is ready for a new pack.`
       : "Add a child to start a pack together.";
+  const recent = data.activities.slice(0, 5);
 
   function chooseChild(childId: string) {
     setFocusId(childId);
@@ -37,10 +40,34 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
 
   return (
     <div className="space-y-8 sm:space-y-10">
-      <section className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h1 className="font-display text-3xl leading-tight text-[#17352A] sm:text-4xl">Welcome back, {account.display_name}</h1>
-          <p className="mt-2 text-base text-[#3d5348] sm:text-lg">{welcome}</p>
+      <section className="flex items-center justify-between gap-4">
+        <div className="relative min-w-0">
+          <h1 className="font-display text-3xl leading-tight text-[#306A51] sm:text-4xl">
+            Welcome back, <span className="text-[#e8a428]">{account.display_name}</span>
+          </h1>
+          <button type="button" className="mt-2 inline-flex items-center gap-1 text-left font-display text-base text-[#306A51] sm:text-lg" aria-expanded={logOpen} onClick={() => setLogOpen((open) => !open)}>
+            {welcome}
+            <ChevronDown className={`size-5 shrink-0 transition ${logOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+          </button>
+          {logOpen && (
+            <div className="absolute z-20 mt-2 w-[min(100%,24rem)] rounded-2xl border border-[#eadfce] bg-white p-3 shadow-[0_5px_0_#c9b89a]">
+              {recent.length === 0 ? (
+                <p className="text-sm text-[#5e7266]">Nothing has been logged yet.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {recent.map((item) => (
+                    <li key={item.id} className="text-sm text-[#17352A]">
+                      <span className="block font-bold">{item.summary}</span>
+                      {item.at && <span className="text-xs text-[#5e7266]">{formatWhen(item.at)}</span>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <Link href="/club/group#activity" className="mt-3 inline-block text-sm font-extrabold text-[#306A51] underline">
+                View full activity log
+              </Link>
+            </div>
+          )}
         </div>
         {data.children.length > 0 && (
           <div className="shrink-0">
@@ -265,6 +292,12 @@ function statusWord(done: number, total: number) {
   if (ratio >= 0.75) return "Almost done";
   if (ratio >= 0.34) return "In progress";
   return "Started";
+}
+
+function formatWhen(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(date);
 }
 
 function activityLine(name: string, title: string, done: number, total: number) {

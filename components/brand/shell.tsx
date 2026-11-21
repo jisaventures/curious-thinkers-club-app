@@ -80,6 +80,9 @@ function ParentHeader({ account }: { account: AccountRecord | null }) {
               </svg>
             </summary>
             <div className="absolute right-0 z-30 mt-2 w-48 rounded-2xl border border-[#eadfce] bg-white p-2 shadow-lg">
+              <Link href="/club/group" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
+                My Group
+              </Link>
               <Link href="/club/rewards" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
                 Rewards
               </Link>

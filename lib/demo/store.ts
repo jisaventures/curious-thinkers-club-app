@@ -79,6 +79,7 @@ export type DemoProgress = {
   status: "in_progress" | "complete";
   video_position_seconds: number;
   points_awarded: number;
+  completed_at?: string;
 };
 
 export type DemoLedger = {
@@ -307,6 +308,11 @@ export function createSeed(): DemoDb {
   finish(ARIA_ID, packPrefixes[3][0], knight);
   finish(ARIA_ID, packPrefixes[4][0], space);
   for (let n = 1; n <= 2; n += 1) progress.push(complete(NOAH_ID, `51500000-0000-4000-8000-000000000${String(n).padStart(3, "0")}`));
+  progress.forEach((row, index) => {
+    const at = new Date("2026-11-20T12:00:00.000Z");
+    at.setDate(at.getDate() - (progress.length - index));
+    row.completed_at = at.toISOString();
+  });
 
   const ledger: DemoLedger[] = [
     ...progress
@@ -391,7 +397,7 @@ export function createSeed(): DemoDb {
   };
 }
 
-const SEED_VERSION = 3;
+const SEED_VERSION = 4;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {
