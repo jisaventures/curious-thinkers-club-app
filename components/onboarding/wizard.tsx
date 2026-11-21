@@ -83,9 +83,6 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [avatarDraft, setAvatarDraft] = useState<AvatarBuild | null>(null);
   const tabsRef = useRef<HTMLOListElement>(null);
-  const tabsBarRef = useRef<HTMLDivElement>(null);
-  const tabsSentinelRef = useRef<HTMLDivElement>(null);
-  const [tabsCollapsed, setTabsCollapsed] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
@@ -177,31 +174,6 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
   const hairValue = avatarDraft && new Set<string>(hairOptions).has(avatarDraft.top) ? avatarDraft.top : hairOptions[0];
 
   useEffect(() => {
-    const sentinel = tabsSentinelRef.current;
-    const syncCollapsed = () => {
-      if (!sentinel || window.innerWidth >= 640) {
-        setTabsCollapsed(false);
-        return;
-      }
-      const header = document.querySelector("header");
-      const headerBottom = header?.getBoundingClientRect().bottom ?? 0;
-      const top = sentinel.getBoundingClientRect().top;
-      setTabsCollapsed((current) => {
-        if (!current && top <= headerBottom) return true;
-        if (current && (window.scrollY < 8 || top > headerBottom + 48)) return false;
-        return current;
-      });
-    };
-    syncCollapsed();
-    window.addEventListener("scroll", syncCollapsed, { passive: true });
-    window.addEventListener("resize", syncCollapsed);
-    return () => {
-      window.removeEventListener("scroll", syncCollapsed);
-      window.removeEventListener("resize", syncCollapsed);
-    };
-  }, [screen, progressLabels.length]);
-
-  useEffect(() => {
     const el = tabsRef.current;
     if (!el) return;
     const sync = () => {
@@ -253,8 +225,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
 
   return (
     <div className="w-full">
-      <div ref={tabsSentinelRef} className="h-px sm:hidden" aria-hidden="true" />
-      <div ref={tabsBarRef} className={`step-tabs relative mb-5 max-lg:sticky max-lg:top-[var(--site-header-h)] max-lg:z-30 max-lg:-mx-3 max-lg:bg-[#fffdf8] max-lg:px-3 max-lg:pb-3 sm:max-lg:-mx-5 sm:max-lg:px-5 md:max-lg:-mx-7 md:max-lg:px-7 ${tabsCollapsed ? "is-collapsed" : ""}`}>
+      <div className="step-tabs relative mb-5 max-lg:sticky max-lg:top-[var(--site-header-h)] max-lg:z-30 max-lg:-mx-3 max-lg:bg-[#fffdf8] max-lg:px-3 max-lg:pb-3 sm:max-lg:-mx-5 sm:max-lg:px-5 md:max-lg:-mx-7 md:max-lg:px-7">
       <ol ref={tabsRef} className="tab-scroll flex gap-2 overflow-x-auto px-1 pt-2" aria-label="Onboarding progress">
         {progressLabels.map((label, index) => {
           const done = index < progress;
@@ -275,7 +246,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 {done && <Check className="mr-1 size-3.5 shrink-0" strokeWidth={3} aria-hidden="true" />}
                 {done ? "Completed" : `Step ${index + 1}`}
               </span>
-              <div className={`step-tab flex min-h-16 w-full items-center justify-center rounded-2xl px-2 py-3 text-center font-display text-lg leading-tight font-bold md:text-xl ${tabClass}`}>
+              <div className={`step-tab flex min-h-11 w-full items-center justify-center rounded-2xl px-2 py-2 text-center font-display text-base leading-tight font-bold lg:min-h-16 lg:py-3 lg:text-xl ${tabClass}`}>
                 {label}
               </div>
             </li>
@@ -372,7 +343,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
             <button
               type="button"
               onClick={openAvatarModal}
-              className="group relative size-28 shrink-0 self-center overflow-hidden rounded-[28px] bg-[#f6efe2] justify-self-center sm:row-span-2 sm:size-44 lg:size-36"
+              className="group relative size-36 shrink-0 self-center overflow-hidden rounded-[28px] bg-[#f6efe2] justify-self-center sm:row-span-2 sm:size-44 lg:size-36"
               aria-label="Edit avatar"
             >
               <FamilyAvatar build={child.avatar} className="size-full" title="Child avatar" />
@@ -426,7 +397,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <Input id="nickname" value={child.nickname} disabled className="max-sm:h-10 max-sm:px-1.5 max-sm:text-xs max-sm:tracking-tight" />
+                <Input id="nickname" value={child.nickname} disabled className="max-sm:h-10 max-sm:w-[7.25rem] max-sm:max-w-[7.25rem] max-sm:px-1.5 max-sm:text-xs" />
                 <span className="inline-flex pb-[5px]">
                   <Button type="button" variant="green" size="sm" className="regen-button shrink-0" aria-label="Re-generate" onClick={regenerateNickname}>
                     <RefreshCw className="size-5 sm:size-6 lg:hidden" strokeWidth={3} aria-hidden="true" />

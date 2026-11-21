@@ -249,61 +249,6 @@ select {
   border-radius: 999px;
 }
 
-@media (max-width: 639px) {
-  .step-tabs .step-pill,
-  .step-tabs .step-tab,
-  .step-tabs ol {
-    transition:
-      opacity 280ms ease,
-      max-height 280ms ease,
-      min-height 280ms ease,
-      height 280ms ease,
-      padding 280ms ease,
-      margin 280ms ease,
-      font-size 280ms ease;
-  }
-
-  .step-tabs.is-collapsed {
-    padding-bottom: 0.45rem;
-  }
-
-  .step-tabs.is-collapsed ol {
-    padding-top: 0;
-  }
-
-  .step-tabs.is-collapsed .step-pill {
-    max-height: 0;
-    margin: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    overflow: hidden;
-    opacity: 0;
-  }
-
-  .step-tabs.is-collapsed .step-tab {
-    min-height: 0;
-    height: 0.4rem;
-    padding: 0;
-    overflow: hidden;
-    font-size: 0;
-    color: transparent;
-    border-radius: 999px;
-  }
-
-  .step-tabs.is-collapsed button {
-    opacity: 0;
-    pointer-events: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .step-tabs .step-pill,
-  .step-tabs .step-tab,
-  .step-tabs ol {
-    transition: none;
-  }
-}
-
 .tab-scroll {
   scrollbar-width: none;
 }
@@ -333,6 +278,13 @@ select {
 .ctc-button[data-size="sm"] {
   padding: 0.55rem 0.95rem;
   font-size: 0.95rem;
+}
+
+@media (max-width: 1023px) {
+  .step-tabs .step-pill.ctc-button {
+    padding: 0.32rem 0.65rem;
+    font-size: 0.78rem;
+  }
 }
 
 .ctc-button[data-size="md"] {
