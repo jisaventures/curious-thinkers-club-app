@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { setFocusChild } from "@/app/club/actions";
@@ -26,11 +26,9 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
   const focus = data.children.find((child) => child.id === focusId) ?? data.focus;
   const owned = data.packs.filter((pack) => pack.owned);
   const spotlight = focus ? pickSpotlight(owned, data.doneByChild[focus.id] ?? {}) : null;
-  const welcome = spotlight && focus
-    ? activityLine(memberName(focus), spotlight.pack.title, spotlight.done, spotlight.total)
-    : focus
-      ? `${memberName(focus)} is ready for a new pack.`
-      : "Add a child to start a pack together.";
+  const latest = data.activities[0] ?? null;
+  const latestColour = latest ? colourForChild(latest.childId, data.children) : null;
+  const logLabel = latest?.summary ?? "Nothing has been logged yet.";
   const recent = data.activities.slice(0, 3);
 
   useEffect(() => {
@@ -71,10 +69,10 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
           <div className="mt-2 flex flex-wrap items-center justify-center gap-2 xl:justify-start">
             <span className="font-display text-base text-[#306A51] sm:text-lg">Activity log</span>
             <div className="relative max-w-full" onMouseEnter={showLog} onMouseLeave={hideLogSoon}>
-              <button type="button" className="inline-flex max-w-full items-center gap-1 rounded-full border border-[#eadfce] bg-white px-3 py-1 text-left font-display text-sm text-[#306A51] shadow-sm" aria-expanded={logOpen} onClick={() => (logOpen ? closeLog() : showLog())}>
-                <span className="min-w-0">{welcome}</span>
-                <ChevronDown className={`size-4 shrink-0 transition ${logOpen ? "rotate-180" : ""}`} aria-hidden="true" />
-              </button>
+              <Button type="button" variant={latestColour ? "member" : "grey"} size="sm" className="max-w-full gap-1.5" style={latestColour ? memberButtonStyle(latestColour.dot) : undefined} aria-expanded={logOpen} onClick={() => (logOpen ? closeLog() : showLog())}>
+                <span className="min-w-0 text-left">{logLabel}</span>
+                <ChevronDown className={`size-4 shrink-0 text-white transition ${logOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+              </Button>
               {logOpen && (
                 <div className="absolute top-full left-1/2 z-20 min-w-full max-w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 pt-2 text-left xl:left-0 xl:translate-x-0">
                   <div className="rounded-2xl border border-[#eadfce] bg-white p-2 shadow-[0_16px_40px_rgba(23,53,42,0.08)]">
@@ -333,16 +331,6 @@ function statusWord(done: number, total: number) {
   return "Started";
 }
 
-function activityLine(name: string, title: string, done: number, total: number) {
-  const pack = packLabel(title).toLowerCase();
-  const ratio = total ? done / total : 0;
-  if (ratio >= 1) return `${name} has finished the ${pack}.`;
-  if (ratio >= 0.75) return `${name} is nearly done with the ${pack}.`;
-  if (ratio >= 0.4) return `${name} is halfway through the ${pack}.`;
-  if (done > 0) return `${name} has started the ${pack}.`;
-  return `${name} can start the ${pack}.`;
-}
-
 function packLabel(title: string) {
   const value = title.toLowerCase();
   if (value.includes("pirate")) return "Pirate pack";
@@ -351,6 +339,26 @@ function packLabel(title: string) {
   if (value.includes("knight")) return "Knight pack";
   if (value.includes("space")) return "Space pack";
   return title;
+}
+
+function memberButtonStyle(dot: string): CSSProperties {
+  const shadow = darken(dot, 0.24);
+  return {
+    "--ctc-member": dot,
+    "--ctc-member-shadow": shadow,
+    "--ctc-member-glow": toRgba(shadow, 0.25),
+  } as CSSProperties;
+}
+
+function darken(hex: string, amount: number) {
+  const value = Number.parseInt(hex.slice(1), 16);
+  const channel = (shift: number) => Math.max(0, Math.round(((value >> shift) & 255) * (1 - amount)));
+  return `#${[channel(16), channel(8), channel(0)].map((part) => part.toString(16).padStart(2, "0")).join("")}`;
+}
+
+function toRgba(hex: string, alpha: number) {
+  const value = Number.parseInt(hex.slice(1), 16);
+  return `rgba(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255}, ${alpha})`;
 }
 
 function Progress({ value, total, className = "" }: { value: number; total: number; className?: string }) {

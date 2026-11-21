@@ -1,5 +1,4 @@
 import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +14,7 @@ const buttonVariants = cva(
         mustard: "ctc-button",
         green: "ctc-button",
         grey: "ctc-button",
+        member: "ctc-button",
       },
       size: {
         sm: "h-9 px-3.5",
@@ -34,17 +34,29 @@ export function Button({
   variant,
   size,
   asChild = false,
+  children,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & { asChild?: boolean }) {
-  const Comp = asChild ? Slot : "button";
-  const chunky = variant === "mustard" || variant === "green" || variant === "grey";
+  const chunky = variant === "mustard" || variant === "green" || variant === "grey" || variant === "member";
+  const classes = cn(chunky ? "ctc-button" : buttonVariants({ variant, size }), className);
+  const shared = {
+    "data-variant": chunky ? variant : undefined,
+    "data-size": chunky ? size ?? "md" : undefined,
+    className: classes,
+    ...props,
+  };
+  if (asChild && React.isValidElement(children)) {
+    const child = children as React.ReactElement<{ className?: string; style?: React.CSSProperties }>;
+    return React.cloneElement(child, {
+      ...shared,
+      className: cn(classes, child.props.className),
+      style: { ...(props.style as React.CSSProperties | undefined), ...child.props.style },
+    });
+  }
   return (
-    <Comp
-      data-variant={chunky ? variant : undefined}
-      data-size={chunky ? size ?? "md" : undefined}
-      className={cn(chunky ? "ctc-button" : buttonVariants({ variant, size }), className)}
-      {...props}
-    />
+    <button type="button" {...shared}>
+      {children}
+    </button>
   );
 }
