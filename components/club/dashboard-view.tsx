@@ -47,8 +47,8 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
                   className="size-full"
                   title="Group icon"
                 />
-                <span className="pointer-events-none absolute inset-0 bg-black/0 transition group-hover:bg-black/45" />
-                <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent pt-6 pb-2 text-center text-sm font-extrabold text-white">
+                <span className="pointer-events-none absolute inset-0 bg-black/45 opacity-0 transition group-hover:opacity-100" />
+                <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent pt-6 pb-2 text-center text-sm font-extrabold text-white opacity-0 transition group-hover:opacity-100">
                   Edit
                 </span>
               </Link>

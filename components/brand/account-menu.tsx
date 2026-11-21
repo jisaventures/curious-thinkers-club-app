@@ -26,12 +26,8 @@ export function AccountMenu({
   const initial = name.slice(0, 1).toUpperCase();
   const groupIcon = isGroupIcon(icon) ? icon : null;
 
-  function close() {
-    setOpen(false);
-  }
-
   return (
-    <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={close}>
+    <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       <button
         type="button"
         className="flex cursor-default items-center gap-2 rounded-full border border-[#eadfce] bg-white py-1 pr-2 pl-1 shadow-sm sm:pr-3"
@@ -42,7 +38,7 @@ export function AccountMenu({
         }}
       >
         {groupIcon ? (
-          <GroupIcon icon={groupIcon} background={background || "2f9a4a"} colour={colour || "fff4dc"} className="size-8 shrink-0 rounded-lg" title={name} />
+          <GroupIcon icon={groupIcon} background={background || "2f9a4a"} colour={colour || "fff4dc"} className="size-8 shrink-0 overflow-hidden rounded-full" title={name} />
         ) : (
           <span className="flex size-8 items-center justify-center rounded-full bg-[#306A51] font-display text-sm font-bold text-white">{initial}</span>
         )}
@@ -54,23 +50,23 @@ export function AccountMenu({
       {open && (
         <div className="absolute right-0 top-full z-30 pt-2">
           <div className="w-48 rounded-2xl border border-[#eadfce] bg-white p-2 shadow-lg" role="menu">
-            <Link href="/club/group" onClick={close} className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]" role="menuitem">
+            <Link href="/club/group" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]" role="menuitem">
               My Group
             </Link>
-            <Link href="/club/leaderboard" onClick={close} className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]" role="menuitem">
+            <Link href="/club/leaderboard" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]" role="menuitem">
               Leaderboards
             </Link>
-            <Link href="/club/rewards" onClick={close} className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]" role="menuitem">
+            <Link href="/club/rewards" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]" role="menuitem">
               Rewards
             </Link>
-            <Link href="/club/uploads" onClick={close} className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]" role="menuitem">
+            <Link href="/club/uploads" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]" role="menuitem">
               Uploads
             </Link>
-            <Link href="/club/children" onClick={close} className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]" role="menuitem">
+            <Link href="/club/children" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]" role="menuitem">
               Children
             </Link>
             {isAdmin && (
-              <Link href="/admin" onClick={close} className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]" role="menuitem">
+              <Link href="/admin" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]" role="menuitem">
                 Admin
               </Link>
             )}
