@@ -440,7 +440,7 @@ export function OnboardingWizard({ shopFirstName }: { shopFirstName: string | nu
               type="button"
               variant="grey"
               size="lg"
-              className="footer-cta"
+              className="footer-cta footer-back"
               onClick={() => {
                 setMessage(null);
                 if (screen === "family") setScreen("welcome");

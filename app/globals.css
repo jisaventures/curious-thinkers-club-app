@@ -584,6 +584,14 @@ select {
     max-width: none;
     font-size: 0.95rem;
     padding-inline: 0.7rem;
+    white-space: nowrap;
+  }
+
+  .footer-cta.footer-back {
+    flex: 0 0 5.25rem;
+    width: 5.25rem;
+    max-width: 5.25rem;
+    padding-inline: 0.4rem;
   }
 }
 
