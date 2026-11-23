@@ -97,30 +97,25 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
           <EmptyPackBanner />
         ) : (
           <>
-            <div className="grid items-stretch gap-4 lg:grid-cols-3">
-              <div className="lg:col-span-2 lg:self-start">
-                <PackBanner
-                  state={data.banners[0].state}
-                  title={data.banners[0].title}
-                  tone={data.banners[0].coverTone}
-                  clubName={account.group_name?.trim() || "Your club"}
-                  done={data.banners[0].done}
-                  total={data.banners[0].total}
-                  nextStep={data.banners[0].nextStep}
-                  members={data.children}
-                  blurb={data.banners[0].blurb}
-                  durationLabel={data.banners[0].durationLabel}
-                  ageMin={data.banners[0].ageMin}
-                  ageMax={data.banners[0].ageMax}
-                  pageCount={data.banners[0].pageCount}
-                  href={focus ? `/club/packs/${data.banners[0].slug}?mode=together&child=${focus.id}` : `/club/packs/${data.banners[0].slug}`}
-                  featured
-                />
-              </div>
-              {data.poll && <PackPoll poll={data.poll} />}
-            </div>
-            {data.banners.length > 1 ? (
-              <div className="grid items-start gap-4 lg:grid-cols-3">
+            <PackBanner
+              state={data.banners[0].state}
+              title={data.banners[0].title}
+              tone={data.banners[0].coverTone}
+              clubName={account.group_name?.trim() || "Your club"}
+              done={data.banners[0].done}
+              total={data.banners[0].total}
+              nextStep={data.banners[0].nextStep}
+              members={data.children}
+              blurb={data.banners[0].blurb}
+              durationLabel={data.banners[0].durationLabel}
+              ageMin={data.banners[0].ageMin}
+              ageMax={data.banners[0].ageMax}
+              pageCount={data.banners[0].pageCount}
+              href={focus ? `/club/packs/${data.banners[0].slug}?mode=together&child=${focus.id}` : `/club/packs/${data.banners[0].slug}`}
+              featured
+            />
+            <div className="grid items-start gap-4 lg:grid-cols-3">
+              {data.banners.length > 1 && (
                 <div className="space-y-3 lg:col-span-2">
                   {data.banners.slice(1).map((banner) => (
                     <PackBanner
@@ -138,11 +133,12 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
                     />
                   ))}
                 </div>
+              )}
+              <div className={`space-y-4 ${data.banners.length > 1 ? "" : "lg:col-span-3"}`}>
+                {data.poll && <PackPoll poll={data.poll} />}
                 <RecentReleases releases={data.releases} />
               </div>
-            ) : (
-              <RecentReleases releases={data.releases} />
-            )}
+            </div>
           </>
         )}
       </section>
