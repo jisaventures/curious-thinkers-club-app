@@ -1071,6 +1071,11 @@ select {
 
   .new-pack-banner__copy {
     min-width: 0;
+    text-align: center;
+  }
+
+  .new-pack-banner__meta {
+    justify-content: center;
   }
 
   .new-pack-banner__circle {
