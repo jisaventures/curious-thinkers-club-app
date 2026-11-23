@@ -10,7 +10,7 @@ import {
   demoAddChild,
   demoDeleteChild,
   demoUpdateGroupProfile,
-  demoVoteNextPack,
+  demoRemindPack,
   demoMark,
   demoMarkNext,
   demoMarkNextResult,
@@ -31,10 +31,18 @@ function text(formData: FormData, key: string) {
   return typeof value === "string" ? value : "";
 }
 
-export async function voteNextPack(optionId: string) {
-  const { account } = await requireAdult();
-  if (isDemoMode()) return demoVoteNextPack(account.id, optionId);
-  return { error: "Pack polls will open once they are managed in admin." };
+export async function remindPackLaunch(packId: string) {
+  const { account, supabase } = await requireAdult();
+  if (isDemoMode()) return demoRemindPack(account.id, account.email, packId);
+  const id = uuidSchema.safeParse(packId);
+  if (!id.success) return { error: "Choose a pack that has not launched yet." };
+  const { error } = await supabase.from("pack_reminders").upsert(
+    { account_id: account.id, pack_id: id.data, email: account.email },
+    { onConflict: "account_id,pack_id" },
+  );
+  if (error) return { error: "We could not save that reminder." };
+  revalidatePath("/club");
+  return { ok: true as const };
 }
 
 export async function updateGroupProfile(formData: FormData) {

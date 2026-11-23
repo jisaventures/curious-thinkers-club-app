@@ -67,6 +67,9 @@ export type DemoPack = {
   page_count: number;
   published: boolean;
   created_at: string;
+  free: boolean;
+  upcoming: boolean;
+  submission_slots: number;
 };
 
 export type DemoStep = {
@@ -150,17 +153,11 @@ export type DemoOrder = {
   items: DemoOrderItem[];
 };
 
-export type DemoPoll = {
-  id: string;
-  question: string;
-  opens_at: string;
-  closes_at: string;
-  options: Array<{ id: string; label: string }>;
-};
-
-export type DemoPollVote = {
+export type DemoReminder = {
   account_id: string;
-  option_id: string;
+  pack_id: string;
+  email: string;
+  created_at: string;
 };
 
 export type DemoEvent = {
@@ -186,8 +183,7 @@ export type DemoDb = {
   ownership: DemoOwnership[];
   events: DemoEvent[];
   orders: DemoOrder[];
-  poll: DemoPoll;
-  poll_votes: DemoPollVote[];
+  reminders: DemoReminder[];
   certificates: Array<{ child_id: string; pack_id: string }>;
 };
 
@@ -254,7 +250,29 @@ function pack(
     page_count: pageCount,
     published: true,
     created_at: createdAt,
+    free: false,
+    upcoming: false,
+    submission_slots: 3,
   };
+}
+
+function catalog(
+  id: string,
+  slug: string,
+  title: string,
+  theme: string,
+  blurb: string,
+  cover: CoverTone,
+  createdAt: string,
+  options: { free?: boolean; upcoming?: boolean } = {},
+): DemoPack {
+  const row = pack(id, slug, title, theme, blurb, cover, options.upcoming ? "900000000099" : `9${id.slice(-11)}`, 5, 10, createdAt);
+  row.free = options.free ?? false;
+  row.upcoming = options.upcoming ?? false;
+  row.published = !row.upcoming;
+  row.price_pence = row.free ? 0 : 899;
+  if (row.upcoming) row.shopify_product_id = null;
+  return row;
 }
 
 const CROWD_ID = "a1000000-0000-4000-8000-000000000099";
@@ -505,11 +523,21 @@ export function createSeed(): DemoDb {
       ...crowd.children,
     ],
     packs: [
-      pack(pirate, "be-a-pirate-for-the-day", "Be a pirate for the day", "history", "Learn about real pirates, maps and ships", "bottle", "900000000001", 4, 8, "2026-07-01T00:00:00.000Z", 22),
-      pack(egypt, "be-an-egyptian-explorer", "Be an Egyptian explorer", "history", "Hieroglyphs, pyramids and real ancient Egypt", "palm", "900000000002", 6, 10, "2026-08-01T00:00:00.000Z"),
-      pack(spy, "become-a-spy", "Become a spy", "codes", "Learn about real spies, codes and secret messages", "navy", "900000000003", 7, 10, "2026-09-01T00:00:00.000Z"),
-      pack(knight, "be-a-knight-for-the-day", "Be a knight for the day", "castles", "Castles, armour and real medieval life", "plum", "900000000004", 5, 9, "2026-11-10T00:00:00.000Z"),
-      pack(space, "be-a-space-explorer", "Be a space explorer", "space", "Planets, rockets and the real night sky", "sea", "900000000005", 6, 10, "2026-11-20T00:00:00.000Z"),
+      pack(pirate, "be-a-pirate-for-the-day", "Be a pirate for the day", "history", "Learn about real pirates, maps and ships", "bottle", "900000000001", 4, 8, "2026-06-20T00:00:00.000Z", 22),
+      pack(egypt, "be-an-egyptian-explorer", "Be an Egyptian explorer", "history", "Hieroglyphs, pyramids and real ancient Egypt", "palm", "900000000002", 6, 10, "2026-11-15T00:00:00.000Z"),
+      pack(spy, "become-a-spy", "Become a spy", "codes", "Learn about real spies, codes and secret messages", "navy", "900000000003", 7, 10, "2026-11-08T00:00:00.000Z"),
+      pack(knight, "be-a-knight-for-the-day", "Be a knight for the day", "castles", "Castles, armour and real medieval life", "plum", "900000000004", 5, 9, "2026-11-20T00:00:00.000Z"),
+      pack(space, "be-a-space-explorer", "Be a space explorer", "space", "Planets, rockets and the real night sky", "sea", "900000000005", 6, 10, "2026-11-25T00:00:00.000Z"),
+      catalog("b1000000-0000-4000-8000-000000000006", "pocket-money-bosses", "Pocket Money Bosses", "money", "Count, save and spend pocket money", "bottle", "2026-11-12T00:00:00.000Z", { free: true }),
+      catalog("b1000000-0000-4000-8000-000000000007", "be-a-roman-builder", "Be a Roman builder", "history", "Roads, baths and real Roman towns", "plum", "2026-06-01T00:00:00.000Z"),
+      catalog("b1000000-0000-4000-8000-000000000008", "be-a-volcano-explorer", "Be a volcano explorer", "science", "Lava, rocks and how volcanoes work", "sea", "2026-05-01T00:00:00.000Z"),
+      catalog("b1000000-0000-4000-8000-000000000009", "be-a-baker-for-the-day", "Be a baker for the day", "food", "Bread, ovens and how bakers work", "palm", "2026-04-01T00:00:00.000Z"),
+      catalog("b1000000-0000-4000-8000-000000000010", "train-like-an-athlete", "Train like an athlete", "sport", "Warm-ups, practice and real sport science", "navy", "2026-03-01T00:00:00.000Z"),
+      catalog("b1000000-0000-4000-8000-000000000011", "map-your-town", "Map your town", "maps", "Streets, symbols and how maps are made", "bottle", "2026-02-01T00:00:00.000Z"),
+      catalog("b1000000-0000-4000-8000-000000000012", "design-a-garden", "Design a garden", "nature", "Soil, seeds and a garden of your own", "palm", "2026-01-01T00:00:00.000Z"),
+      catalog("b1000000-0000-4000-8000-000000000013", "dinosaur-detective", "Dinosaur detective", "dinosaurs", "Fossils, teeth and real dinosaur detectives", "plum", "2026-12-01T00:00:00.000Z", { upcoming: true }),
+      catalog("b1000000-0000-4000-8000-000000000014", "rainforest-explorer", "Rainforest explorer", "rainforest", "Canopies, creatures and real rainforests", "palm", "2026-12-08T00:00:00.000Z", { upcoming: true, free: true }),
+      catalog("b1000000-0000-4000-8000-000000000015", "ocean-scientist", "Ocean scientist", "ocean", "Tides, creatures and how the ocean works", "sea", "2026-12-15T00:00:00.000Z", { upcoming: true }),
     ],
     steps,
     progress,
@@ -542,24 +570,7 @@ export function createSeed(): DemoDb {
       { account_id: SAM_ID, pack_id: spy, source: "seed" as const, granted_at: "2026-09-12T09:00:00.000Z" },
     ],
     events: [],
-    poll: {
-      id: "poll-next-pack",
-      question: "Which pack should we make next?",
-      opens_at: "2026-11-01T00:00:00.000Z",
-      closes_at: "2026-11-30T23:59:00.000Z",
-      options: [
-        { id: "dinosaurs", label: "Dinosaur detective" },
-        { id: "rainforest", label: "Rainforest explorer" },
-        { id: "ocean", label: "Ocean scientist" },
-        { id: "castle-kitchen", label: "Castle kitchen" },
-      ],
-    },
-    poll_votes: [
-      { account_id: "a1000000-0000-4000-8000-000000000003", option_id: "dinosaurs" },
-      { account_id: "a1000000-0000-4000-8000-000000000004", option_id: "dinosaurs" },
-      { account_id: "a1000000-0000-4000-8000-000000000005", option_id: "ocean" },
-      { account_id: CROWD_ID, option_id: "rainforest" },
-    ],
+    reminders: [],
     orders: [
       {
         id: "1048",
@@ -608,7 +619,7 @@ export function createSeed(): DemoDb {
   };
 }
 
-const SEED_VERSION = 13;
+const SEED_VERSION = 14;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {

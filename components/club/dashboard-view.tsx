@@ -5,13 +5,11 @@ import Link from "next/link";
 import { Avatar } from "@/components/brand/avatar";
 import { CountryFlag } from "@/components/brand/country-flag";
 import { GROUP_ICONS, GroupIcon, type GroupIconId } from "@/components/brand/group-icon";
-import { PackPoll } from "@/components/club/pack-poll";
-import { Button } from "@/components/ui/button";
-import { EmptyPackBanner, PackBanner, RecentReleases } from "@/components/club/pack-banner";
+import { DashboardHome } from "@/components/club/dashboard-home";
+import { EmptyPackBanner, PackBanner } from "@/components/club/pack-banner";
 import { Scrapbook } from "@/components/club/scrapbook";
 import { shortName } from "@/lib/format";
 import { memberColour } from "@/lib/member-colour";
-import type { CoverTone } from "@/lib/validators";
 import type { loadDashboard } from "@/lib/club/data";
 
 type DashboardData = Awaited<ReturnType<typeof loadDashboard>>;
@@ -114,59 +112,9 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
               href={focus ? `/club/packs/${data.banners[0].slug}?mode=together&child=${focus.id}` : `/club/packs/${data.banners[0].slug}`}
               featured
             />
-            <div className="grid items-start gap-4 lg:grid-cols-3">
-              {data.banners.length > 1 && (
-                <div className="space-y-3 lg:col-span-2">
-                  {data.banners.slice(1).map((banner) => (
-                    <PackBanner
-                      key={banner.id}
-                      state={banner.state}
-                      title={banner.title}
-                      tone={banner.coverTone}
-                      clubName={account.group_name?.trim() || "Your club"}
-                      done={banner.done}
-                      total={banner.total}
-                      nextStep={banner.nextStep}
-                      members={data.children}
-                      href={focus ? `/club/packs/${banner.slug}?mode=together&child=${focus.id}` : `/club/packs/${banner.slug}`}
-                      compact
-                    />
-                  ))}
-                </div>
-              )}
-              <div className={`space-y-4 ${data.banners.length > 1 ? "" : "lg:col-span-3"}`}>
-                {data.poll && <PackPoll poll={data.poll} />}
-                <RecentReleases releases={data.releases} />
-              </div>
-            </div>
           </>
         )}
-      </section>
-
-      <section>
-        <div className="mb-4 flex items-end justify-between gap-3">
-          <h2 className="font-display text-2xl text-[#17352A]">My packs</h2>
-          <Link href="/club/shop" className="text-sm font-extrabold text-[#306A51] underline-offset-2 hover:underline">
-            Find a pack
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {owned.map((pack) => {
-            const done = focus ? (data.doneByChild[focus.id]?.[pack.id] ?? pack.done) : pack.done;
-            const total = pack.total || pack.step_count;
-            return (
-              <Link key={pack.id} href={focus ? `/club/packs/${pack.slug}?mode=together&child=${focus.id}` : `/club/packs/${pack.slug}`} className="min-w-0 no-underline">
-                <PackArt tone={pack.cover_tone} title={pack.title} className="aspect-[3/4] w-full" />
-                <p className="mt-2 font-display text-base leading-tight text-[#17352A]">{pack.title}</p>
-                <p className="text-sm text-[#5e7266]">{statusWord(done, total)}</p>
-              </Link>
-            );
-          })}
-          <Link href="/club/shop" className="flex aspect-[3/4] w-full flex-col items-center justify-center self-start rounded-[22px] border-2 border-dashed border-[#c9b89a] bg-[#fbf7f0] text-center no-underline">
-            <span className="flex size-10 items-center justify-center rounded-full bg-white text-2xl text-[#306A51] shadow-sm">+</span>
-            <span className="mt-3 text-sm font-extrabold text-[#306A51]">Find a pack</span>
-          </Link>
-        </div>
+        <DashboardHome home={data.home} members={data.children} focusId={focus?.id ?? null} />
       </section>
       {bookId && (
         <Scrapbook
@@ -191,64 +139,6 @@ function memberRank(childId: string, children: DashboardData["children"], points
   return ordered.findIndex((child) => child.id === childId) + 1;
 }
 
-function statusWord(done: number, total: number) {
-  if (!total || done <= 0) return "Started";
-  const ratio = done / total;
-  if (ratio >= 1) return "Finished";
-  if (ratio >= 0.75) return "Almost done";
-  if (ratio >= 0.34) return "In progress";
-  return "Started";
-}
-
 function isGroupIcon(value: string | null | undefined): value is GroupIconId {
   return !!value && (GROUP_ICONS as readonly string[]).includes(value);
-}
-
-const tones: Record<CoverTone, string> = {
-  bottle: "bg-[#1e4d3a]",
-  palm: "bg-[#2f6b45]",
-  navy: "bg-[#1e3a5f]",
-  plum: "bg-[#5c3d6e]",
-  sea: "bg-[#245e78]",
-};
-
-function PackArt({ tone, title, className = "" }: { tone: CoverTone; title: string; className?: string }) {
-  return (
-    <div className={`relative overflow-hidden rounded-[22px] ${tones[tone]} ${className}`}>
-      <div className="absolute inset-x-3 top-3 bottom-[28%] rounded-xl bg-[#f7f1e6]">
-        <CoverSketch title={title} />
-      </div>
-      <p className="absolute inset-x-3 bottom-3 text-center text-xs leading-tight font-bold text-white sm:text-sm">{title}</p>
-    </div>
-  );
-}
-
-function CoverSketch({ title }: { title: string }) {
-  const value = title.toLowerCase();
-  if (value.includes("egypt")) {
-    return (
-      <svg viewBox="0 0 80 90" className="h-full w-full" aria-hidden="true">
-        <path d="M10 70 L40 18 L70 70 Z" fill="#e7c56a" />
-        <path d="M28 70 L40 42 L52 70 Z" fill="#f3e0a0" />
-        <circle cx="58" cy="24" r="8" fill="#e8a428" />
-      </svg>
-    );
-  }
-  if (value.includes("spy")) {
-    return (
-      <svg viewBox="0 0 80 90" className="h-full w-full" aria-hidden="true">
-        <rect x="18" y="16" width="44" height="56" rx="4" fill="#f4e2b0" />
-        <circle cx="40" cy="40" r="12" fill="none" stroke="#1e4d3a" strokeWidth="3" />
-        <path d="M48 48 L60 62" stroke="#1e4d3a" strokeWidth="3" strokeLinecap="round" />
-      </svg>
-    );
-  }
-  return (
-    <svg viewBox="0 0 80 90" className="h-full w-full" aria-hidden="true">
-      <path d="M14 58 C28 40 52 40 66 58" fill="none" stroke="#c45b4a" strokeWidth="3" strokeDasharray="3 3" />
-      <circle cx="22" cy="50" r="4" fill="#e07a3d" />
-      <path d="M48 28 l4 8 h8 l-6 5 2 8 -8-5 -8 5 2-8 -6-5 h8 z" fill="#e8a428" />
-      <rect x="16" y="62" width="48" height="8" rx="2" fill="#d7c4a2" />
-    </svg>
-  );
 }

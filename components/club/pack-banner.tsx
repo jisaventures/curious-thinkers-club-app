@@ -1,9 +1,7 @@
-import { Check, Clock, FileText, Play, Printer, UserRound } from "lucide-react";
+import { Clock, FileText, Play, Printer, UserRound } from "lucide-react";
 import Link from "next/link";
 import { Avatar } from "@/components/brand/avatar";
-import { BookCover } from "@/components/club/book-cover";
 import { Button } from "@/components/ui/button";
-import type { ClubRelease } from "@/lib/club/banners";
 import { cn } from "@/lib/utils";
 import type { AvatarKey, CoverTone } from "@/lib/validators";
 
@@ -257,34 +255,6 @@ function NewPackBanner({
         <img src="/brand/mascot-spy.png" alt="" />
       </div>
     </article>
-  );
-}
-
-export function RecentReleases({ releases }: { releases: ClubRelease[] }) {
-  return (
-    <aside className="rounded-[28px] bg-white p-4 shadow-[0_18px_50px_rgba(23,53,42,0.06)]">
-      <h2 className="font-display text-xl text-[#17352A]">Recent Releases</h2>
-      <ul className="mt-3 space-y-3">
-        {releases.map((pack) => (
-          <li key={pack.id} className="flex items-center gap-3">
-            <BookCover tone={pack.coverTone} title={pack.title} locked={!pack.owned} />
-            <div className="min-w-0">
-              <p className="font-display text-base leading-tight text-[#17352A]">{pack.title}</p>
-              {pack.owned ? (
-                <p className="mt-1 flex items-center gap-1 text-sm font-extrabold text-[#306A51]">
-                  <Check className="size-4" strokeWidth={3} aria-hidden="true" />
-                  Already Owned
-                </p>
-              ) : (
-                <Button asChild variant="mustard" size="sm" className="mt-2">
-                  <Link href="/club/shop">Unlock</Link>
-                </Button>
-              )}
-            </div>
-          </li>
-        ))}
-      </ul>
-    </aside>
   );
 }
 

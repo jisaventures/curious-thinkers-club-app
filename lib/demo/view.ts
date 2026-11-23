@@ -2,7 +2,8 @@ import "server-only";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { levelProgress } from "@/lib/levels";
-import { clubPackBanners, clubPoll, recentReleases } from "@/lib/club/banners";
+import { clubPackBanners } from "@/lib/club/banners";
+import { buildDashboardHome, groupPackProgress } from "@/lib/club/home";
 import { catchUpNudge } from "@/lib/progress";
 import { detectVideoProvider, vimeoId, youtubeId, type AvatarKey } from "@/lib/validators";
 import type { AccountRecord } from "@/lib/auth/session";
@@ -78,7 +79,7 @@ export async function demoDashboard(account: AccountRecord) {
   const ownership = db.ownership.filter((row) => row.account_id === account.id);
   const owned = new Set(ownership.map((row) => row.pack_id));
   const packs = db.packs
-    .filter((pack) => pack.published || account.role === "admin")
+    .filter((pack) => !pack.upcoming && (pack.published || account.role === "admin"))
     .map((pack) => {
       const packSteps = db.steps.filter((step) => step.pack_id === pack.id).sort((a, b) => a.position - b.position);
       const done = focus
@@ -156,8 +157,30 @@ export async function demoDashboard(account: AccountRecord) {
       progress: db.progress,
       childIds: children.map((child) => child.id),
     }),
-    releases: recentReleases({ packs: db.packs, ownedIds: owned }),
-    poll: clubPoll(db.poll, db.poll_votes, account.id),
+    home: buildDashboardHome({
+      packs: db.packs.map((pack) => ({
+        id: pack.id,
+        slug: pack.slug,
+        title: pack.title,
+        theme: pack.theme,
+        coverTone: pack.cover_tone,
+        createdAt: pack.created_at,
+        owned: owned.has(pack.id),
+        upcoming: pack.upcoming,
+        free: pack.free,
+        submissionSlots: pack.submission_slots,
+        ...groupPackProgress({
+          steps: db.steps,
+          progress: db.progress,
+          childIds: children.map((child) => child.id),
+          packId: pack.id,
+          stepCount: pack.step_count,
+        }),
+      })),
+      points: Object.values(pointsByChild).reduce((sum, value) => sum + value, 0),
+      submissionsSent: db.submissions.filter((row) => row.account_id === account.id && row.status !== "rejected").length,
+      remindedPackIds: db.reminders.filter((row) => row.account_id === account.id).map((row) => row.pack_id),
+    }),
     pointsByChild,
     rewardLadder: rewards
       .filter((reward) => reward.active)

@@ -25,7 +25,7 @@ export default async function ShopPage() {
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         {locked.map((pack) => (
-          <article key={pack.id} className="flex gap-4 rounded-[22px] bg-white p-4">
+          <article id={pack.slug} key={pack.id} className="flex gap-4 rounded-[22px] bg-white p-4">
             <BookCover tone={pack.cover_tone} title={pack.title} locked />
             <div className="min-w-0">
               <h2 className="font-display text-xl text-[#17352A]">{pack.title}</h2>

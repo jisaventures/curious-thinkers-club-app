@@ -16,15 +16,13 @@ function fail(path: string, message: string): never {
   redirect(`${path}?error=${encodeURIComponent(message)}`);
 }
 
-export async function demoVoteNextPack(accountId: string, optionId: string) {
+export async function demoRemindPack(accountId: string, email: string, packId: string) {
   const db = demoDb();
-  const now = Date.now();
-  if (now < Date.parse(db.poll.opens_at) || now > Date.parse(db.poll.closes_at)) {
-    return { error: "This poll is closed." };
+  const pack = db.packs.find((item) => item.id === packId && item.upcoming);
+  if (!pack) return { error: "That pack is not waiting to launch." };
+  if (!db.reminders.some((row) => row.account_id === accountId && row.pack_id === packId)) {
+    db.reminders.push({ account_id: accountId, pack_id: packId, email, created_at: new Date().toISOString() });
   }
-  if (!db.poll.options.some((option) => option.id === optionId)) return { error: "Choose one of the four packs." };
-  if (db.poll_votes.some((vote) => vote.account_id === accountId)) return { error: "Your group has already voted." };
-  db.poll_votes.push({ account_id: accountId, option_id: optionId });
   return { ok: true as const };
 }
 
@@ -223,8 +221,12 @@ export async function demoCreatePack(formData: FormData) {
     price_pence: parsed.data.pricePence,
     certificate_bonus_points: parsed.data.certificateBonusPoints,
     step_count: 0,
+    page_count: 16,
     published: parsed.data.published,
     created_at: new Date().toISOString(),
+    free: false,
+    upcoming: false,
+    submission_slots: 3,
   });
   redirect(`/admin/packs/${id}?saved=1`);
 }
