@@ -47,10 +47,12 @@ export function PackBanner({
         continuing ? "bg-[#f3faf4]" : "bg-[#fff8ee]"
       } ${compact ? "p-3" : featured ? "p-4 sm:p-6" : "p-4"}`}
     >
-      <div className={`flex flex-col md:flex-row md:items-center ${compact ? "gap-3" : "gap-4"} ${featured ? "md:pr-8" : ""}`}>
+      <div className={`flex flex-col md:flex-row ${featured ? "md:items-end md:pr-4" : "md:items-center"} ${compact ? "gap-3" : "gap-4"}`}>
         <PackArt tone={tone} title={title} compact={compact} className={`mx-auto shrink-0 md:mx-0 ${compact ? "h-24 w-20" : featured ? "h-56 w-40 md:h-64 md:w-48" : "h-44 w-36 md:h-48"}`} />
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-extrabold tracking-[0.16em] text-[#306A51] uppercase">{continuing ? "Continue pack" : "Start pack"}</p>
+          {!(featured && !continuing) && (
+            <p className="text-xs font-extrabold tracking-[0.16em] text-[#306A51] uppercase">{continuing ? "Continue pack" : "Start pack"}</p>
+          )}
           {!compact && (
             <p className="mt-2 text-sm font-bold text-[#3d5348] sm:text-base">
               {continuing ? continueLead(clubName, done, total) : "Your new pack is ready"}
@@ -63,7 +65,9 @@ export function PackBanner({
             </p>
           )}
           {featured && !continuing && (
-            <p className="mt-2 text-sm text-[#3d5348] sm:text-base md:hidden">Print the pages, then start whenever the club is ready.</p>
+            <p className="mt-2 text-sm text-[#3d5348] sm:text-base md:hidden">
+              Don&apos;t forget to print out the pages! Or order your workbook <Link href="/club/shop" className="font-extrabold text-[#306A51] underline">here</Link>!
+            </p>
           )}
           {continuing && (
             <div className={compact ? "mt-2" : "mt-4"}>
@@ -108,15 +112,14 @@ export function PackBanner({
         </div>
       </div>
       {featured && (
-        <div className="pointer-events-none absolute top-3 right-3 hidden items-start md:flex">
+        <div className="absolute top-4 right-4 hidden items-start md:flex">
           {!continuing && (
-            <p className="relative mt-8 mr-1 w-52 rounded-2xl bg-white px-4 py-2.5 text-center font-display text-sm font-bold leading-snug text-[#306A51] shadow-[0_5px_0_#e4d7c4]">
-              Print the pages, then start whenever the club is ready.
-              <span aria-hidden="true" className="absolute right-3 -bottom-[7px] h-0 w-0 border-x-8 border-t-[8px] border-x-transparent border-t-[#e4d7c4]" />
-              <span aria-hidden="true" className="absolute right-3 -bottom-[3px] h-0 w-0 border-x-8 border-t-[8px] border-x-transparent border-t-white" />
+            <p className="mt-2 mr-2 w-56 rounded-2xl bg-white px-4 py-2.5 text-center font-display text-sm font-bold leading-snug text-[#306A51] shadow-[0_5px_0_#e4d7c4]">
+              Don&apos;t forget to print out the pages! Or order your workbook{" "}
+              <Link href="/club/shop" className="underline">here</Link>!
             </p>
           )}
-          <img src="/brand/mascot-spy.png" alt="" className="h-28 w-auto" />
+          <img src="/brand/mascot-spy.png" alt="" className="mt-8 h-36 w-auto" />
         </div>
       )}
     </article>
