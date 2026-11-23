@@ -201,74 +201,83 @@ function NewPackBanner({
   href: string;
 }) {
   return (
-    <article className="relative overflow-hidden rounded-[28px] bg-[#fff8ee] p-4 shadow-[0_18px_50px_rgba(23,53,42,0.06)] sm:p-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
-        <div className="grid grid-cols-[7.75rem_minmax(0,1fr)] items-center gap-x-3 gap-y-2 md:contents">
-          <PackArt tone={tone} title={title} className="row-span-3 h-40 w-full md:h-60 md:w-44 md:shrink-0" />
-          <p className="inline-flex w-fit items-center gap-2 self-end rounded-full bg-[#e7f5e1] px-3 py-1 text-sm font-bold text-[#306A51] md:hidden">
-            <span className="size-2 rounded-full bg-[#306A51]" aria-hidden="true" />
-            Your new pack is ready!
-          </p>
-          <h2 className="font-display text-3xl leading-tight text-[#17352A] md:hidden">{title}</h2>
-          {blurb && <p className="text-sm text-[#3d5348] md:hidden">{blurb}</p>}
+    <article className="relative overflow-hidden rounded-[28px] bg-[#fff8ee] p-4 shadow-[0_18px_50px_rgba(23,53,42,0.06)] sm:p-5">
+      <span className="pointer-events-none absolute -top-10 -right-8 size-40 rounded-full bg-[#e7f4ea] lg:hidden" aria-hidden="true" />
+      <div className="relative grid grid-cols-[6.75rem_minmax(0,1fr)] items-center gap-x-3 gap-y-1 lg:flex lg:items-center lg:gap-4">
+        <PackArt tone={tone} title={title} className="row-span-3 h-[8.5rem] w-full lg:h-48 lg:w-[8.5rem] lg:shrink-0" />
+        <div className="flex min-w-0 flex-col justify-center gap-1 lg:hidden">
+          <ReadyPill className="text-[11px]" />
+          <h2 className="font-display text-[1.65rem] leading-[1.05] text-[#17352A]">{title}</h2>
+          {blurb && <p className="text-[13px] leading-snug text-[#3d5348]">{blurb}</p>}
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="hidden w-fit items-center gap-2 rounded-full bg-[#e7f5e1] px-3 py-1 text-sm font-bold text-[#306A51] md:inline-flex">
-            <span className="size-2 rounded-full bg-[#306A51]" aria-hidden="true" />
-            Your new pack is ready!
-          </p>
-          <h2 className="mt-3 hidden font-display text-4xl leading-tight text-[#17352A] md:block">{title}</h2>
-          {blurb && <p className="mt-2 hidden text-base text-[#3d5348] md:block">{blurb}</p>}
-          <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm font-bold text-[#3d5348]">
+        <div className="col-span-2 min-w-0 lg:flex-1 lg:pr-4">
+          <div className="hidden lg:block">
+            <ReadyPill />
+            <h2 className="mt-2 font-display text-[1.55rem] leading-none whitespace-nowrap text-[#17352A] xl:text-[1.85rem]">{title}</h2>
+            {blurb && <p className="mt-1.5 truncate text-sm text-[#3d5348]">{blurb}</p>}
+          </div>
+          <ul className="mt-3 flex flex-nowrap items-center gap-x-2.5 text-[11px] font-bold whitespace-nowrap text-[#3d5348] sm:gap-x-4 sm:text-xs lg:text-[13px]">
             {durationLabel && (
-              <li className="inline-flex items-center gap-1.5">
-                <Clock className="size-4 text-[#306A51]" aria-hidden="true" />
+              <li className="inline-flex items-center gap-1">
+                <Clock className="size-3.5 shrink-0 text-[#306A51]" aria-hidden="true" />
                 {durationLabel}
               </li>
             )}
             {pageCount != null && (
-              <li className="inline-flex items-center gap-1.5">
-                <FileText className="size-4 text-[#306A51]" aria-hidden="true" />
+              <li className="inline-flex items-center gap-1">
+                <FileText className="size-3.5 shrink-0 text-[#306A51]" aria-hidden="true" />
                 {pageCount} pages
               </li>
             )}
             {ageMin > 0 && ageMax > 0 && (
-              <li className="inline-flex items-center gap-1.5">
-                <UserRound className="size-4 text-[#306A51]" aria-hidden="true" />
+              <li className="inline-flex items-center gap-1">
+                <UserRound className="size-3.5 shrink-0 text-[#306A51]" aria-hidden="true" />
                 Ages {ageMin}–{ageMax}
               </li>
             )}
           </ul>
-          <div className="mt-4 flex flex-col gap-3 md:flex-row">
-            <Button asChild variant="mustard" size="md" className="w-full md:w-auto">
+          <div className="mt-3 flex flex-col gap-2.5 lg:flex-row">
+            <Button asChild variant="mustard" size="sm" className="w-full lg:w-auto">
               <Link href={href}>
                 Start pack
-                <Play className="size-4 fill-current" aria-hidden="true" />
+                <Play className="size-3.5 fill-current" aria-hidden="true" />
               </Link>
             </Button>
-            <Button asChild variant="white" size="md" className="w-full border-2 border-[#306A51] md:w-auto">
+            <Button asChild variant="white" size="sm" className="w-full border-2 border-[#306A51] lg:w-auto">
               <Link href={href}>
                 Print pages
-                <Printer className="size-4" aria-hidden="true" />
+                <Printer className="size-3.5" aria-hidden="true" />
               </Link>
             </Button>
           </div>
-          <p className="mt-3 text-sm text-[#3d5348]">
+          <p className="mt-2.5 text-xs text-[#3d5348] sm:text-sm lg:whitespace-nowrap">
             Prefer it printed?{" "}
             <Link href="/club/shop" className="font-extrabold text-[#306A51] underline">
               Order your workbook here
             </Link>
           </p>
         </div>
-        <div className="relative hidden w-40 shrink-0 flex-col items-center md:flex">
-          <span className="absolute right-0 bottom-0 -z-0 size-36 rounded-full bg-[#d7efe4]" aria-hidden="true" />
-          <p className="relative z-10 mb-1 w-36 rounded-2xl bg-white px-3 py-2 text-center font-display text-sm font-bold leading-snug text-[#306A51] shadow-[0_5px_0_#e4d7c4]">
+        <div className="relative hidden w-[8.75rem] shrink-0 flex-col items-end lg:flex">
+          <p className="relative z-20 -ml-4 w-[8.75rem] rounded-2xl bg-white px-2.5 py-2 text-center font-display text-[13px] leading-snug font-bold text-[#306A51] shadow-[0_4px_0_#e4d7c4]">
             Don&apos;t forget to print the pages first!
+            <span className="absolute -bottom-1.5 left-8 size-3 rotate-45 rounded-[2px] bg-white shadow-[2px_2px_0_#e4d7c4]" aria-hidden="true" />
           </p>
-          <img src="/brand/mascot-spy.png" alt="" className="relative z-10 h-40 w-auto" />
+          <div className="relative mt-2 h-36 w-full">
+            <span className="absolute -left-3 bottom-0 size-[9.5rem] rounded-full bg-[#e3f3e7]" aria-hidden="true" />
+            <img src="/brand/mascot-spy.png" alt="" className="absolute right-0 bottom-0 z-10 h-36 w-auto" />
+          </div>
         </div>
       </div>
     </article>
+  );
+}
+
+function ReadyPill({ className = "" }: { className?: string }) {
+  return (
+    <p className={`inline-flex w-fit items-center gap-1.5 rounded-full bg-[#e7f5e1] px-2.5 py-1 text-xs font-bold whitespace-nowrap text-[#306A51] ${className}`}>
+      <span className="size-1.5 rounded-full bg-[#306A51]" aria-hidden="true" />
+      Your new pack is ready!
+    </p>
   );
 }
 
