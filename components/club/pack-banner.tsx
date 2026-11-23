@@ -56,10 +56,15 @@ export function PackBanner({
               {continuing ? continueLead(clubName, done, total) : "Your new pack is ready"}
             </p>
           )}
-          <h2 className={`font-display leading-tight text-[#17352A] ${compact ? "mt-1 text-lg" : featured ? "mt-1 text-3xl sm:text-4xl" : "mt-1 text-2xl sm:text-3xl"}`}>{title}</h2>
-          <p className={`${compact ? "mt-1 text-sm" : "mt-2 text-sm sm:text-base"} text-[#3d5348]`}>
-            {continuing ? `Next: ${nextStep ?? "Keep going"}` : "Print the pages, then start whenever the club is ready."}
-          </p>
+          <h2 className={`font-display leading-tight text-[#17352A] ${compact ? "mt-1 text-lg" : featured ? "mt-1 text-2xl whitespace-nowrap sm:text-3xl" : "mt-1 text-2xl sm:text-3xl"}`}>{title}</h2>
+          {(continuing || !featured) && (
+            <p className={`${compact ? "mt-1 text-sm" : "mt-2 text-sm sm:text-base"} text-[#3d5348]`}>
+              {continuing ? `Next: ${nextStep ?? "Keep going"}` : "Print the pages, then start whenever the club is ready."}
+            </p>
+          )}
+          {featured && !continuing && (
+            <p className="mt-2 text-sm text-[#3d5348] sm:text-base md:hidden">Print the pages, then start whenever the club is ready.</p>
+          )}
           {continuing && (
             <div className={compact ? "mt-2" : "mt-4"}>
               <div className="mb-1.5 flex items-center justify-between gap-3 text-sm text-[#3d5348]">
@@ -101,7 +106,15 @@ export function PackBanner({
         </div>
       </div>
       {featured && (
-        <img src="/brand/mascot-spy.png" alt="" className="pointer-events-none absolute right-3 bottom-2 hidden h-36 w-auto md:block" />
+        <>
+          {!continuing && (
+            <p className="pointer-events-none absolute right-36 bottom-8 hidden w-52 rounded-2xl bg-[#e8a428] px-4 py-2.5 text-center font-display text-sm font-bold leading-snug text-white shadow-[0_5px_0_#c48614] md:block">
+              Print the pages, then start whenever the club is ready.
+              <span aria-hidden="true" className="absolute top-1/2 -right-1.5 size-3 -translate-y-1/2 rotate-45 bg-[#e8a428]" />
+            </p>
+          )}
+          <img src="/brand/mascot-spy.png" alt="" className="pointer-events-none absolute right-3 bottom-2 hidden h-36 w-auto md:block" />
+        </>
       )}
     </article>
   );
