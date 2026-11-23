@@ -13,6 +13,11 @@ export type ClubBanner = {
   id: string;
   slug: string;
   title: string;
+  blurb: string;
+  durationLabel: string;
+  ageMin: number;
+  ageMax: number;
+  pageCount: number | null;
   coverTone: CoverTone;
   state: "start" | "continue";
   done: number;
@@ -26,7 +31,18 @@ type StepRow = { id: string; pack_id: string; position: number; title: string };
 type ProgressRow = { child_id: string; step_id: string; status: string; completed_at?: string | null };
 
 export function clubPackBanners(input: {
-  packs: Array<{ id: string; slug: string; title: string; cover_tone: CoverTone; step_count: number }>;
+  packs: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    blurb?: string;
+    duration_label?: string;
+    age_min?: number;
+    age_max?: number;
+    page_count?: number | null;
+    cover_tone: CoverTone;
+    step_count: number;
+  }>;
   steps: StepRow[];
   owned: Array<{ pack_id: string; granted_at?: string | null }>;
   progress: ProgressRow[];
@@ -58,6 +74,11 @@ export function clubPackBanners(input: {
       id: pack.id,
       slug: pack.slug,
       title: pack.title,
+      blurb: pack.blurb || "",
+      durationLabel: pack.duration_label || "",
+      ageMin: pack.age_min ?? 0,
+      ageMax: pack.age_max ?? 0,
+      pageCount: pack.page_count ?? null,
       coverTone: pack.cover_tone,
       state: done === 0 ? "start" : "continue",
       done,

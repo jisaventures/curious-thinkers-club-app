@@ -108,6 +108,11 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
                   total={data.banners[0].total}
                   nextStep={data.banners[0].nextStep}
                   members={data.children}
+                  blurb={data.banners[0].blurb}
+                  durationLabel={data.banners[0].durationLabel}
+                  ageMin={data.banners[0].ageMin}
+                  ageMax={data.banners[0].ageMax}
+                  pageCount={data.banners[0].pageCount}
                   href={focus ? `/club/packs/${data.banners[0].slug}?mode=together&child=${focus.id}` : `/club/packs/${data.banners[0].slug}`}
                   featured
                 />

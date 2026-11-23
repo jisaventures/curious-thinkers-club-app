@@ -64,6 +64,7 @@ export type DemoPack = {
   price_pence: number;
   certificate_bonus_points: number;
   step_count: number;
+  page_count: number;
   published: boolean;
   created_at: string;
 };
@@ -233,6 +234,7 @@ function pack(
   ageMin: number,
   ageMax: number,
   createdAt = "2026-06-01T00:00:00.000Z",
+  pageCount = 16,
 ): DemoPack {
   return {
     id,
@@ -249,6 +251,7 @@ function pack(
     price_pence: 899,
     certificate_bonus_points: 50,
     step_count: 8,
+    page_count: pageCount,
     published: true,
     created_at: createdAt,
   };
@@ -502,7 +505,7 @@ export function createSeed(): DemoDb {
       ...crowd.children,
     ],
     packs: [
-      pack(pirate, "be-a-pirate-for-the-day", "Be a pirate for the day", "history", "Learn about real pirates, maps and ships", "bottle", "900000000001", 4, 8, "2026-07-01T00:00:00.000Z"),
+      pack(pirate, "be-a-pirate-for-the-day", "Be a pirate for the day", "history", "Learn about real pirates, maps and ships", "bottle", "900000000001", 4, 8, "2026-07-01T00:00:00.000Z", 22),
       pack(egypt, "be-an-egyptian-explorer", "Be an Egyptian explorer", "history", "Hieroglyphs, pyramids and real ancient Egypt", "palm", "900000000002", 6, 10, "2026-08-01T00:00:00.000Z"),
       pack(spy, "become-a-spy", "Become a spy", "codes", "Learn about real spies, codes and secret messages", "navy", "900000000003", 7, 10, "2026-09-01T00:00:00.000Z"),
       pack(knight, "be-a-knight-for-the-day", "Be a knight for the day", "castles", "Castles, armour and real medieval life", "plum", "900000000004", 5, 9, "2026-11-10T00:00:00.000Z"),
@@ -605,7 +608,7 @@ export function createSeed(): DemoDb {
   };
 }
 
-const SEED_VERSION = 12;
+const SEED_VERSION = 13;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {
