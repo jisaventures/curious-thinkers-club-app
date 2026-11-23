@@ -1058,9 +1058,15 @@ select {
   }
 
   .new-pack-banner__cover {
-    width: min(260px, 100%);
+    width: min(168px, 100%);
     height: auto;
     aspect-ratio: 260 / 330;
+  }
+
+  .new-pack-banner__title {
+    font-size: 23px;
+    line-height: 1.1;
+    white-space: nowrap;
   }
 
   .new-pack-banner__copy {
