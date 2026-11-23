@@ -47,7 +47,7 @@ export function PackBanner({
         continuing ? "bg-[#f3faf4]" : "bg-[#fff8ee]"
       } ${compact ? "p-3" : featured ? "p-4 sm:p-6" : "p-4"}`}
     >
-      <div className={`flex flex-col md:flex-row md:items-center ${compact ? "gap-3" : "gap-4"} ${featured ? "md:pr-36" : ""}`}>
+      <div className={`flex flex-col md:flex-row md:items-center ${compact ? "gap-3" : "gap-4"} ${featured ? "md:pr-8" : ""}`}>
         <PackArt tone={tone} title={title} compact={compact} className={`mx-auto shrink-0 md:mx-0 ${compact ? "h-24 w-20" : featured ? "h-56 w-40 md:h-64 md:w-48" : "h-44 w-36 md:h-48"}`} />
         <div className="min-w-0 flex-1">
           <p className="text-xs font-extrabold tracking-[0.16em] text-[#306A51] uppercase">{continuing ? "Continue pack" : "Start pack"}</p>
@@ -76,23 +76,25 @@ export function PackBanner({
               </div>
             </div>
           )}
-          <div className={`${compact ? "mt-2" : "mt-4"} flex items-center gap-2`}>
-            <div className="flex -space-x-2">
-              {members.slice(0, 5).map((member) => (
-                <Avatar
-                  key={member.id}
-                  avatar={member.avatar_key}
-                  options={member.avatar_options}
-                  gender={member.gender === "girl" ? "girl" : "boy"}
-                  title={member.first_name || member.nickname}
-                  className="size-7 rounded-full ring-2 ring-white"
-                />
-              ))}
+          {(continuing || !featured) && (
+            <div className={`${compact ? "mt-2" : "mt-4"} flex items-center gap-2`}>
+              <div className="flex -space-x-2">
+                {members.slice(0, 5).map((member) => (
+                  <Avatar
+                    key={member.id}
+                    avatar={member.avatar_key}
+                    options={member.avatar_options}
+                    gender={member.gender === "girl" ? "girl" : "boy"}
+                    title={member.first_name || member.nickname}
+                    className="size-7 rounded-full ring-2 ring-white"
+                  />
+                ))}
+              </div>
+              <p className="text-sm font-bold text-[#3d5348]">
+                {continuing ? `${members.length} ${members.length === 1 ? "member" : "members"} on this pack` : "Ready for the whole club"}
+              </p>
             </div>
-            <p className="text-sm font-bold text-[#3d5348]">
-              {continuing ? `${members.length} ${members.length === 1 ? "member" : "members"} on this pack` : "Ready for the whole club"}
-            </p>
-          </div>
+          )}
           <div className={`${compact ? "mt-2" : "mt-4"} flex flex-col gap-2 sm:flex-row`}>
             <Button asChild variant="mustard" size={compact ? "sm" : "md"} className="w-full sm:w-auto">
               <Link href={href}>{continuing ? "Continue pack" : "Start pack"}</Link>
@@ -106,15 +108,16 @@ export function PackBanner({
         </div>
       </div>
       {featured && (
-        <>
+        <div className="pointer-events-none absolute top-3 right-3 hidden items-start md:flex">
           {!continuing && (
-            <p className="pointer-events-none absolute right-36 bottom-8 hidden w-52 rounded-2xl bg-[#e8a428] px-4 py-2.5 text-center font-display text-sm font-bold leading-snug text-white shadow-[0_5px_0_#c48614] md:block">
+            <p className="relative mt-8 mr-1 w-52 rounded-2xl bg-white px-4 py-2.5 text-center font-display text-sm font-bold leading-snug text-[#306A51] shadow-[0_5px_0_#e4d7c4]">
               Print the pages, then start whenever the club is ready.
-              <span aria-hidden="true" className="absolute top-1/2 -right-1.5 size-3 -translate-y-1/2 rotate-45 bg-[#e8a428]" />
+              <span aria-hidden="true" className="absolute right-3 -bottom-[7px] h-0 w-0 border-x-8 border-t-[8px] border-x-transparent border-t-[#e4d7c4]" />
+              <span aria-hidden="true" className="absolute right-3 -bottom-[3px] h-0 w-0 border-x-8 border-t-[8px] border-x-transparent border-t-white" />
             </p>
           )}
-          <img src="/brand/mascot-spy.png" alt="" className="pointer-events-none absolute right-3 bottom-2 hidden h-36 w-auto md:block" />
-        </>
+          <img src="/brand/mascot-spy.png" alt="" className="h-28 w-auto" />
+        </div>
       )}
     </article>
   );
