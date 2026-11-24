@@ -216,6 +216,8 @@ export async function loadDashboard() {
     focus,
     packs: packCards,
     points: focusPoints,
+    clubPoints: [...pointsByChild.values()].reduce((sum, value) => sum + value, 0),
+    clubRank: null as number | null,
     level,
     leaderboard: leaderboard as Array<{
       nickname: string;

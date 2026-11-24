@@ -120,6 +120,7 @@ export async function demoDashboard(account: AccountRecord) {
     }
   }
   const focusPoints = focus ? (pointsByChild[focus.id] ?? 0) : 0;
+  const clubStanding = clubStandingFor(db, account.id);
   const totals = new Map<string, number>();
   for (const row of db.ledger) totals.set(row.child_id, (totals.get(row.child_id) ?? 0) + row.amount);
   const ranked = db.children
@@ -141,6 +142,8 @@ export async function demoDashboard(account: AccountRecord) {
     focus,
     packs,
     points: focusPoints,
+    clubPoints: clubStanding.points,
+    clubRank: clubStanding.rank,
     level: levelProgress(focusPoints),
     leaderboard: ranked,
     prizes: [...db.prizes].sort((a, b) => a.sort_order - b.sort_order),
@@ -295,6 +298,26 @@ export function demoPackPage(account: AccountRecord, slug: string, modeRaw?: str
     certificates: db.certificates.filter((row) => row.pack_id === pack.id).map((row) => row.child_id),
     progress: db.progress,
   };
+}
+
+function clubStandingFor(db: ReturnType<typeof demoDb>, accountId: string) {
+  const totals = new Map<string, number>();
+  for (const child of db.children) {
+    const score = db.ledger.filter((row) => row.child_id === child.id).reduce((sum, row) => sum + row.amount, 0);
+    totals.set(child.account_id, (totals.get(child.account_id) ?? 0) + score);
+  }
+  const points = totals.get(accountId) ?? 0;
+  const board = [...totals.entries()].filter(([, score]) => score > 0).sort((a, b) => b[1] - a[1]);
+  let rank = 0;
+  let place = 0;
+  let previous = -1;
+  for (const [id, score] of board) {
+    place += 1;
+    if (score !== previous) rank = place;
+    previous = score;
+    if (id === accountId) return { points, rank };
+  }
+  return { points, rank: null as number | null };
 }
 
 function resolve(url: string | null) {
