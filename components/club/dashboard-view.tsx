@@ -20,6 +20,7 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
   const membersRow = useRef<HTMLDivElement>(null);
   const membersLabel = useRef<HTMLParagraphElement>(null);
   const identityText = useRef<HTMLDivElement>(null);
+  const identityRow = useRef<HTMLDivElement>(null);
   const groupIcon = useRef<HTMLAnchorElement>(null);
   useLayoutEffect(() => {
     const row = membersRow.current;
@@ -34,7 +35,14 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
           label.style.marginLeft = `${Math.max(0, Math.round(inset))}px`;
         }
       }
-      if (text && icon) {
+      const wide = window.matchMedia("(min-width: 1024px)").matches;
+      if (wide && row && identityRow.current && icon) {
+        const height = Math.round(row.getBoundingClientRect().height);
+        identityRow.current.style.minHeight = `${height}px`;
+        icon.style.width = `${height}px`;
+        icon.style.height = `${height}px`;
+      } else if (text && icon && identityRow.current) {
+        identityRow.current.style.minHeight = "";
         const height = Math.round(text.getBoundingClientRect().height);
         icon.style.width = `${height}px`;
         icon.style.height = `${height}px`;
@@ -44,7 +52,11 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
     const observer = new ResizeObserver(align);
     if (row) observer.observe(row);
     if (text) observer.observe(text);
-    return () => observer.disconnect();
+    window.addEventListener("resize", align);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", align);
+    };
   }, [data.children.length, data.clubRank, data.clubPoints]);
 
   const focus = data.focus;
@@ -62,7 +74,7 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
               Manage club
             </Link>
           </div>
-          <div className="order-2 flex items-stretch gap-3 lg:order-none lg:col-start-1 lg:row-start-2">
+          <div ref={identityRow} className="order-2 flex items-stretch gap-3 lg:order-none lg:col-start-1 lg:row-start-2">
             {isGroupIcon(account.group_icon) && (
               <Link ref={groupIcon} href="/club/group#profile" className="group relative shrink-0 self-stretch overflow-hidden rounded-[22px]" aria-label="Edit group icon">
                 <GroupIcon
@@ -78,7 +90,7 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
                 </span>
               </Link>
             )}
-            <div ref={identityText} className="min-w-0 self-center">
+            <div ref={identityText} className="flex min-w-0 flex-1 flex-col justify-between">
               <h1 className="flex items-center gap-2 font-display text-3xl leading-tight font-bold whitespace-nowrap text-[#17352A] sm:text-4xl">
                 <span>{account.group_name || account.display_name}</span>
                 {account.group_location && <CountryFlag country={account.group_location} className="h-4 w-6 shrink-0" />}
