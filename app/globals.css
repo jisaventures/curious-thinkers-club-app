@@ -1104,3 +1104,50 @@ select {
     display: none;
   }
 }
+
+.promo-banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  min-height: 220px;
+}
+
+.promo-banner__rays {
+  position: absolute;
+  inset: -30%;
+  background: repeating-conic-gradient(from 210deg at 72% 42%, transparent 0 14deg, rgba(255, 255, 255, 0.07) 14deg 16deg);
+  pointer-events: none;
+}
+
+.promo-banner__dot {
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.promo-banner__spark {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #fffaf2;
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  pointer-events: none;
+}
+
+.promo-banner__mascot {
+  position: absolute;
+  right: -12px;
+  bottom: -28px;
+  z-index: 2;
+  width: 104px;
+  height: auto;
+  pointer-events: none;
+}
+
+@media (max-width: 639px) {
+  .promo-banner__mascot {
+    width: 84px;
+    right: -4px;
+    bottom: -12px;
+  }
+}

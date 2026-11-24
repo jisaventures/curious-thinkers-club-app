@@ -3,7 +3,8 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { levelProgress } from "@/lib/levels";
 import { clubPackBanners } from "@/lib/club/banners";
-import { buildDashboardHome, groupPackProgress } from "@/lib/club/home";
+import { buildDashboardHome, buildOwnedPacks, groupPackProgress } from "@/lib/club/home";
+import { activePromo } from "@/lib/club/promo";
 import { catchUpNudge } from "@/lib/progress";
 import { detectVideoProvider, vimeoId, youtubeId, type AvatarKey } from "@/lib/validators";
 import type { AccountRecord } from "@/lib/auth/session";
@@ -180,6 +181,32 @@ export async function demoDashboard(account: AccountRecord) {
       points: Object.values(pointsByChild).reduce((sum, value) => sum + value, 0),
       submissionsSent: db.submissions.filter((row) => row.account_id === account.id && row.status !== "rejected").length,
       remindedPackIds: db.reminders.filter((row) => row.account_id === account.id).map((row) => row.pack_id),
+      promo: activePromo(db.dashboardBanner),
+      ownedPacks: buildOwnedPacks({
+        packs: db.packs.map((pack) => ({
+          id: pack.id,
+          slug: pack.slug,
+          title: pack.title,
+          theme: pack.theme,
+          coverTone: pack.cover_tone,
+          ageMin: pack.age_min,
+          ageMax: pack.age_max,
+          durationLabel: pack.duration_label,
+          pageCount: pack.page_count,
+          owned: owned.has(pack.id),
+          upcoming: pack.upcoming,
+          submissionSlots: pack.submission_slots,
+          stepCount: pack.step_count,
+        })),
+        steps: db.steps,
+        progress: db.progress,
+        childIds: children.map((child) => child.id),
+        purchases: ownership.map((row) => ({ packId: row.pack_id, grantedAt: row.granted_at })),
+        submissions: db.submissions
+          .filter((row) => row.account_id === account.id)
+          .map((row) => ({ packId: row.pack_id, status: row.status })),
+        ledger: db.ledger.map((row) => ({ childId: row.child_id, amount: row.amount, refId: row.ref_id, reason: row.reason })),
+      }),
     }),
     pointsByChild,
     rewardLadder: rewards

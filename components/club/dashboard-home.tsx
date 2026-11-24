@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type KeyboardEvent } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 import Link from "next/link";
 import {
   Bell,
@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { Avatar } from "@/components/brand/avatar";
 import { Button } from "@/components/ui/button";
+import { MyPacksStrip } from "@/components/club/my-packs-strip";
+import { PromoBanner } from "@/components/club/promo-banner";
 import { remindPackLaunch } from "@/app/club/actions";
 import type { DashboardHome, HomePackCard, HomeRelease } from "@/lib/club/home";
 import { shopUrl } from "@/lib/env";
@@ -66,6 +68,7 @@ export function DashboardHome({
   const [tab, setTab] = useState<"progress" | "completed">(opensOnCompleted ? "completed" : "progress");
   const [reminded, setReminded] = useState(() => new Set(home.remindedIds));
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const rightColumn = useRef<HTMLDivElement>(null);
 
   function onTabKey(event: KeyboardEvent<HTMLDivElement>) {
     if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
@@ -87,6 +90,7 @@ export function DashboardHome({
 
   return (
     <div className="grid min-w-0 items-start gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <div className="min-w-0 space-y-4">
       <section className="min-w-0 rounded-[28px] bg-white p-4 shadow-[0_18px_50px_rgba(23,53,42,0.06)] sm:p-5">
         <div role="tablist" aria-label="Your packs" className="inline-flex max-w-full rounded-full bg-[#F3E7CF] p-1 max-sm:flex max-sm:w-full" onKeyDown={onTabKey}>
           <TabButton id="pack-tab-progress" controls="pack-panel-progress" selected={tab === "progress"} onSelect={() => setTab("progress")}>
@@ -135,7 +139,10 @@ export function DashboardHome({
           )}
         </div>
       </section>
-      <div className="min-w-0 space-y-4">
+      {home.promo && <PromoBanner banner={home.promo} />}
+      <MyPacksStrip packs={home.ownedPacks} columnRef={rightColumn} />
+      </div>
+      <div ref={rightColumn} className="min-w-0 space-y-4">
         <Stats home={home} />
         <ReleaseCard title="Recent releases" packs={home.recent} mode="recent" />
         <ReleaseCard title="Upcoming releases" packs={home.upcoming} mode="upcoming" reminded={reminded} pendingId={pendingId} onRemind={remind} />

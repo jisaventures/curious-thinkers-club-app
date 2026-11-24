@@ -14,7 +14,7 @@ function demoSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const persona = request.cookies.get("ctc_demo_persona")?.value;
   const signedOut = request.cookies.get("ctc_demo_signed_out")?.value === "1";
-  const needsAdult = path.startsWith("/club") || path.startsWith("/admin") || path.startsWith("/onboarding");
+  const needsAdult = path.startsWith("/club") || path.startsWith("/admin") || path.startsWith("/onboarding") || path.startsWith("/my-packs");
 
   if (persona && !knownDemoPersona(persona)) {
     const response = needsAdult
@@ -90,7 +90,7 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const needsAdult =
-    path.startsWith("/club") || path.startsWith("/admin") || path.startsWith("/onboarding");
+    path.startsWith("/club") || path.startsWith("/admin") || path.startsWith("/onboarding") || path.startsWith("/my-packs");
 
   if (needsAdult && !user) {
     const redirectUrl = request.nextUrl.clone();
@@ -99,7 +99,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (user && (path.startsWith("/club") || path.startsWith("/admin"))) {
+  if (user && (path.startsWith("/club") || path.startsWith("/admin") || path.startsWith("/my-packs"))) {
     const { data: account } = await supabase
       .from("accounts")
       .select("role, is_adult_confirmed")

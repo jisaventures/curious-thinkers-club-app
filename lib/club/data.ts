@@ -6,7 +6,8 @@ import { isDemoMode } from "@/lib/demo/mode";
 import { demoDashboard, demoPackPage } from "@/lib/demo/view";
 import { levelProgress } from "@/lib/levels";
 import { clubPackBanners } from "@/lib/club/banners";
-import { buildDashboardHome, groupPackProgress } from "@/lib/club/home";
+import { buildDashboardHome, buildOwnedPacks, groupPackProgress } from "@/lib/club/home";
+import { activePromo, bannerFromRow } from "@/lib/club/promo";
 import { catchUpNudge, nextStepPosition } from "@/lib/progress";
 import { detectVideoProvider, vimeoId, youtubeId, type AvatarKey, type CoverTone } from "@/lib/validators";
 
@@ -84,12 +85,12 @@ export async function loadDashboard() {
   if (isDemoMode()) return demoDashboard(account);
 
   const { supabase } = await requireAdult();
-  const [childrenRes, packsRes, ownershipRes, ledgerRes, boardRes, rewardsRes, prizesRes, submissionsRes, sentRes, remindersRes] =
+  const [childrenRes, packsRes, ownershipRes, ledgerRes, boardRes, rewardsRes, prizesRes, submissionsRes, sentRes, remindersRes, packSubmissionsRes, bannerRes] =
     await Promise.all([
       supabase.from("children").select("id, nickname, avatar_key, age_years, first_name, gender, avatar_bg, avatar_face, avatar_hair_style, avatar_hair_colour, avatar_glasses, avatar_hat, avatar_skin, avatar_eyes, avatar_shirt, avatar_options, created_at").order("created_at"),
       supabase.from("packs").select("*").or("published.eq.true,upcoming.eq.true"),
       supabase.from("pack_ownership").select("pack_id, granted_at").eq("account_id", account.id),
-      supabase.from("points_ledger").select("child_id, amount"),
+      supabase.from("points_ledger").select("child_id, amount, reason, ref_id"),
       supabase.rpc("leaderboard_month"),
       supabase.from("reward_codes").select("*").order("min_points", { ascending: false }),
       supabase.from("prizes").select("*").order("sort_order"),
@@ -100,11 +101,21 @@ export async function loadDashboard() {
         .limit(12),
       supabase.from("submissions").select("id", { count: "exact", head: true }).neq("status", "rejected"),
       supabase.from("pack_reminders").select("pack_id").eq("account_id", account.id),
+      supabase.from("submissions").select("pack_id, status"),
+      supabase.from("dashboard_banners").select("*").eq("id", "club-kit").maybeSingle(),
     ]);
 
   const children = must(childrenRes.data, childrenRes.error, "children") as ClubChild[];
   const packs = must(packsRes.data, packsRes.error, "packs") as Array<
-    ClubPack & { created_at?: string; upcoming?: boolean; free?: boolean; submission_slots?: number }
+    ClubPack & {
+      created_at?: string;
+      upcoming?: boolean;
+      free?: boolean;
+      submission_slots?: number;
+      age_min?: number;
+      age_max?: number;
+      page_count?: number | null;
+    }
   >;
   const owned = new Set((must(ownershipRes.data, ownershipRes.error, "ownership") ?? []).map((row) => row.pack_id));
   const ledger = must(ledgerRes.data, ledgerRes.error, "points") ?? [];
@@ -255,6 +266,41 @@ export async function loadDashboard() {
       points: [...pointsByChild.values()].reduce((sum, value) => sum + value, 0),
       submissionsSent: sentRes.count ?? submissions.filter((row) => row.status !== "rejected").length,
       remindedPackIds: (remindersRes.data ?? []).map((row) => String(row.pack_id)),
+      promo: activePromo(bannerFromRow(bannerRes.data)),
+      ownedPacks: buildOwnedPacks({
+        packs: packs.map((pack) => ({
+          id: pack.id,
+          slug: pack.slug,
+          title: pack.title,
+          theme: pack.theme,
+          coverTone: pack.cover_tone,
+          ageMin: pack.age_min ?? 0,
+          ageMax: pack.age_max ?? 0,
+          durationLabel: pack.duration_label,
+          pageCount: pack.page_count ?? null,
+          owned: owned.has(pack.id),
+          upcoming: Boolean(pack.upcoming),
+          submissionSlots: Number(pack.submission_slots ?? 3),
+          stepCount: pack.step_count,
+        })),
+        steps,
+        progress,
+        childIds: children.map((child) => child.id),
+        purchases: ((ownershipRes.data ?? []) as Array<{ pack_id: string; granted_at?: string | null }>).map((row) => ({
+          packId: row.pack_id,
+          grantedAt: row.granted_at ?? null,
+        })),
+        submissions: (packSubmissionsRes.data ?? []).map((row) => ({
+          packId: row.pack_id ? String(row.pack_id) : null,
+          status: String(row.status),
+        })),
+        ledger: ledger.map((row) => ({
+          childId: String(row.child_id),
+          amount: Number(row.amount),
+          refId: String(row.ref_id),
+          reason: String(row.reason),
+        })),
+      }),
     }),
     pointsByChild: Object.fromEntries(pointsByChild),
     rewardLadder: rewards

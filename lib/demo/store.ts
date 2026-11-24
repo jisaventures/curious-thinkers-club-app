@@ -1,4 +1,5 @@
 import { boyAvatar, girlAvatar, type AvatarBuild } from "@/lib/avataaars-options";
+import { defaultPromo, type PromoBannerRecord } from "@/lib/club/promo";
 import { nextStepPosition } from "@/lib/progress";
 import type { AvatarKey, CoverTone } from "@/lib/validators";
 
@@ -184,6 +185,7 @@ export type DemoDb = {
   events: DemoEvent[];
   orders: DemoOrder[];
   reminders: DemoReminder[];
+  dashboardBanner: PromoBannerRecord;
   certificates: Array<{ child_id: string; pack_id: string }>;
 };
 
@@ -571,6 +573,7 @@ export function createSeed(): DemoDb {
     ],
     events: [],
     reminders: [],
+    dashboardBanner: { ...defaultPromo },
     orders: [
       {
         id: "1048",
@@ -619,7 +622,7 @@ export function createSeed(): DemoDb {
   };
 }
 
-const SEED_VERSION = 14;
+const SEED_VERSION = 15;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {

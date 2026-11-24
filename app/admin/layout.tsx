@@ -10,6 +10,7 @@ const links = [
   ["Submissions", "/admin/submissions"],
   ["Rewards", "/admin/rewards"],
   ["Grants", "/admin/grants"],
+  ["Dashboard banner", "/admin/dashboard-banner"],
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
