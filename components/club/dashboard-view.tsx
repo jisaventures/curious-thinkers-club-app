@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { LayoutGrid } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Avatar } from "@/components/brand/avatar";
 import { CountryFlag } from "@/components/brand/country-flag";
 import { GROUP_ICONS, GroupIcon, type GroupIconId } from "@/components/brand/group-icon";
@@ -65,14 +65,10 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
   return (
     <div className="space-y-4">
       <section className="rounded-[28px] bg-white p-4 shadow-[0_18px_50px_rgba(23,53,42,0.06)] sm:p-5">
-        <div className="grid grid-cols-1 gap-y-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-x-10">
-          <p className="order-1 flex min-h-11 items-center font-display text-sm font-bold text-[#306A51] lg:col-start-1 lg:row-start-1">Group Leader: {account.display_name}</p>
-          <div className="order-3 flex min-h-11 items-center justify-between gap-4 lg:order-none lg:col-start-2 lg:row-start-1">
+        <div className="grid grid-cols-1 gap-y-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-x-10">
+          <p className="order-1 font-display text-sm font-bold text-[#306A51] lg:col-start-1 lg:row-start-1">Group Leader: {account.display_name}</p>
+          <div className="order-3 lg:order-none lg:col-start-2 lg:row-start-1">
             <p ref={membersLabel} className="font-display text-sm font-bold text-[#306A51]">Group Members</p>
-            <Link href="/club/group" className="hidden min-h-11 items-center gap-2 rounded-full border-2 border-[#306A51] px-4 text-sm font-bold text-[#306A51] no-underline lg:inline-flex">
-              <LayoutGrid className="size-4" aria-hidden="true" />
-              Manage club
-            </Link>
           </div>
           <div ref={identityRow} className="order-2 flex items-stretch gap-3 lg:order-none lg:col-start-1 lg:row-start-2">
             {isGroupIcon(account.group_icon) && (
@@ -94,6 +90,12 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
               <h1 className="flex items-center gap-2 font-display text-3xl leading-tight font-bold whitespace-nowrap text-[#17352A] sm:text-4xl">
                 <span>{account.group_name || account.display_name}</span>
                 {account.group_location && <CountryFlag country={account.group_location} className="h-4 w-6 shrink-0" />}
+                <Link href="/club/group" aria-label="Manage club" className="manage-pen relative inline-flex size-8 items-center justify-center rounded-full text-[#306A51] no-underline hover:bg-[#E7F6EA]">
+                  <Pencil className="size-4" aria-hidden="true" />
+                  <span role="tooltip" className="manage-tip pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 -translate-x-1/2 rounded-md bg-[#17352A] px-2 py-1 text-xs font-bold whitespace-nowrap text-white">
+                    Manage club
+                  </span>
+                </Link>
               </h1>
               <div className="mt-2 flex flex-wrap gap-2">
                 {data.clubRank != null && (
@@ -135,10 +137,6 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
                 );
               })}
             </div>
-            <Link href="/club/group" className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border-2 border-[#306A51] text-sm font-bold text-[#306A51] no-underline lg:hidden">
-              <LayoutGrid className="size-4" aria-hidden="true" />
-              Manage club
-            </Link>
           </div>
         </div>
       </section>

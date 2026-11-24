@@ -245,6 +245,16 @@ html {
   }
 }
 
+.manage-tip {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.manage-pen:hover .manage-tip {
+  opacity: 1;
+  visibility: visible;
+}
+
 .member-avatar {
   border: 2px solid transparent;
   transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
