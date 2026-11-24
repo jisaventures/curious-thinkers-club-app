@@ -63,7 +63,7 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
   const owned = data.packs.filter((pack) => pack.owned);
 
   return (
-    <div className="space-y-8 sm:space-y-10">
+    <div className="space-y-4">
       <section className="rounded-[28px] bg-white p-4 shadow-[0_18px_50px_rgba(23,53,42,0.06)] sm:p-5">
         <div className="grid grid-cols-1 gap-y-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-x-10">
           <p className="order-1 flex min-h-11 items-center font-display text-sm font-bold text-[#306A51] lg:col-start-1 lg:row-start-1">Group Leader: {account.display_name}</p>
@@ -90,7 +90,7 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
                 </span>
               </Link>
             )}
-            <div ref={identityText} className="flex min-w-0 flex-1 flex-col justify-between">
+            <div ref={identityText} className="flex min-w-0 flex-1 flex-col justify-center">
               <h1 className="flex items-center gap-2 font-display text-3xl leading-tight font-bold whitespace-nowrap text-[#17352A] sm:text-4xl">
                 <span>{account.group_name || account.display_name}</span>
                 {account.group_location && <CountryFlag country={account.group_location} className="h-4 w-6 shrink-0" />}
