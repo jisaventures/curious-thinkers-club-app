@@ -1002,6 +1002,17 @@ select {
   gap: 6px;
 }
 
+.new-pack-banner__people {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 22px;
+  color: #fffaf2;
+  font-family: var(--font-nunito), "Nunito", sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+}
+
 .new-pack-banner__actions {
   display: flex;
   gap: 14px;

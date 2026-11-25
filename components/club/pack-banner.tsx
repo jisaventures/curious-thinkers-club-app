@@ -11,6 +11,15 @@ type Member = {
   nickname: string;
   first_name?: string | null;
   avatar_key: AvatarKey;
+  avatar_bg?: string | null;
+  avatar_face?: string | null;
+  avatar_hair_style?: string | null;
+  avatar_hair_colour?: string | null;
+  avatar_glasses?: boolean | null;
+  avatar_hat?: string | null;
+  avatar_skin?: string | null;
+  avatar_eyes?: string | null;
+  avatar_shirt?: string | null;
   avatar_options?: string | null;
   gender?: "boy" | "girl" | "unspecified" | null;
 };
@@ -51,17 +60,18 @@ export function PackBanner({
   compact?: boolean;
 }) {
   const continuing = state === "continue";
-  if (featured && !continuing) {
+  if (featured) {
     return (
       <NewPackBanner
         title={title}
-        tone={tone}
         blurb={blurb}
         durationLabel={durationLabel}
         ageMin={ageMin}
         ageMax={ageMax}
         pageCount={pageCount}
         href={href}
+        resume={continuing}
+        members={continuing ? members : []}
       />
     );
   }
@@ -189,15 +199,18 @@ function NewPackBanner({
   ageMax,
   pageCount,
   href,
+  resume = false,
+  members = [],
 }: {
   title: string;
-  tone: CoverTone;
   blurb: string;
   durationLabel: string;
   ageMin: number;
   ageMax: number;
   pageCount: number | null;
   href: string;
+  resume?: boolean;
+  members?: Member[];
 }) {
   const icon = { size: 20, strokeWidth: 2.5, strokeLinecap: "round" as const, color: "currentColor", "aria-hidden": true };
   return (
@@ -214,7 +227,7 @@ function NewPackBanner({
       <div className="new-pack-banner__copy">
         <p className="new-pack-banner__pill">
           <span aria-hidden="true" />
-          Your new quest is ready!
+          {resume ? "Resume quest" : "Your new quest is ready!"}
         </p>
         <h2 className="new-pack-banner__title">{title}</h2>
         {blurb && <p className="new-pack-banner__blurb">{blurb}</p>}
@@ -238,9 +251,37 @@ function NewPackBanner({
             </li>
           )}
         </ul>
+        {resume && (
+          <div className="new-pack-banner__people">
+            <div className="flex -space-x-2">
+              {members.map((member) => (
+                <Avatar
+                  key={member.id}
+                  avatar={member.avatar_key}
+                  colour={member.avatar_bg}
+                  face={member.avatar_face}
+                  hairStyle={member.avatar_hair_style}
+                  hairColour={member.avatar_hair_colour}
+                  glasses={member.avatar_glasses}
+                  hat={member.avatar_hat}
+                  gender={member.gender === "girl" ? "girl" : "boy"}
+                  skin={member.avatar_skin}
+                  eyeColour={member.avatar_eyes}
+                  shirt={member.avatar_shirt}
+                  options={member.avatar_options}
+                  title={member.first_name?.trim() || member.nickname}
+                  className="size-7 rounded-full ring-2 ring-[#1b4d3c]"
+                />
+              ))}
+            </div>
+            <p>
+              {members.length} {members.length === 1 ? "member still needs" : "members still need"} to complete this quest
+            </p>
+          </div>
+        )}
         <div className="new-pack-banner__actions">
           <Link href={href} className="new-pack-banner__start">
-            Start quest
+            {resume ? "Continue quest" : "Start quest"}
             <Play {...icon} />
           </Link>
           <Link href={href} className="new-pack-banner__print">
@@ -254,7 +295,7 @@ function NewPackBanner({
       </div>
       <div className="new-pack-banner__mascot">
         <p className="new-pack-banner__bubble">
-          Don&apos;t forget to print the pages first!
+          {resume ? "Pick up where you left off!" : "Don't forget to print the pages first!"}
           <span className="new-pack-banner__tail" aria-hidden="true" />
         </p>
         <img src="/brand/mascot-spy.webp" alt="" width={368} height={512} loading="eager" fetchPriority="high" decoding="async" />

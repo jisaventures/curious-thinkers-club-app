@@ -16,6 +16,7 @@ export type ClubBanner = {
   nextStep: string | null;
   purchasedAt: string;
   lastActivity: string | null;
+  pendingMemberIds: string[];
 };
 
 type StepRow = { id: string; pack_id: string; position: number; title: string };
@@ -49,18 +50,22 @@ export function clubPackBanners(input: {
     const steps = input.steps.filter((step) => step.pack_id === pack.id).sort((a, b) => a.position - b.position);
     const total = steps.length || pack.step_count;
     if (!total) continue;
-    const packProgress = input.progress.filter(
-      (row) => row.status === "complete" && kids.has(row.child_id) && steps.some((step) => step.id === row.step_id),
-    );
-    const doneIds = new Set(packProgress.map((row) => row.step_id));
+    const stepIds = new Set(steps.map((step) => step.id));
+    const doneByChild = new Map<string, Set<string>>();
+    let lastActivity = "";
+    for (const row of input.progress) {
+      if (row.status !== "complete" || !kids.has(row.child_id) || !stepIds.has(row.step_id)) continue;
+      const finished = doneByChild.get(row.child_id) ?? new Set<string>();
+      finished.add(row.step_id);
+      doneByChild.set(row.child_id, finished);
+      if (row.completed_at && row.completed_at > lastActivity) lastActivity = row.completed_at;
+    }
+    const doneIds = new Set([...doneByChild.values()].flatMap((finished) => [...finished]));
     const done = steps.filter((step) => doneIds.has(step.id)).length;
-    if (done >= total) continue;
     const next = steps.find((step) => !doneIds.has(step.id));
-    const lastActivity = packProgress
-      .map((row) => row.completed_at || "")
-      .filter(Boolean)
-      .sort()
-      .at(-1) ?? null;
+    const pendingMemberIds = input.childIds.filter((id) => (doneByChild.get(id)?.size ?? 0) < total);
+    const started = doneByChild.size > 0;
+    if (started && pendingMemberIds.length === 0) continue;
     const banner: ClubBanner = {
       id: pack.id,
       slug: pack.slug,
@@ -71,12 +76,13 @@ export function clubPackBanners(input: {
       ageMax: pack.age_max ?? 0,
       pageCount: pack.page_count ?? null,
       coverTone: pack.cover_tone,
-      state: done === 0 ? "start" : "continue",
+      state: started ? "continue" : "start",
       done,
       total,
       nextStep: next?.title ?? null,
       purchasedAt: ownedAt.get(pack.id) || "",
-      lastActivity,
+      lastActivity: lastActivity || null,
+      pendingMemberIds,
     };
     if (banner.state === "start") starts.push(banner);
     else continues.push(banner);
@@ -84,6 +90,7 @@ export function clubPackBanners(input: {
 
   starts.sort((a, b) => b.purchasedAt.localeCompare(a.purchasedAt));
   continues.sort((a, b) => (b.lastActivity || "").localeCompare(a.lastActivity || ""));
-  return [...starts, ...continues];
+  if (starts.length > 0) return [starts[0]];
+  return continues.slice(0, 1);
 }
 

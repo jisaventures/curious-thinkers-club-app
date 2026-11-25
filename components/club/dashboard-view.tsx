@@ -152,7 +152,7 @@ export function DashboardView({ data, notice, leaderboard }: { data: DashboardDa
               done={data.banners[0].done}
               total={data.banners[0].total}
               nextStep={data.banners[0].nextStep}
-              members={data.children}
+              members={data.children.filter((child) => data.banners[0].pendingMemberIds.includes(child.id))}
               blurb={data.banners[0].blurb}
               durationLabel={data.banners[0].durationLabel}
               ageMin={data.banners[0].ageMin}
