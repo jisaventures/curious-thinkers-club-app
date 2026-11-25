@@ -622,7 +622,7 @@ export function createSeed(): DemoDb {
   };
 }
 
-const SEED_VERSION = 18;
+const SEED_VERSION = 19;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {

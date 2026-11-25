@@ -292,7 +292,7 @@ html {
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   --site-header-h: calc(3.25rem + 1px);
 }
 
@@ -354,7 +354,7 @@ select {
   color: #fff;
   cursor: pointer;
   touch-action: manipulation;
-  transition: filter 80ms linear;
+  transition: none;
 }
 
 .ctc-button:active:not(:disabled),
@@ -458,7 +458,7 @@ select {
   position: relative;
   white-space: nowrap;
   touch-action: manipulation;
-  transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1), filter 80ms linear;
+  transition: none;
 }
 
 .header-pill::after,
@@ -473,7 +473,7 @@ select {
 }
 
 .header-shop.ctc-button {
-  transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1), filter 80ms linear;
+  transition: none;
 }
 
 .header-pill[data-variant="green"] {
@@ -508,10 +508,11 @@ select {
     filter: brightness(1.05);
   }
 
-  .header-pill:hover,
-  .leaderboard-link:hover,
-  .header-shop.ctc-button:hover:not(:disabled) {
-    transform: translateY(-3px);
+  .ctc-button:active:not(:disabled),
+  .header-pill:active,
+  .leaderboard-link:active,
+  .header-shop.ctc-button:active:not(:disabled) {
+    transform: translateY(3px);
   }
 
   .ctc-button.activity-log-button:hover:not(:disabled) {

@@ -16,7 +16,7 @@ export type PromoBannerRecord = PromoBannerContent & {
 };
 
 export const defaultPromo: PromoBannerRecord = {
-  imageUrl: "/brand/merch-banner-v2.png",
+  imageUrl: "/brand/merch-banner.webp",
   badgeText: "Club Merchandise",
   headline: "Get the official club kit!",
   subtext: "Show you're a Curious Thinker. Free drawstring bag with every bundle.",

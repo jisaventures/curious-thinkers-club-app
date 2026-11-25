@@ -3,6 +3,8 @@
 import { useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
 import Link from "next/link";
 import {
+  ArrowDown,
+  ArrowUp,
   Bell,
   BookOpen,
   Cake,
@@ -11,6 +13,7 @@ import {
   Coins,
   Flag,
   Flame,
+  Minus,
   Mountain,
   Rocket,
   Search,
@@ -28,15 +31,8 @@ import { PromoBanner } from "@/components/club/promo-banner";
 import { remindPackLaunch } from "@/app/club/actions";
 import type { DashboardHome, HomePackCard, HomeRelease } from "@/lib/club/home";
 import { shopUrl } from "@/lib/env";
+import type { GlobalBoardRow } from "@/lib/leaderboard";
 import type { AvatarKey, CoverTone } from "@/lib/validators";
-
-type BoardPreview = {
-  nickname: string;
-  avatar_key: AvatarKey;
-  points: number;
-  rank: number;
-  is_mine: boolean;
-};
 
 type Member = {
   id: string;
@@ -73,7 +69,7 @@ export function DashboardHome({
   home: DashboardHome;
   members: Member[];
   focusId: string | null;
-  leaderboard: BoardPreview[];
+  leaderboard: GlobalBoardRow[];
 }) {
   const opensOnCompleted = home.inProgress.length === 0;
   const [tab, setTab] = useState<"progress" | "completed">(opensOnCompleted ? "completed" : "progress");
@@ -420,7 +416,13 @@ function StatIcon({ icon: Icon, className }: { icon: LucideIcon; className: stri
   );
 }
 
-function LeaderboardPreview({ rows }: { rows: BoardPreview[] }) {
+function MoveMark({ move }: { move: GlobalBoardRow["move"] }) {
+  if (move === "up") return <ArrowUp className="size-4 shrink-0 text-[#2f9d4a]" aria-label="Moving up" />;
+  if (move === "down") return <ArrowDown className="size-4 shrink-0 text-[#d64545]" aria-label="Moving down" />;
+  return <Minus className="size-4 shrink-0 text-[#8d8982]" aria-label="Staying put" />;
+}
+
+function LeaderboardPreview({ rows }: { rows: GlobalBoardRow[] }) {
   const sectionRef = useRef<HTMLElement>(null);
   const [count, setCount] = useState(() => Math.min(rows.length, 4));
 
@@ -436,12 +438,7 @@ function LeaderboardPreview({ rows }: { rows: BoardPreview[] }) {
       const style = getComputedStyle(section);
       const limit = section.getBoundingClientRect().bottom - (parseFloat(style.paddingBottom) || 0);
       const lis = [...section.querySelectorAll("li")];
-      let fit = lis.filter((li) => li.getBoundingClientRect().bottom <= limit + 1).length;
-      const last = lis[fit - 1];
-      if (last && fit < rows.length) {
-        const gap = 8;
-        if (limit - last.getBoundingClientRect().bottom >= last.getBoundingClientRect().height + gap) fit += 1;
-      }
+      const fit = lis.filter((li) => li.getBoundingClientRect().bottom <= limit + 1).length;
       const next = Math.min(rows.length, Math.max(fit, lis.length ? 1 : 0));
       setCount((current) => (current === next ? current : next));
     };
@@ -465,14 +462,34 @@ function LeaderboardPreview({ rows }: { rows: BoardPreview[] }) {
         <p className="text-sm text-[#5e7266]">No scores yet.</p>
       ) : (
         <ol className="space-y-2">
-          {shown.map((row) => (
-            <li key={`${row.rank}-${row.nickname}`} className={`flex items-center gap-3 rounded-2xl px-2 py-1.5 ${row.is_mine ? "bg-[#E7F6EA]" : ""}`}>
-              <span className="w-6 text-center font-display text-lg text-[#306A51]">{row.rank}</span>
-              <Avatar avatar={row.avatar_key} title={row.nickname} className="size-9 rounded-full" />
-              <span className="min-w-0 flex-1 truncate font-display text-base text-[#17352A]">{row.nickname}</span>
-              <span className="font-display text-base text-[#17352A]">{row.points}</span>
-            </li>
-          ))}
+          {shown.map((row) => {
+            const first = row.firstName?.trim();
+            const name = first ? `@${row.nickname} (${first})` : `@${row.nickname}`;
+            return (
+              <li key={row.id} className={`flex items-center gap-2 rounded-2xl px-2 py-1.5 ${row.isMine ? "ring-2 ring-[#e8a428]" : ""}`}>
+                <span className="w-6 shrink-0 text-center font-display text-lg text-[#306A51]">{row.rank}</span>
+                <MoveMark move={row.move} />
+                <Avatar
+                  avatar={row.avatarKey as AvatarKey}
+                  options={row.avatarOptions}
+                  colour={row.avatarBg}
+                  face={row.avatarFace}
+                  hairStyle={row.avatarHairStyle}
+                  hairColour={row.avatarHairColour}
+                  glasses={row.avatarGlasses}
+                  hat={row.avatarHat}
+                  gender={row.gender === "girl" ? "girl" : "boy"}
+                  skin={row.avatarSkin}
+                  eyeColour={row.avatarEyes}
+                  shirt={row.avatarShirt}
+                  title={name}
+                  className="size-9 shrink-0 rounded-full"
+                />
+                <span className="min-w-0 flex-1 truncate text-sm font-bold text-[#17352A]">{name}</span>
+                <span className="shrink-0 font-display text-lg text-[#17352A]">{row.points}</span>
+              </li>
+            );
+          })}
         </ol>
       )}
     </section>

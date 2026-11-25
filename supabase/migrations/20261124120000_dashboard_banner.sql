@@ -25,7 +25,7 @@ insert into public.dashboard_banners (
   id, image_url, badge_text, headline, subtext, button_label, button_link, background, text_colour, visible
 ) values (
   'club-kit',
-  '/brand/merch-banner-v2.png',
+  '/brand/merch-banner.webp',
   'Club Merchandise',
   'Get the official club kit!',
   'Show you''re a Curious Thinker. Free drawstring bag with every bundle.',

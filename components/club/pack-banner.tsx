@@ -173,7 +173,7 @@ export function PackBanner({
               Don&apos;t forget to print the pages first!
             </p>
           )}
-          <img src="/brand/mascot-spy.png" alt="" className="h-40 w-auto" />
+          <img src="/brand/mascot-spy.webp" alt="" width={368} height={512} loading="eager" fetchPriority="high" decoding="sync" className="h-40 w-auto" />
         </div>
       )}
     </article>
@@ -252,7 +252,7 @@ function NewPackBanner({
           Don&apos;t forget to print the pages first!
           <span className="new-pack-banner__tail" aria-hidden="true" />
         </p>
-        <img src="/brand/mascot-spy.png" alt="" />
+        <img src="/brand/mascot-spy.webp" alt="" width={368} height={512} loading="eager" fetchPriority="high" decoding="sync" />
       </div>
     </article>
   );

@@ -26,6 +26,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en-GB">
       <head>
         <link rel="preload" href="/brand/bulb.png" as="image" fetchPriority="high" />
+        <link rel="preload" href="/brand/mascot-spy.webp" as="image" type="image/webp" fetchPriority="high" />
       </head>
       <body className={`${nunito.variable} ${fredoka.variable} isolate font-sans antialiased`}>
         <ScrollToTop />

@@ -39,6 +39,8 @@ export function PromoBanner({ banner }: { banner: PromoBannerContent }) {
         <img
           src={banner.imageUrl}
           alt="Official Club kit products"
+          fetchPriority="low"
+          decoding="async"
           className="block h-auto w-full rounded-2xl"
         />
         <div className="min-w-0 max-sm:pb-14 sm:pr-16">
@@ -55,7 +57,7 @@ export function PromoBanner({ banner }: { banner: PromoBannerContent }) {
           </Button>
         </div>
       </div>
-      <img src="/brand/mascot-spy.png" alt="" aria-hidden="true" className="promo-banner__mascot" />
+      <img src="/brand/mascot-spy.webp" alt="" width={368} height={512} loading="lazy" fetchPriority="low" decoding="async" aria-hidden="true" className="promo-banner__mascot" />
     </section>
   );
 }

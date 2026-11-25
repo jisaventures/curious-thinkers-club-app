@@ -60,6 +60,60 @@ export function buildBoard(people: BoardPerson[], period: PeriodId, scope: "glob
   });
 }
 
+export type GlobalBoardRow = {
+  id: string;
+  nickname: string;
+  firstName: string | null;
+  points: number;
+  rank: number;
+  isMine: boolean;
+  move: Move;
+  avatarKey: string;
+  avatarOptions: string | null;
+  avatarBg: string | null;
+  avatarFace: string | null;
+  avatarHairStyle: string | null;
+  avatarHairColour: string | null;
+  avatarGlasses: boolean | null;
+  avatarHat: string | null;
+  avatarSkin: string | null;
+  avatarEyes: string | null;
+  avatarShirt: string | null;
+  gender: "boy" | "girl" | "unspecified" | null;
+};
+
+type GlobalBoardSource = BoardPerson & Omit<GlobalBoardRow, "points" | "rank" | "move">;
+
+export function globalBoardRows(people: GlobalBoardSource[]): GlobalBoardRow[] {
+  const ranked = buildBoard(people, "all", "global", "Worldwide");
+  const byId = new Map(people.map((person) => [person.id, person]));
+  return ranked.flatMap((row) => {
+    const person = byId.get(row.id);
+    if (!person) return [];
+    return [{
+      id: person.id,
+      nickname: person.nickname,
+      firstName: person.firstName,
+      points: row.points,
+      rank: row.rank,
+      isMine: person.isMine,
+      move: row.move,
+      avatarKey: person.avatarKey,
+      avatarOptions: person.avatarOptions,
+      avatarBg: person.avatarBg,
+      avatarFace: person.avatarFace,
+      avatarHairStyle: person.avatarHairStyle,
+      avatarHairColour: person.avatarHairColour,
+      avatarGlasses: person.avatarGlasses,
+      avatarHat: person.avatarHat,
+      avatarSkin: person.avatarSkin,
+      avatarEyes: person.avatarEyes,
+      avatarShirt: person.avatarShirt,
+      gender: person.gender,
+    }];
+  });
+}
+
 function ranks(rows: { id: string; nickname: string; points: number }[]) {
   const ordered = [...rows].sort((a, b) => b.points - a.points || a.nickname.localeCompare(b.nickname));
   let lastPoints = -1;

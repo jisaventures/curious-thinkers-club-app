@@ -11,10 +11,11 @@ import { EmptyPackBanner, PackBanner } from "@/components/club/pack-banner";
 import { Scrapbook } from "@/components/club/scrapbook";
 import { shortName } from "@/lib/format";
 import type { loadDashboard } from "@/lib/club/data";
+import type { GlobalBoardRow } from "@/lib/leaderboard";
 
 type DashboardData = Awaited<ReturnType<typeof loadDashboard>>;
 
-export function DashboardView({ data, notice }: { data: DashboardData; notice?: string }) {
+export function DashboardView({ data, notice, leaderboard }: { data: DashboardData; notice?: string; leaderboard: GlobalBoardRow[] }) {
   const { account } = data;
   const [bookId, setBookId] = useState<string | null>(null);
   const membersRow = useRef<HTMLDivElement>(null);
@@ -160,7 +161,7 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
             />
           </>
         )}
-        <DashboardHome home={data.home} members={data.children} focusId={focus?.id ?? null} leaderboard={data.leaderboard} />
+        <DashboardHome home={data.home} members={data.children} focusId={focus?.id ?? null} leaderboard={leaderboard} />
       </section>
       {bookId && (
         <Scrapbook

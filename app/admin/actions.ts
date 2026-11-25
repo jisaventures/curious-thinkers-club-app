@@ -437,7 +437,7 @@ export async function saveDashboardBanner(formData: FormData) {
   if (!/^#[0-9a-fA-F]{3,8}$/.test(textColour)) back("/admin/dashboard-banner", "Use a hex text colour.");
   if (!buttonLink) back("/admin/dashboard-banner", "Use a site path or a web link.");
   const existing = await supabase.from("dashboard_banners").select("image_url").eq("id", "club-kit").maybeSingle();
-  let imageUrl = existing.data?.image_url || "/brand/merch-banner-v2.png";
+  let imageUrl = existing.data?.image_url || "/brand/merch-banner.webp";
   const file = formData.get("image");
   if (file instanceof File && file.size > 0) {
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 1_500_000) {
