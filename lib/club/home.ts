@@ -15,6 +15,8 @@ export type HomePack = {
   done: number;
   total: number;
   nextStep: string | null;
+  pendingMemberIds: string[];
+  completedMemberIds: string[];
 };
 
 export type HomePackCard = {
@@ -26,6 +28,8 @@ export type HomePackCard = {
   done: number;
   total: number;
   nextStep: string | null;
+  pendingMemberIds: string[];
+  completedMemberIds: string[];
 };
 
 export type HomeRelease = {
@@ -124,6 +128,8 @@ function card(pack: HomePack): HomePackCard {
     done: pack.done,
     total: pack.total,
     nextStep: pack.nextStep,
+    pendingMemberIds: pack.pendingMemberIds,
+    completedMemberIds: pack.completedMemberIds,
   };
 }
 
@@ -156,7 +162,22 @@ export function groupPackProgress(input: {
   );
   const done = steps.filter((step) => doneIds.has(step.id)).length;
   const next = steps.find((step) => !doneIds.has(step.id));
-  return { done, total, nextStep: next?.title ?? null };
+  const stepIds = new Set(steps.map((step) => step.id));
+  const doneByChild = new Map<string, Set<string>>();
+  for (const row of input.progress) {
+    if (row.status !== "complete" || !kids.has(row.child_id) || !stepIds.has(row.step_id)) continue;
+    const finishedSteps = doneByChild.get(row.child_id) ?? new Set<string>();
+    finishedSteps.add(row.step_id);
+    doneByChild.set(row.child_id, finishedSteps);
+  }
+  const pendingMemberIds: string[] = [];
+  const completedMemberIds: string[] = [];
+  for (const childId of input.childIds) {
+    const finished = total > 0 && (doneByChild.get(childId)?.size ?? 0) >= total;
+    if (finished) completedMemberIds.push(childId);
+    else pendingMemberIds.push(childId);
+  }
+  return { done, total, nextStep: next?.title ?? null, pendingMemberIds, completedMemberIds };
 }
 
 export function buildOwnedPacks(input: {
@@ -233,8 +254,8 @@ export function buildDashboardHome(input: {
 }): DashboardHome {
   const released = input.packs.filter((pack) => !pack.upcoming);
   const owned = released.filter((pack) => pack.owned);
-  const inProgress = owned.filter((pack) => pack.total > 0 && pack.done > 0 && pack.done < pack.total);
-  const completed = owned.filter((pack) => pack.total > 0 && pack.done >= pack.total);
+  const inProgress = owned.filter((pack) => pack.pendingMemberIds.length > 0 && (pack.done > 0 || pack.completedMemberIds.length > 0));
+  const completed = owned.filter((pack) => pack.completedMemberIds.length > 0);
   const recent = [...released]
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, 5)

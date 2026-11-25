@@ -458,6 +458,10 @@ export function createSeed(): DemoDb {
     });
   };
   stamp(LOU_ID, "51200000-0000-4000-8000-000000000", [1, 2, 3, 5], "2026-11-16T12:00:00.000Z");
+  stamp(MO_ID, "51200000-0000-4000-8000-000000000", [1, 2, 4], "2026-11-14T12:00:00.000Z");
+  stamp(NOAH_ID, "51200000-0000-4000-8000-000000000", [1, 2, 3], "2026-11-12T12:00:00.000Z");
+  finish(ARIA_ID, "51200000-0000-4000-8000-000000000", egypt);
+  finish(PIP_ID, "51200000-0000-4000-8000-000000000", egypt);
   stamp(MO_ID, "51300000-0000-4000-8000-000000000", [1, 2, 3, 4, 5, 6], "2026-11-08T12:00:00.000Z");
   finish(ARIA_ID, packPrefixes[3][0], knight);
   finish(PIP_ID, packPrefixes[4][0], space);
@@ -624,7 +628,7 @@ export function createSeed(): DemoDb {
   };
 }
 
-const SEED_VERSION = 20;
+const SEED_VERSION = 21;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {

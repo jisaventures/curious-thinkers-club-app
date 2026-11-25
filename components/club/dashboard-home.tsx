@@ -199,8 +199,8 @@ function PackRow({
   mode: "progress" | "completed";
 }) {
   const href = focusId ? `/club/packs/${pack.slug}?mode=together&child=${focusId}` : `/club/packs/${pack.slug}`;
-  const ratio = pack.total ? Math.min(1, pack.done / pack.total) : 0;
   const finished = mode === "completed";
+  const shown = members.filter((member) => (finished ? pack.completedMemberIds : pack.pendingMemberIds).includes(member.id));
   return (
     <article className="rounded-[22px] bg-[#f3faf4] p-3 sm:p-4">
       <div className="flex min-w-0 items-start gap-3">
@@ -217,10 +217,10 @@ function PackRow({
             <div className="min-w-0 flex-1">
               <h3 className="font-display text-lg leading-tight text-[#17352A]">{pack.title}</h3>
               <p className="mt-0.5 text-sm text-[#3d5348]">
-                {finished ? `Completed · ${pack.done} of ${pack.total} steps` : `Next: ${pack.nextStep ?? "Keep going"}`}
+                {finished ? "Completed" : pack.nextStep ? `Next: ${pack.nextStep}` : "Still to finish"}
               </p>
               <div className="mt-3 hidden sm:block">
-                <PackProgress pack={pack} ratio={ratio} finished={finished} members={members} />
+                <MemberFaces members={shown} finished={finished} />
               </div>
             </div>
             <div className="hidden shrink-0 sm:block">
@@ -230,67 +230,42 @@ function PackRow({
         </div>
       </div>
       <div className="mt-3 space-y-3 sm:hidden">
-        <PackProgress pack={pack} ratio={ratio} finished={finished} members={members} />
+        <MemberFaces members={shown} finished={finished} />
         <PackAction href={href} finished={finished} />
       </div>
     </article>
   );
 }
 
-function PackProgress({
-  pack,
-  ratio,
-  finished,
-  members,
-}: {
-  pack: HomePackCard;
-  ratio: number;
-  finished: boolean;
-  members: Member[];
-}) {
+function MemberFaces({ members, finished }: { members: Member[]; finished: boolean }) {
+  const label = finished
+    ? `${members.length} ${members.length === 1 ? "member has" : "members have"} completed this quest`
+    : `${members.length} ${members.length === 1 ? "member still needs" : "members still need"} to complete this quest`;
   return (
-    <>
-      <div className="flex items-center justify-between gap-3 text-sm text-[#3d5348]">
-        <span>{finished ? "All steps done" : `${pack.done} of ${pack.total} steps done`}</span>
-        <span>{finished ? "Finished" : paceWord(ratio)}</span>
+    <div className="flex min-w-0 items-center gap-2">
+      <div className="flex -space-x-2">
+        {members.map((member) => (
+          <Avatar
+            key={member.id}
+            avatar={member.avatar_key}
+            colour={member.avatar_bg}
+            face={member.avatar_face}
+            hairStyle={member.avatar_hair_style}
+            hairColour={member.avatar_hair_colour}
+            glasses={member.avatar_glasses}
+            hat={member.avatar_hat}
+            gender={member.gender === "girl" ? "girl" : "boy"}
+            skin={member.avatar_skin}
+            eyeColour={member.avatar_eyes}
+            shirt={member.avatar_shirt}
+            options={member.avatar_options}
+            title={member.first_name?.trim() || member.nickname}
+            className="size-7 rounded-full ring-2 ring-[#f3faf4]"
+          />
+        ))}
       </div>
-      <div
-        className="mt-1.5 h-2 overflow-hidden rounded-full bg-[#F3E7CF]"
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={pack.total}
-        aria-valuenow={pack.done}
-        aria-label={`${pack.done} of ${pack.total} steps done`}
-      >
-        <div className="h-full rounded-full bg-[#306A51]" style={{ width: `${Math.round(ratio * 100)}%` }} />
-      </div>
-      <div className="mt-3 flex min-w-0 items-center gap-2">
-        <div className="flex -space-x-2">
-          {members.slice(0, 5).map((member) => (
-            <Avatar
-              key={member.id}
-              avatar={member.avatar_key}
-              colour={member.avatar_bg}
-              face={member.avatar_face}
-              hairStyle={member.avatar_hair_style}
-              hairColour={member.avatar_hair_colour}
-              glasses={member.avatar_glasses}
-              hat={member.avatar_hat}
-              gender={member.gender === "girl" ? "girl" : "boy"}
-              skin={member.avatar_skin}
-              eyeColour={member.avatar_eyes}
-              shirt={member.avatar_shirt}
-              options={member.avatar_options}
-              title={member.first_name?.trim() || member.nickname}
-              className="size-7 rounded-full ring-2 ring-[#f3faf4]"
-            />
-          ))}
-        </div>
-        <p className="min-w-0 text-sm font-bold text-[#3d5348]">
-          {members.length} {members.length === 1 ? "member" : "members"} {finished ? "finished this quest" : "on this quest"}
-        </p>
-      </div>
-    </>
+      <p className="min-w-0 text-sm font-bold text-[#3d5348]">{label}</p>
+    </div>
   );
 }
 
@@ -575,10 +550,4 @@ function iconFor(title: string, theme: string): LucideIcon {
   if (value.includes("volcano") || value.includes("science")) return Flame;
   if (value.includes("baker") || value.includes("food")) return Cake;
   return BookOpen;
-}
-
-function paceWord(ratio: number) {
-  if (ratio >= 0.75) return "Almost done";
-  if (ratio >= 0.35) return "Halfway";
-  return "Just started";
 }
