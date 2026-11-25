@@ -30,9 +30,12 @@ export function DashboardView({ data, notice, leaderboard }: { data: DashboardDa
     const icon = groupIcon.current;
     const align = () => {
       if (row && label) {
-        const avatar = row.querySelector(".member-avatar");
-        if (avatar) {
-          const inset = avatar.getBoundingClientRect().left - row.getBoundingClientRect().left;
+        const name = row.querySelector(".member-name");
+        const home = label.parentElement;
+        if (name && home) {
+          const range = document.createRange();
+          range.selectNodeContents(name);
+          const inset = range.getBoundingClientRect().left - home.getBoundingClientRect().left;
           label.style.marginLeft = `${Math.max(0, Math.round(inset))}px`;
         }
       }
@@ -43,6 +46,7 @@ export function DashboardView({ data, notice, leaderboard }: { data: DashboardDa
       }
     };
     align();
+    document.fonts?.ready.then(align).catch(() => {});
     const observer = new ResizeObserver(align);
     if (row) observer.observe(row);
     if (text) observer.observe(text);
@@ -127,7 +131,7 @@ export function DashboardView({ data, notice, leaderboard }: { data: DashboardDa
                         className="size-14"
                       />
                     </span>
-                    <span className="mt-1 block whitespace-nowrap font-display text-sm font-bold leading-tight text-[#17352A]">{name}</span>
+                    <span className="member-name mt-1 block whitespace-nowrap font-display text-sm font-bold leading-tight text-[#17352A]">{name}</span>
                     <span className="block whitespace-nowrap text-[10px] font-extrabold text-[#5e7266] sm:text-[11px]">@{child.nickname}</span>
                   </button>
                 );
