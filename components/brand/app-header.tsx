@@ -3,13 +3,13 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Backpack, Gift, Home, ShoppingCart, Star, Upload, Users } from "lucide-react";
+import { Gift, Home, NotebookText, ShoppingCart, Star, Upload, Users } from "lucide-react";
 import { AccountMenu } from "@/components/brand/account-menu";
 import type { AccountRecord } from "@/lib/auth/session";
 
 const MENU = [
   { href: "/club", label: "Dashboard", icon: Home, face: "bg-[#E8A428] shadow-[0_4px_0_#C48614]", current: "bg-[#E8A428] shadow-[inset_0_0_0_2px_#fff,0_4px_0_#C48614]", tab: "bg-[#E8A428]", tabShadow: "shadow-[0_3px_0_#C48614]", match: (path: string) => path === "/club" },
-  { href: "/my-quests", label: "Quests", icon: Backpack, face: "bg-[#E07A3D] shadow-[0_4px_0_#c4551a]", current: "bg-[#E07A3D] shadow-[inset_0_0_0_2px_#fff,0_4px_0_#c4551a]", tab: "bg-[#E07A3D]", tabShadow: "shadow-[0_3px_0_#c4551a]", match: (path: string) => path.startsWith("/my-quests") },
+  { href: "/my-quests", label: "Quests", icon: NotebookText, face: "bg-[#E07A3D] shadow-[0_4px_0_#c4551a]", current: "bg-[#E07A3D] shadow-[inset_0_0_0_2px_#fff,0_4px_0_#c4551a]", tab: "bg-[#E07A3D]", tabShadow: "shadow-[0_3px_0_#c4551a]", match: (path: string) => path.startsWith("/my-quests") },
   { href: "/club/leaderboard", label: "Leaderboards", icon: Star, face: "bg-[#F08AB0] shadow-[0_4px_0_#d56b96]", current: "bg-[#F08AB0] shadow-[inset_0_0_0_2px_#fff,0_4px_0_#d56b96]", tab: "bg-[#F08AB0]", tabShadow: "shadow-[0_3px_0_#d56b96]", match: (path: string) => path.startsWith("/club/leaderboard") },
   { href: "/rewards", label: "Rewards", icon: Gift, face: "bg-[#50B0DC] shadow-[0_4px_0_#2f8fb8]", current: "bg-[#50B0DC] shadow-[inset_0_0_0_2px_#fff,0_4px_0_#2f8fb8]", tab: "bg-[#50B0DC]", tabShadow: "shadow-[0_3px_0_#2f8fb8]", match: (path: string) => path.startsWith("/rewards") },
   { href: "/submit-work", label: "Submit Work", icon: Upload, face: "bg-[#3F8A5C] shadow-[0_4px_0_#2d6844]", current: "bg-[#3F8A5C] shadow-[inset_0_0_0_2px_#fff,0_4px_0_#2d6844]", tab: "bg-[#3F8A5C]", tabShadow: "shadow-[0_3px_0_#2d6844]", match: (path: string) => path.startsWith("/submit-work") },
@@ -157,13 +157,13 @@ export function AppHeader({ account }: { account: AccountRecord | null }) {
                   prefetch
                   aria-current={active ? "page" : undefined}
                   aria-label={item.label}
+                  title={item.label}
                   onClick={() => setPendingHref(item.href)}
-                  className="flex h-full flex-col items-center justify-center gap-1 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#306A51]"
+                  className="flex h-full items-center justify-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#306A51]"
                 >
-                  <span className={`flex items-center justify-center rounded-xl text-white ${item.tab} ${active ? `size-9 -translate-y-0.5 ${item.tabShadow}` : "size-7 opacity-70"}`}>
-                    <item.icon className={active ? "size-[18px]" : "size-4"} aria-hidden="true" />
+                  <span className={`flex items-center justify-center rounded-2xl text-white ${item.tab} ${active ? `size-12 -translate-y-0.5 ${item.tabShadow}` : "size-10 opacity-70"}`}>
+                    <item.icon className={active ? "size-6" : "size-5"} aria-hidden="true" />
                   </span>
-                  <span className={`max-w-full truncate px-0.5 text-[11px] leading-none text-[#17352A] ${active ? "font-bold" : "font-semibold opacity-70"}`}>{item.label}</span>
                 </Link>
               </li>
             );
