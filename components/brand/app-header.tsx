@@ -137,7 +137,6 @@ export function AppHeader({ account }: { account: AccountRecord | null }) {
                 icon={account?.group_icon}
                 background={account?.group_bg}
                 colour={account?.group_icon_colour}
-                isAdmin={account?.role === "admin"}
               />
             </div>
           </div>
