@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { PromoBackdrop } from "@/components/club/promo-banner";
 import { Button } from "@/components/ui/button";
 import { ownedPackStatus, type OwnedPack, type OwnedPackStatus } from "@/lib/club/home";
 import type { CoverTone } from "@/lib/validators";
@@ -60,11 +61,14 @@ function ExploreTile() {
   return (
     <Link
       href="/club/shop"
-      className="flex h-full min-h-40 flex-col items-start justify-center rounded-2xl p-4 no-underline"
+      className="relative flex h-full min-h-40 flex-col items-start justify-center overflow-hidden rounded-2xl p-4 no-underline"
       style={{ background: "linear-gradient(115deg, #12352a 0%, #1b4d3c 46%, #2a6a52 100%)", color: "#fffaf2" }}
     >
-      <p className="font-display text-xl leading-tight text-[#fffaf2]">Explore Quests</p>
-      <span className="mt-3 inline-flex rounded-full bg-[#E8A428] px-3 py-1.5 text-sm font-bold text-[#17352A]">Shop now</span>
+      <PromoBackdrop />
+      <span className="relative z-[1]">
+        <p className="font-display text-xl leading-tight text-[#fffaf2]">Explore Quests</p>
+        <span className="mt-3 inline-flex rounded-full bg-[#E8A428] px-3 py-1.5 text-sm font-bold text-[#17352A]">Shop now</span>
+      </span>
     </Link>
   );
 }

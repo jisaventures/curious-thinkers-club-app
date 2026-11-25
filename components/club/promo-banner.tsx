@@ -19,9 +19,9 @@ const sparks = [
   { top: "58%", left: "24%" },
 ];
 
-export function PromoBanner({ banner }: { banner: PromoBannerContent }) {
+export function PromoBackdrop() {
   return (
-    <section className="promo-banner" style={{ background: banner.background, color: banner.textColour }}>
+    <>
       <div className="promo-banner__rays" aria-hidden="true" />
       <div aria-hidden="true">
         {dots.map((dot) => (
@@ -35,11 +35,22 @@ export function PromoBanner({ banner }: { banner: PromoBannerContent }) {
           <span key={`${spark.top}-${spark.left ?? spark.right}`} className="promo-banner__spark" style={spark} />
         ))}
       </div>
+    </>
+  );
+}
+
+export function PromoBanner({ banner }: { banner: PromoBannerContent }) {
+  return (
+    <section className="promo-banner" style={{ background: banner.background, color: banner.textColour }}>
+      <PromoBackdrop />
       <div className="relative z-[1] grid items-center gap-4 p-4 sm:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] sm:p-5">
         <img
           src={banner.imageUrl}
           alt="Official Club kit products"
-          fetchPriority="low"
+          width={800}
+          height={450}
+          loading="eager"
+          fetchPriority="high"
           decoding="async"
           className="block h-auto w-full rounded-2xl"
         />
@@ -57,7 +68,7 @@ export function PromoBanner({ banner }: { banner: PromoBannerContent }) {
           </Button>
         </div>
       </div>
-      <img src="/brand/mascot-spy.webp" alt="" width={368} height={512} loading="lazy" fetchPriority="low" decoding="async" aria-hidden="true" className="promo-banner__mascot" />
+      <img src="/brand/mascot-spy.webp" alt="" width={368} height={512} loading="eager" fetchPriority="high" decoding="async" aria-hidden="true" className="promo-banner__mascot" />
     </section>
   );
 }
