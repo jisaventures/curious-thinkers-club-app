@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Check, ChevronDown, ChevronUp, Lock } from "lucide-react";
-import { markStepForChildren } from "@/app/club/actions";
+import { markStepForChildren } from "@/app/(parent)/club/actions";
 import { Avatar } from "@/components/brand/avatar";
 import { BookCover } from "@/components/club/book-cover";
 import { VideoGuide } from "@/components/club/video-guide";

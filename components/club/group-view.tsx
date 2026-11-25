@@ -4,7 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, BarChart3, ClipboardList, Lock, ShoppingBag, UserRound, Users, X } from "lucide-react";
 import Link from "next/link";
-import { updateGroupProfile } from "@/app/club/actions";
+import { updateGroupProfile } from "@/app/(parent)/club/actions";
 import { Avatar } from "@/components/brand/avatar";
 import { GROUP_ICONS, GroupIcon, type GroupIconId } from "@/components/brand/group-icon";
 import { GROUP_BACKGROUND_COLOURS, GROUP_ICON_COLOURS } from "@/lib/avatar-style";

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { withdrawSubmission } from "@/app/club/actions";
+import { withdrawSubmission } from "@/app/(parent)/club/actions";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { possessive } from "@/lib/format";

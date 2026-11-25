@@ -28,7 +28,7 @@ import { Avatar } from "@/components/brand/avatar";
 import { Button } from "@/components/ui/button";
 import { MyPacksStrip } from "@/components/club/my-packs-strip";
 import { PromoBanner } from "@/components/club/promo-banner";
-import { remindPackLaunch } from "@/app/club/actions";
+import { remindPackLaunch } from "@/app/(parent)/club/actions";
 import type { DashboardHome, HomePackCard, HomeRelease } from "@/lib/club/home";
 import { shopUrl } from "@/lib/env";
 import type { GlobalBoardRow } from "@/lib/leaderboard";

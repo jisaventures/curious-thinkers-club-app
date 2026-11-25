@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { addChild, deleteChild, updateChild } from "@/app/club/actions";
+import { addChild, deleteChild, updateChild } from "@/app/(parent)/club/actions";
 import { Avatar } from "@/components/brand/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

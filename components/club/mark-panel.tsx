@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { markStepForChildren } from "@/app/club/actions";
+import { markStepForChildren } from "@/app/(parent)/club/actions";
 import { Avatar } from "@/components/brand/avatar";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
