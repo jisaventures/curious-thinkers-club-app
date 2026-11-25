@@ -51,7 +51,7 @@ export function DashboardView({ data, notice, leaderboard }: { data: DashboardDa
       observer.disconnect();
       window.removeEventListener("resize", align);
     };
-  }, [data.children.length, data.clubRank, data.clubPoints]);
+  }, [data.children.length, data.joinedAt, data.questsCompleted]);
 
   const focus = data.focus;
   const owned = data.packs.filter((pack) => pack.owned);
@@ -92,11 +92,13 @@ export function DashboardView({ data, notice, leaderboard }: { data: DashboardDa
                 </Link>
               </h1>
               <div className="mt-2 flex flex-wrap gap-2">
-                {data.clubRank != null && (
-                  <span className="rounded-full bg-[#F8E4B8] px-2.5 py-1 text-xs font-extrabold text-[#17352A]">Rank #{data.clubRank}</span>
+                {data.joinedAt && (
+                  <span className="rounded-full bg-[#F8E4B8] px-2.5 py-1 text-xs font-extrabold text-[#17352A]">
+                    Date joined {joinedOn(data.joinedAt)}
+                  </span>
                 )}
                 <span className="rounded-full bg-[#DDF3E4] px-2.5 py-1 text-xs font-extrabold text-[#306A51]">
-                  {data.clubPoints.toLocaleString("en-GB")} club points
+                  Quests completed {data.questsCompleted}
                 </span>
               </div>
             </div>
@@ -175,6 +177,12 @@ export function DashboardView({ data, notice, leaderboard }: { data: DashboardDa
       )}
     </div>
   );
+}
+
+function joinedOn(iso: string) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Europe/Bucharest" }).format(date);
 }
 
 function memberName(child: DashboardData["children"][number]) {

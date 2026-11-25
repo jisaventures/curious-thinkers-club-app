@@ -35,6 +35,7 @@ export function MyPacksStrip({ packs }: { packs: OwnedPack[] }) {
   }
 
   const shown = packs.slice(0, 4);
+  const explore = shown.length % 2 === 1;
 
   return (
     <section className="rounded-[28px] bg-white p-4 shadow-[0_18px_50px_rgba(23,53,42,0.06)] sm:p-5">
@@ -49,8 +50,22 @@ export function MyPacksStrip({ packs }: { packs: OwnedPack[] }) {
         {shown.map((pack) => (
           <PackTile key={pack.id} pack={pack} />
         ))}
+        {explore && <ExploreTile />}
       </div>
     </section>
+  );
+}
+
+function ExploreTile() {
+  return (
+    <Link
+      href="/club/shop"
+      className="flex h-full min-h-40 flex-col items-start justify-center rounded-2xl p-4 no-underline"
+      style={{ background: "linear-gradient(115deg, #12352a 0%, #1b4d3c 46%, #2a6a52 100%)", color: "#fffaf2" }}
+    >
+      <p className="font-display text-xl leading-tight text-[#fffaf2]">Explore Quests</p>
+      <span className="mt-3 inline-flex rounded-full bg-[#E8A428] px-3 py-1.5 text-sm font-bold text-[#17352A]">Shop now</span>
+    </Link>
   );
 }
 

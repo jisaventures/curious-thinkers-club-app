@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { levelProgress } from "@/lib/levels";
 import { clubPackBanners } from "@/lib/club/banners";
-import { buildDashboardHome, buildOwnedPacks, groupPackProgress } from "@/lib/club/home";
+import { buildDashboardHome, buildOwnedPacks, groupPackProgress, questsCompletedByGroup } from "@/lib/club/home";
 import { activePromo } from "@/lib/club/promo";
 import { catchUpNudge } from "@/lib/progress";
 import { detectVideoProvider, vimeoId, youtubeId, type AvatarKey } from "@/lib/validators";
@@ -144,6 +144,13 @@ export async function demoDashboard(account: AccountRecord) {
     points: focusPoints,
     clubPoints: clubStanding.points,
     clubRank: clubStanding.rank,
+    joinedAt: account.created_at ?? null,
+    questsCompleted: questsCompletedByGroup({
+      packs: db.packs.filter((pack) => !pack.upcoming).map((pack) => ({ id: pack.id, stepCount: pack.step_count })),
+      steps: db.steps,
+      progress: db.progress,
+      childIds: children.map((child) => child.id),
+    }),
     level: levelProgress(focusPoints),
     leaderboard: ranked,
     prizes: [...db.prizes].sort((a, b) => a.sort_order - b.sort_order),

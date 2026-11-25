@@ -6,7 +6,7 @@ import { isDemoMode } from "@/lib/demo/mode";
 import { demoDashboard, demoPackPage } from "@/lib/demo/view";
 import { levelProgress } from "@/lib/levels";
 import { clubPackBanners } from "@/lib/club/banners";
-import { buildDashboardHome, buildOwnedPacks, groupPackProgress } from "@/lib/club/home";
+import { buildDashboardHome, buildOwnedPacks, groupPackProgress, questsCompletedByGroup } from "@/lib/club/home";
 import { activePromo, bannerFromRow } from "@/lib/club/promo";
 import { catchUpNudge, nextStepPosition } from "@/lib/progress";
 import { detectVideoProvider, vimeoId, youtubeId, type AvatarKey, type CoverTone } from "@/lib/validators";
@@ -218,6 +218,13 @@ export async function loadDashboard() {
     points: focusPoints,
     clubPoints: [...pointsByChild.values()].reduce((sum, value) => sum + value, 0),
     clubRank: null as number | null,
+    joinedAt: account.created_at ?? null,
+    questsCompleted: questsCompletedByGroup({
+      packs: packs.filter((pack) => !pack.upcoming).map((pack) => ({ id: pack.id, stepCount: pack.step_count })),
+      steps,
+      progress,
+      childIds: children.map((child) => child.id),
+    }),
     level,
     leaderboard: leaderboard as Array<{
       nickname: string;

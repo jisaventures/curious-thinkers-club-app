@@ -26,6 +26,7 @@ export type DemoAccount = {
   group_icon?: string;
   group_icon_colour?: string;
   group_bg?: string;
+  created_at?: string;
 };
 
 export type DemoChild = {
@@ -506,6 +507,7 @@ export function createSeed(): DemoDb {
         group_icon: "star",
         group_icon_colour: "fff4dc",
         group_bg: "2f9a4a",
+        created_at: "2026-01-10T00:00:00.000Z",
       },
       { id: ADMIN_ID, display_name: "Ada", email: "admin@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "admin", shopify_customer_id: null, region: "Europe" },
       { id: "a1000000-0000-4000-8000-000000000003", display_name: "Star", email: "star@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "North America" },
@@ -622,7 +624,7 @@ export function createSeed(): DemoDb {
   };
 }
 
-const SEED_VERSION = 19;
+const SEED_VERSION = 20;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {
@@ -816,6 +818,7 @@ export function createDemoFamily(input: {
     group_icon: input.group?.icon,
     group_icon_colour: input.group?.colour,
     group_bg: input.group?.background,
+    created_at: new Date().toISOString(),
   });
   const childIds = input.children.map((child) => {
     const id = crypto.randomUUID();

@@ -59,6 +59,37 @@ export type OwnedPack = {
 
 export type OwnedPackStatus = "in-progress" | "completed" | "not-started";
 
+export function questsCompletedByGroup(input: {
+  packs: Array<{ id: string; stepCount?: number }>;
+  steps: Array<{ id: string; pack_id: string }>;
+  progress: Array<{ child_id: string; step_id: string; status: string }>;
+  childIds: string[];
+}) {
+  const kids = new Set(input.childIds);
+  const stepsByPack = new Map<string, string[]>();
+  for (const step of input.steps) {
+    const list = stepsByPack.get(step.pack_id) ?? [];
+    list.push(step.id);
+    stepsByPack.set(step.pack_id, list);
+  }
+  const doneByChild = new Map<string, Set<string>>();
+  for (const row of input.progress) {
+    if (row.status !== "complete" || !kids.has(row.child_id)) continue;
+    const done = doneByChild.get(row.child_id) ?? new Set<string>();
+    done.add(row.step_id);
+    doneByChild.set(row.child_id, done);
+  }
+  let completed = 0;
+  for (const pack of input.packs) {
+    const stepIds = stepsByPack.get(pack.id) ?? [];
+    const total = stepIds.length || pack.stepCount || 0;
+    if (total === 0) continue;
+    const finished = [...doneByChild.values()].some((done) => stepIds.length > 0 && stepIds.every((id) => done.has(id)));
+    if (finished) completed += 1;
+  }
+  return completed;
+}
+
 export function ownedPackStatus(pack: Pick<OwnedPack, "done" | "total">): OwnedPackStatus {
   if (pack.total > 0 && pack.done >= pack.total) return "completed";
   if (pack.done > 0) return "in-progress";
