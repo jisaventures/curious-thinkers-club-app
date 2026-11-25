@@ -30,7 +30,7 @@ export function AccountMenu({
     <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       <button
         type="button"
-        className="flex cursor-default items-center gap-2 rounded-full border border-[#eadfce] bg-white py-1 pr-2 pl-1 shadow-sm sm:pr-3"
+        className="flex h-8 cursor-default items-center gap-2 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#306A51] max-md:bg-transparent max-md:p-0 md:h-[38px] md:bg-white md:pr-2.5 md:pl-1 md:shadow-[0_4px_0_#17352A]"
         aria-expanded={open}
         aria-haspopup="menu"
         onClick={() => {
@@ -42,8 +42,8 @@ export function AccountMenu({
         ) : (
           <span className="flex size-8 items-center justify-center rounded-full bg-[#306A51] font-display text-sm font-bold text-white">{initial}</span>
         )}
-        <span className="hidden max-w-40 truncate font-display text-base text-[#17352A] sm:inline">{name}</span>
-        <svg viewBox="0 0 20 20" className="size-4 text-[#306A51]" aria-hidden="true">
+        <span className="hidden max-w-32 truncate font-display text-base text-[#17352A] lg:inline">{name}</span>
+        <svg viewBox="0 0 20 20" className="hidden size-4 text-[#306A51] md:block" aria-hidden="true">
           <path d="M5 7.5 10 12.5 15 7.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
         </svg>
       </button>

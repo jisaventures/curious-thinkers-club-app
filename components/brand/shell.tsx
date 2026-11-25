@@ -27,7 +27,7 @@ export function AppShell({
     return (
       <div className="flex min-h-svh flex-col bg-[#f6f1e6]">
         <AppHeader account={account} />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-[calc(var(--tabbar-h)+1.5rem)] sm:px-6 md:py-8">{children}</main>
         {isDemoMode() && <DemoModeMenu corner="bottom" />}
       </div>
     );
@@ -145,7 +145,7 @@ function SiteHeader({
 
 function DemoModeMenu({ corner = "top" }: { corner?: "top" | "bottom" }) {
   return (
-    <details className={`fixed z-50 ${corner === "bottom" ? "bottom-3 left-3" : "top-3 right-3"}`}>
+    <details className={`fixed z-50 ${corner === "bottom" ? "bottom-[calc(var(--tabbar-h)+0.75rem)] left-3 md:bottom-3" : "top-3 right-3"}`}>
       <summary
         className="flex cursor-pointer list-none flex-col items-center [&::-webkit-details-marker]:hidden"
         aria-label="Demo mode"

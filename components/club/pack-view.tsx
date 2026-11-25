@@ -207,8 +207,8 @@ function LivePack({ data }: { data: OwnedPack }) {
   const ordered = [...data.steps].reverse();
 
   return (
-    <div className="flex h-[calc(100dvh-8.5rem)] flex-col gap-3 lg:h-[calc(100dvh-11.25rem)]">
-      <div className="sticky top-[6.5rem] z-30 flex h-auto shrink-0 flex-col justify-center gap-2 rounded-[28px] bg-white px-3 shadow-[0_18px_50px_rgba(23,53,42,0.06)] lg:top-[7.15rem] lg:h-20 lg:flex-row lg:items-center lg:gap-4 lg:px-4">
+    <div className="flex h-[calc(100dvh-var(--site-header-h)-var(--tabbar-h)-3.25rem)] flex-col gap-3 md:h-[calc(100dvh-var(--site-header-h)-5rem)]">
+      <div className="sticky top-[var(--site-header-h)] z-30 flex h-auto shrink-0 flex-col justify-center gap-2 rounded-[28px] bg-white px-3 shadow-[0_18px_50px_rgba(23,53,42,0.06)] lg:h-20 lg:flex-row lg:items-center lg:gap-4 lg:px-4">
         <div className="flex min-w-0 items-center gap-3">
           <Link href="/club" className="shrink-0 text-xs font-extrabold text-[#306A51] no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#306A51]">← My Quests</Link>
           <div className="h-[68px] w-12 shrink-0 overflow-hidden rounded-lg">
