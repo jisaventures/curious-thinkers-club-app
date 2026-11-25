@@ -39,16 +39,16 @@ export function PromoBanner({ banner }: { banner: PromoBannerContent }) {
         <img
           src={banner.imageUrl}
           alt="Official Club kit products"
-          className="h-40 w-full rounded-2xl object-cover sm:h-52"
+          className="h-40 w-full rounded-2xl bg-[#16382c] object-contain sm:h-52"
         />
-        <div className="max-sm:pb-14 sm:pr-36">
+        <div className="max-sm:pb-14 sm:pr-24">
           <p className="inline-flex items-center gap-1.5 rounded-full bg-[#E8A428] px-3 py-1 font-display text-xs font-semibold tracking-wide text-[#17352A]">
             <Star className="size-3.5 fill-current" aria-hidden="true" />
             {banner.badgeText}
           </p>
-          <h2 className="mt-3 font-display text-2xl leading-tight sm:text-3xl">
+          <h2 className="mt-3 font-display text-[1.45rem] leading-[1.15] sm:text-[1.7rem]">
             {banner.headline.split(/\n|<br\s*\/?>/i).map((line) => (
-              <span key={line} className="block">{line}</span>
+              <span key={line} className="block whitespace-nowrap">{line}</span>
             ))}
           </h2>
           <p className="mt-2 max-w-md text-sm leading-snug sm:text-base" style={{ color: banner.textColour }}>

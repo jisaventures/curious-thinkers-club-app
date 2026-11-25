@@ -17,7 +17,7 @@ export type PromoBannerRecord = PromoBannerContent & {
 
 export const defaultPromo: PromoBannerRecord = {
   imageUrl: "/brand/merch-banner-v2.png",
-  badgeText: "Club Merch",
+  badgeText: "Club Merchandise",
   headline: "Get the official\nclub kit!",
   subtext: "Show you're a Curious Thinker. Free drawstring bag with every bundle.",
   buttonLabel: "Shop Now",
@@ -45,7 +45,7 @@ export function bannerFromRow(row: {
   if (!row?.headline || !row.image_url) return null;
   return {
     imageUrl: row.image_url,
-    badgeText: row.badge_text || "Club Merch",
+    badgeText: row.badge_text || "Club Merchandise",
     headline: row.headline,
     subtext: row.subtext || "",
     buttonLabel: row.button_label || "Shop Now",

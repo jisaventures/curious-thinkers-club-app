@@ -478,8 +478,8 @@ function PackIcon({ title, theme, tone, done }: { title: string; theme: string; 
 function PackThumb({ title, theme, tone }: { title: string; theme: string; tone: CoverTone }) {
   const Icon = iconFor(title, theme);
   return (
-    <span role="img" aria-label={title} className={`flex size-12 shrink-0 items-center justify-center rounded-xl ${tones[tone]} text-white`}>
-      <Icon className="size-5" aria-hidden="true" />
+    <span role="img" aria-label={title} className={`flex aspect-[1/1.414] w-16 shrink-0 items-center justify-center rounded-xl ${tones[tone]} text-white`}>
+      <Icon className="size-6" aria-hidden="true" />
     </span>
   );
 }

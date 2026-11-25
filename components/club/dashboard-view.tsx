@@ -35,17 +35,10 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
           label.style.marginLeft = `${Math.max(0, Math.round(inset))}px`;
         }
       }
-      const wide = window.matchMedia("(min-width: 1024px)").matches;
-      if (wide && row && identityRow.current && icon) {
-        const height = Math.round(row.getBoundingClientRect().height);
-        identityRow.current.style.minHeight = `${height}px`;
-        icon.style.width = `${height}px`;
-        icon.style.height = `${height}px`;
-      } else if (text && icon && identityRow.current) {
-        identityRow.current.style.minHeight = "";
-        const height = Math.round(text.getBoundingClientRect().height);
-        icon.style.width = `${height}px`;
-        icon.style.height = `${height}px`;
+      if (identityRow.current) identityRow.current.style.minHeight = "";
+      if (icon) {
+        icon.style.width = "";
+        icon.style.height = "";
       }
     };
     align();
@@ -72,7 +65,7 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
           </div>
           <div ref={identityRow} className="order-2 flex items-stretch gap-3 lg:order-none lg:col-start-1 lg:row-start-2">
             {isGroupIcon(account.group_icon) && (
-              <Link ref={groupIcon} href="/club/group#profile" className="group relative shrink-0 self-stretch overflow-hidden rounded-[22px]" aria-label="Edit group icon">
+              <Link ref={groupIcon} href="/club/group#profile" className="club-group-icon group relative shrink-0 self-stretch overflow-hidden rounded-[22px]" aria-label="Edit group icon">
                 <GroupIcon
                   icon={account.group_icon}
                   background={account.group_bg || "2f9a4a"}

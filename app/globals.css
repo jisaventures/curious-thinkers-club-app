@@ -245,6 +245,18 @@ html {
   }
 }
 
+.club-group-icon {
+  width: 4.5rem;
+  height: 4.5rem;
+}
+
+@media (min-width: 1024px) {
+  .club-group-icon {
+    width: 5.875rem;
+    height: 5.875rem;
+  }
+}
+
 .manage-tip {
   opacity: 0;
   visibility: hidden;
