@@ -3,15 +3,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Backpack, Gift, Home, Star, Upload } from "lucide-react";
 import { AccountMenu } from "@/components/brand/account-menu";
 import type { AccountRecord } from "@/lib/auth/session";
 
 const MENU = [
-  { href: "/club", label: "Dashboard", match: (path: string) => path === "/club" },
-  { href: "/my-quests", label: "Quests", match: (path: string) => path.startsWith("/my-quests") },
-  { href: "/club/leaderboard", label: "Leaderboards", match: (path: string) => path.startsWith("/club/leaderboard") },
-  { href: "/rewards", label: "Rewards", match: (path: string) => path.startsWith("/rewards") },
-  { href: "/submit-work", label: "Submit Work", match: (path: string) => path.startsWith("/submit-work") },
+  { href: "/club", label: "Dashboard", icon: Home, className: "bg-[#306A51] text-white shadow-[0_4px_0_#17352A]", match: (path: string) => path === "/club" },
+  { href: "/my-quests", label: "Quests", icon: Backpack, className: "bg-[#E8A428] text-[#17352A] shadow-[0_4px_0_#C48614]", match: (path: string) => path.startsWith("/my-quests") },
+  { href: "/club/leaderboard", label: "Leaderboards", icon: Star, className: "bg-[#F08AB0] text-[#17352A] shadow-[0_4px_0_#d56b96]", match: (path: string) => path.startsWith("/club/leaderboard") },
+  { href: "/rewards", label: "Rewards", icon: Gift, className: "bg-[#50B0DC] text-[#17352A] shadow-[0_4px_0_#2f8fb8]", match: (path: string) => path.startsWith("/rewards") },
+  { href: "/submit-work", label: "Submit Work", icon: Upload, className: "bg-[#9BD0A8] text-[#17352A] shadow-[0_4px_0_#6eae80]", match: (path: string) => path.startsWith("/submit-work") },
 ];
 
 const SOCIALS = [
@@ -67,8 +68,9 @@ export function AppHeader({ account }: { account: AccountRecord | null }) {
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`font-display text-lg font-semibold no-underline ${active ? "text-[#E8A428]" : "text-[#17352A] hover:text-[#306A51]"}`}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-display text-sm font-bold no-underline ${item.className} ${active ? "outline outline-2 outline-offset-2 outline-[#17352A]" : ""}`}
               >
+                <item.icon className="size-4 shrink-0" aria-hidden="true" />
                 {item.label}
               </Link>
             );
