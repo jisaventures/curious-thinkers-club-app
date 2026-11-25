@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Backpack, Gift, Home, ShoppingCart, Star, Upload, Users } from "lucide-react";
 import { AccountMenu } from "@/components/brand/account-menu";
 import type { AccountRecord } from "@/lib/auth/session";
@@ -26,14 +26,26 @@ const SOCIALS = [
 
 export function AppHeader({ account }: { account: AccountRecord | null }) {
   const path = usePathname();
+  const router = useRouter();
   const [community, setCommunity] = useState(false);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
   const name = account?.display_name?.trim() || "Parent";
+
+  useEffect(() => {
+    setPendingHref(null);
+  }, [path]);
+
+  useEffect(() => {
+    for (const href of ["/club", "/my-quests", "/club/leaderboard", "/rewards", "/submit-work", "/club/shop"]) {
+      router.prefetch(href);
+    }
+  }, [router]);
 
   return (
     <header className="sticky top-0 z-40 bg-[#f6f1e6]">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
         <div className="flex justify-center py-3">
-          <Link href="/club" className="header-logo flex items-center gap-2.5">
+          <Link href="/club" prefetch className="header-logo flex items-center gap-2.5">
             <img
               src="/brand/bulb.png"
               alt=""
@@ -50,28 +62,36 @@ export function AppHeader({ account }: { account: AccountRecord | null }) {
         <nav className="flex flex-wrap items-center gap-2 pb-3" aria-label="Main">
           <div className="flex flex-wrap items-center gap-2">
             {MENU.map((item) => {
-              const active = item.match(path);
+              const active = pendingHref ? pendingHref === item.href : item.match(path);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch
                   aria-current={active ? "page" : undefined}
-                  className={`menu-pop inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-display text-sm font-bold text-white no-underline ${active ? ACTIVE : item.className}`}
+                  onClick={() => setPendingHref(item.href)}
+                  className="inline-flex rounded-full"
                 >
-                  <item.icon className="size-4 shrink-0" aria-hidden="true" />
-                  {item.label}
+                  <span className={`menu-pop inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-display text-sm font-bold text-white ${active ? ACTIVE : item.className}`}>
+                    <item.icon className="size-4 shrink-0" aria-hidden="true" />
+                    {item.label}
+                  </span>
                 </Link>
               );
             })}
           </div>
           <div className="ml-auto flex items-center gap-2">
-            <button type="button" className="header-brand menu-pop gap-1.5" onClick={() => setCommunity(true)}>
-              <Users className="size-4 shrink-0" aria-hidden="true" />
-              Community
+            <button type="button" className="inline-flex rounded-full border-0 bg-transparent p-0" onClick={() => setCommunity(true)}>
+              <span className="header-brand menu-pop gap-1.5">
+                <Users className="size-4 shrink-0" aria-hidden="true" />
+                Community
+              </span>
             </button>
-            <Link href="/club/shop" className="header-brand menu-pop gap-1.5">
-              <ShoppingCart className="size-4 shrink-0" aria-hidden="true" />
-              Shop
+            <Link href="/club/shop" prefetch onClick={() => setPendingHref("/club/shop")} className="inline-flex rounded-full">
+              <span className="header-brand menu-pop gap-1.5">
+                <ShoppingCart className="size-4 shrink-0" aria-hidden="true" />
+                Shop
+              </span>
             </Link>
             <AccountMenu
               name={account?.group_name?.trim() || name}

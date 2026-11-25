@@ -30,7 +30,7 @@ export function AccountMenu({
     <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       <button
         type="button"
-        className="menu-pop flex cursor-default items-center gap-2 rounded-full border border-[#eadfce] bg-white py-1 pr-2 pl-1 shadow-sm sm:pr-3"
+        className="flex cursor-default items-center gap-2 rounded-full border border-[#eadfce] bg-white py-1 pr-2 pl-1 shadow-sm sm:pr-3"
         aria-expanded={open}
         aria-haspopup="menu"
         onClick={() => {

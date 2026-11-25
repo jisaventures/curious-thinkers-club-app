@@ -478,11 +478,16 @@ select {
 }
 
 .menu-pop {
-  transition: transform 220ms ease;
+  transition: transform 140ms ease;
 }
 
 .menu-pop:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
+}
+
+.menu-pop:active {
+  transform: translateY(-1px);
+  transition-duration: 40ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
