@@ -913,6 +913,8 @@ select {
   height: 330px;
   border-radius: 20px;
   box-shadow: 0 8px 0 #17352a;
+  overflow: hidden;
+  background: linear-gradient(115deg, #12352a 0%, #1b4d3c 46%, #2a6a52 100%);
 }
 
 .new-pack-banner__pill {

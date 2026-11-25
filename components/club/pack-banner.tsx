@@ -1,6 +1,7 @@
 import { Clock, FileText, Play, Printer, UserRound } from "lucide-react";
 import Link from "next/link";
 import { Avatar } from "@/components/brand/avatar";
+import { PromoBackdrop } from "@/components/club/promo-banner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { AvatarKey, CoverTone } from "@/lib/validators";
@@ -204,7 +205,8 @@ function NewPackBanner({
     <article className="new-pack-banner">
       <span className="new-pack-banner__circle" aria-hidden="true" />
       <div className="new-pack-banner__cover">
-        <PackArt tone={tone} title={title} className="h-full w-full rounded-[20px]" />
+        <PromoBackdrop />
+        <PackArt tone={tone} title={title} className="relative z-[1] h-full w-full rounded-[20px] bg-transparent" />
       </div>
       <div className="new-pack-banner__copy">
         <p className="new-pack-banner__pill">
