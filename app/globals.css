@@ -439,6 +439,32 @@ select {
   gap: 0.85rem;
 }
 
+@keyframes journey-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+@keyframes journey-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.journey-pop {
+  animation: journey-pop 300ms ease;
+}
+
+.journey-bob {
+  animation: journey-bob 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-pop,
+  .journey-bob {
+    animation: none;
+  }
+}
+
 .journey-scroll {
   scrollbar-width: none;
 }

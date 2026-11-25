@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Check, ChevronDown, ChevronUp, Lock } from "lucide-react";
 import { markStepForChildren } from "@/app/club/actions";
@@ -46,7 +46,12 @@ function LivePack({ data }: { data: OwnedPack }) {
   const doneCount = focus?.finished ? data.steps.length : Math.max(0, (focus?.nextPosition ?? 1) - 1);
   const ratio = data.steps.length ? doneCount / data.steps.length : 0;
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLOListElement>(null);
   const positions = data.steps.map((step) => step.position);
+  const [viewStep, setViewStep] = useState(activePosition ?? positions[0] ?? 1);
+  const [greenTop, setGreenTop] = useState(0);
+  const [popStep, setPopStep] = useState<number | null>(null);
+  const [doneOpen, setDoneOpen] = useState<number | null>(null);
 
   function scrollToPosition(position: number, smooth: boolean) {
     const scroller = scrollerRef.current;
@@ -65,8 +70,10 @@ function LivePack({ data }: { data: OwnedPack }) {
       const eased = 1 - (1 - t) ** 3;
       scroller.scrollTop = from + (dest - from) * eased;
       if (t < 1) requestAnimationFrame(tick);
+      else setViewStep(position);
     };
     requestAnimationFrame(tick);
+    if (!smooth) setViewStep(position);
   }
 
   function nearestPosition() {
@@ -94,6 +101,40 @@ function LivePack({ data }: { data: OwnedPack }) {
     // Centre the current step once the map has its height.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const roadActive = activePosition ?? praise?.position ?? (focus?.finished ? data.steps.at(-1)?.position : null) ?? 1;
+
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    const badge = document.getElementById(`journey-badge-${roadActive}`);
+    if (!list || !badge) return;
+    const top = badge.getBoundingClientRect().top - list.getBoundingClientRect().top + badge.offsetHeight / 2;
+    setGreenTop(top);
+  }, [roadActive, praise, childViews]);
+
+  useEffect(() => {
+    if (!activePosition) return;
+    setPopStep(activePosition);
+    const timer = window.setTimeout(() => setPopStep(null), 300);
+    return () => window.clearTimeout(timer);
+  }, [activePosition]);
+
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      const target = event.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        stepBy(1);
+      }
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        stepBy(-1);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
 
   function selectMember(childId: string) {
     setFocusId(childId);
@@ -164,39 +205,38 @@ function LivePack({ data }: { data: OwnedPack }) {
   }
 
   const ordered = [...data.steps].reverse();
-  const roadActive = activePosition ?? praise?.position ?? (focus?.finished ? data.steps.at(-1)?.position : null) ?? 1;
 
   return (
     <div className="flex h-[calc(100dvh-8.5rem)] flex-col gap-3 lg:h-[calc(100dvh-11.25rem)]">
-      <div className="sticky top-[6.5rem] z-30 flex max-h-none shrink-0 flex-col gap-2 rounded-[28px] bg-white px-3 py-2 shadow-[0_18px_50px_rgba(23,53,42,0.06)] lg:top-[7.15rem] lg:h-[88px] lg:max-h-[88px] lg:flex-row lg:items-center lg:gap-4 lg:px-4">
+      <div className="sticky top-[6.5rem] z-30 flex h-auto shrink-0 flex-col justify-center gap-2 rounded-[28px] bg-white px-3 shadow-[0_18px_50px_rgba(23,53,42,0.06)] lg:top-[7.15rem] lg:h-20 lg:flex-row lg:items-center lg:gap-4 lg:px-4">
         <div className="flex min-w-0 items-center gap-3">
-          <Link href="/club" className="shrink-0 text-xs font-extrabold text-[#306A51] no-underline">← My Quests</Link>
+          <Link href="/club" className="shrink-0 text-xs font-extrabold text-[#306A51] no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#306A51]">← My Quests</Link>
           <div className="h-[68px] w-12 shrink-0 overflow-hidden rounded-lg">
             <BookCover tone={data.pack.cover_tone} title={data.pack.title} className="h-full w-full rounded-lg" />
           </div>
-            <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1">
             <p className="text-[10px] font-extrabold tracking-wide text-[#306A51] uppercase">Quest · {seriesLabel(data.pack.title, data.pack.theme)}</p>
-            <h1 className="font-display text-lg leading-tight font-bold text-[#17352A] lg:text-[22px]">{data.pack.title}</h1>
+            <h1 className="truncate font-display text-lg leading-none font-bold text-[#17352A] lg:text-[22px]">{data.pack.title}</h1>
           </div>
-          <div className="w-24 shrink-0 lg:ml-2 lg:w-[140px]">
-            <p className="text-xs font-extrabold text-[#17352A]">{doneCount} of {data.steps.length}</p>
-            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#F3E7CF]" role="progressbar" aria-valuemin={0} aria-valuemax={data.steps.length} aria-valuenow={doneCount}>
+          <div className="flex shrink-0 items-center gap-2">
+            <p className="text-xs font-extrabold whitespace-nowrap text-[#17352A]">{doneCount} of {data.steps.length} tasks</p>
+            <div className="h-2 w-24 overflow-hidden rounded-full bg-[#F3E7CF] sm:w-40" role="progressbar" aria-valuemin={0} aria-valuemax={data.steps.length} aria-valuenow={doneCount}>
               <div className="h-full rounded-full bg-[#306A51]" style={{ width: `${Math.round(ratio * 100)}%` }} />
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 lg:ml-auto">
-          <p className="sr-only">Tap a name to jump to their step</p>
-          <div className="flex gap-2 overflow-x-auto pb-1 lg:pb-0" title="Tap a name to jump to their step">
+        <div className="lg:ml-auto">
+          <p className="mb-1 text-[11px] font-semibold text-[#5e7266]">Tap to jump to their step</p>
+          <div className="flex gap-3 overflow-x-auto pb-1 lg:pb-0">
             {childViews.map((child) => (
               <button
                 key={child.id}
                 type="button"
                 onClick={() => selectMember(child.id)}
-                title={`${displayName(child)} @${child.nickname}. Tap a name to jump to their step`}
-                className="flex w-12 shrink-0 flex-col items-center gap-1"
+                title={`${displayName(child)} @${child.nickname}`}
+                className="flex w-12 shrink-0 flex-col items-center gap-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#306A51]"
               >
-                <Avatar {...avatarProps(child)} title={displayName(child)} className={`size-8 rounded-full ring-2 ring-offset-2 ${child.id === focus?.id ? "ring-[#E8A428]" : "ring-transparent"}`} />
+                <RoundAvatar child={child} size={40} selected={child.id === focus?.id} />
                 <StepPill child={child} current={child.id === focus?.id && !child.finished} compact />
               </button>
             ))}
@@ -205,20 +245,22 @@ function LivePack({ data }: { data: OwnedPack }) {
       </div>
 
       <section className="relative min-h-0 flex-1 overflow-hidden rounded-[28px] bg-white shadow-[0_18px_50px_rgba(23,53,42,0.06)]">
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[120px] bg-gradient-to-b from-white to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-16 bg-gradient-to-t from-white to-transparent" />
-        <div className="absolute top-4 right-3 z-30 flex flex-col gap-2">
-          <button type="button" aria-label="Next step" className="flex size-9 items-center justify-center rounded-full bg-white text-[#17352A] shadow-[0_8px_20px_rgba(23,53,42,0.12)]" onClick={() => stepBy(1)}>
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[140px] bg-gradient-to-b from-white to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[60px] bg-gradient-to-t from-white to-transparent" />
+        <div className="absolute top-1/2 right-3 z-30 hidden -translate-y-1/2 flex-col gap-2 md:flex">
+          <button type="button" title="Next step" aria-label="Next step" disabled={viewStep === positions.at(-1)} className="flex size-10 items-center justify-center rounded-full bg-white text-[#17352A] shadow-[0_8px_20px_rgba(23,53,42,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#306A51] disabled:opacity-40" onClick={() => stepBy(1)}>
             <ChevronUp className="size-5" aria-hidden="true" />
           </button>
-          <button type="button" aria-label="Previous step" className="flex size-9 items-center justify-center rounded-full bg-white text-[#17352A] shadow-[0_8px_20px_rgba(23,53,42,0.12)]" onClick={() => stepBy(-1)}>
+          <button type="button" title="Previous step" aria-label="Previous step" disabled={viewStep === positions[0]} className="flex size-10 items-center justify-center rounded-full bg-white text-[#17352A] shadow-[0_8px_20px_rgba(23,53,42,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#306A51] disabled:opacity-40" onClick={() => stepBy(-1)}>
             <ChevronDown className="size-5" aria-hidden="true" />
           </button>
         </div>
-        <div ref={scrollerRef} className="journey-scroll h-full overflow-x-hidden overflow-y-auto px-3 py-8 sm:px-8">
+        <div ref={scrollerRef} className="journey-scroll h-full overflow-x-hidden overflow-y-auto px-3 py-8 sm:px-8" onScroll={() => setViewStep(nearestPosition())}>
           <p className="text-center text-xs font-extrabold tracking-[0.16em] text-[#306A51] uppercase">Your journey</p>
           <h2 className="mt-1 mb-6 text-center font-display text-3xl text-[#17352A] sm:text-4xl">{journeyTitle(data.pack.title)}</h2>
-          <ol className="mx-auto flex w-full max-w-5xl flex-col pb-[28vh]">
+          <ol ref={listRef} className="relative mx-auto flex w-full max-w-[1000px] flex-col pb-[28vh]">
+            <div className="pointer-events-none absolute top-0 bottom-0 left-7 z-0 w-0.5 -translate-x-1/2 bg-[#DCD6C8] md:left-1/2" aria-hidden="true" />
+            <div className="pointer-events-none absolute bottom-0 left-7 z-0 w-0.5 -translate-x-1/2 bg-[#306A51] transition-[top] duration-300 ease-out md:left-1/2" style={{ top: greenTop }} aria-hidden="true" />
             {ordered.map((step) => {
               const here = onStep(childViews, step.position);
               const passed = focus ? (focus.finished || (focus.nextPosition ?? 1) > step.position) : false;
@@ -226,34 +268,24 @@ function LivePack({ data }: { data: OwnedPack }) {
               const praised = praise?.position === step.position;
               const occupied = here.length > 0;
               const locked = !passed && !active && !occupied;
-              const topGreen = step.position < roadActive;
-              const bottomGreen = step.position <= roadActive;
               return (
-                <li id={`journey-step-${step.position}`} key={step.id} className="relative grid min-h-[200px] grid-cols-1 items-center md:min-h-[210px] md:grid-cols-[1fr_5.5rem_1fr]">
-                  <div className="absolute top-0 bottom-0 left-8 w-0.5 -translate-x-1/2 md:left-1/2" aria-hidden="true">
-                    {step.position < data.steps.length && (
-                      <span className={`absolute top-0 h-1/2 w-full ${topGreen ? "bg-[#306A51]" : "bg-[#DCD6C8]"}`} />
-                    )}
-                    {step.position > 1 && (
-                      <span className={`absolute bottom-0 h-1/2 w-full ${bottomGreen ? "bg-[#306A51]" : "bg-[#DCD6C8]"}`} />
-                    )}
-                  </div>
-                  <div className="relative z-[1] hidden items-center justify-end gap-3 pr-6 md:flex">
+                <li id={`journey-step-${step.position}`} key={step.id} className="relative grid min-h-[200px] grid-cols-1 items-center md:grid-cols-[1fr_11rem_1fr] md:gap-6">
+                  <div className="relative z-[2] hidden items-center justify-end gap-6 md:flex">
                     {active ? (
                       <>
                         <FacePile people={here} />
-                        <VideoCard step={step} className="relative w-64" pointer onPlay={() => setVideoStep(step.position)} />
+                        <VideoCard step={step} className="relative w-[360px]" pointer onPlay={() => setVideoStep(step.position)} />
                       </>
                     ) : (
                       <FacePile people={here} />
                     )}
                   </div>
-                  <div className="absolute top-1/2 left-8 z-[1] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center md:static md:flex md:h-full md:translate-x-0 md:translate-y-0 md:justify-center">
-                    <StepBadge state={active || occupied ? "active" : passed ? "done" : "locked"} position={step.position} large={active} />
+                  <div className="absolute top-1/2 left-7 z-[2] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center md:static md:h-full md:translate-x-0 md:translate-y-0 md:justify-center">
+                    <StepBadge id={`journey-badge-${step.position}`} state={active || occupied ? "active" : passed ? "done" : "locked"} position={step.position} large={active} pop={popStep === step.position} />
                     {active && (
                       <button
                         type="button"
-                        className="relative z-[1] mt-3 rounded-full bg-[#E8A428] px-3 py-2 text-center text-xs font-extrabold whitespace-nowrap text-[#17352A] shadow-[0_5px_0_#C48614] disabled:opacity-60 max-md:absolute max-md:top-full max-md:left-1/2 max-md:mt-2"
+                        className="relative z-[2] mt-4 hidden rounded-full bg-[#E8A428] px-4 py-2 text-center font-display text-[15px] font-semibold whitespace-nowrap text-[#17352A] shadow-[0_5px_0_#C48614] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#306A51] disabled:opacity-60 md:inline-flex"
                         disabled={saving || here.length === 0}
                         onClick={() => askToComplete(step.position)}
                       >
@@ -261,19 +293,45 @@ function LivePack({ data }: { data: OwnedPack }) {
                       </button>
                     )}
                   </div>
-                  <div className="relative z-[1] min-w-0 py-6 pl-16 md:py-0 md:pl-6">
-                    {here.length > 0 && !active && <div className="mb-2 md:hidden"><FacePile people={here} /></div>}
+                  <div className="relative z-[2] min-w-0 py-4 pl-14 md:py-0 md:pl-0">
+                    {locked && <p className="sr-only">Complete step {roadActive} first</p>}
+                    {!active && occupied && <div className="mb-2 md:hidden"><FacePile people={here} /></div>}
                     {active ? (
                       <div className="space-y-3">
-                        <VideoCard step={step} className="md:hidden" onPlay={() => setVideoStep(step.position)} />
-                        <Tip step={step} />
+                        <div className="md:hidden"><FacePile people={here} /></div>
+                        <VideoCard step={step} className="w-full md:hidden" onPlay={() => setVideoStep(step.position)} />
+                        <button
+                          type="button"
+                          className="rounded-full bg-[#E8A428] px-4 py-2 font-display text-[15px] font-semibold text-[#17352A] shadow-[0_5px_0_#C48614] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#306A51] disabled:opacity-60 md:hidden"
+                          disabled={saving || here.length === 0}
+                          onClick={() => askToComplete(step.position)}
+                        >
+                          {saving ? "Saving…" : "Mark as complete"}
+                        </button>
+                        <Tip step={step} compact />
                       </div>
                     ) : praised ? (
                       <WellDone praise={praise} people={childViews.filter((child) => praise.childIds.includes(child.id))} onContinue={carryOn} />
                     ) : (
-                      <div>
-                        <p className={`font-display text-lg ${locked ? "text-[#8d8982]" : "text-[#17352A]"}`}>{step.title}</p>
+                      <button
+                        type="button"
+                        className="text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#306A51]"
+                        title={locked ? `Complete step ${roadActive} first` : undefined}
+                        onClick={() => {
+                          if (locked) return;
+                          if (passed && !occupied) setDoneOpen(doneOpen === step.position ? null : step.position);
+                        }}
+                      >
+                        <p className={`font-display text-[17px] ${locked ? "text-[#8d8982] opacity-60" : "text-[#17352A]"}`}>{step.title}</p>
                         {passed && !occupied && <p className="text-sm font-bold text-[#306A51]">+{step.points} points</p>}
+                      </button>
+                    )}
+                    {doneOpen === step.position && (
+                      <div className="mt-2 max-w-xs rounded-2xl bg-white p-3 shadow-[0_12px_30px_rgba(23,53,42,0.12)]">
+                        <p className="font-display text-base text-[#17352A]">{step.title}</p>
+                        <p className="text-sm font-bold text-[#306A51]">+{step.points} points</p>
+                        <p className="mt-1 text-sm text-[#3d5348]">{completers(childViews, step.position).map(displayName).join(", ") || "Completed"}</p>
+                        <button type="button" className="mt-2 text-sm font-extrabold text-[#306A51] underline" onClick={() => { setDoneOpen(null); setVideoStep(step.position); }}>Rewatch video</button>
                       </div>
                     )}
                   </div>
@@ -357,34 +415,54 @@ function StepPill({ child, current, compact = false }: { child: ChildView; curre
   );
 }
 
+function RoundAvatar({ child, size, selected = false }: { child: ChildView; size: number; selected?: boolean }) {
+  return (
+    <span
+      className="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-[#9BD0A8] font-display text-sm font-bold text-[#17352A]"
+      style={{ width: size, height: size, boxShadow: selected ? "0 0 0 3px #E8A428, 0 2px 6px rgba(23,53,42,0.18)" : "0 2px 6px rgba(23,53,42,0.18)" }}
+    >
+      <Avatar {...avatarProps(child)} title={displayName(child)} className="h-full w-full object-cover" />
+    </span>
+  );
+}
+
 function FacePile({ people }: { people: ChildView[] }) {
-  if (people.length === 0) return <span className="block h-7" />;
+  if (people.length === 0) return null;
+  const extra = people.length > 4 ? people.length - 3 : 0;
+  const shown = extra ? people.slice(0, 3) : people;
   return (
     <div className="flex -space-x-2">
-      {people.map((child) => (
-        <Avatar key={child.id} {...avatarProps(child)} title={displayName(child)} className="size-7 rounded-full ring-2 ring-white" />
+      {shown.map((child) => (
+        <RoundAvatar key={child.id} child={child} size={32} />
       ))}
+      {extra > 0 && (
+        <span className="inline-flex size-8 items-center justify-center rounded-full border-2 border-white bg-[#17352A] text-xs font-bold text-white">+{extra}</span>
+      )}
     </div>
   );
 }
 
-function StepBadge({ state, position, large }: { state: "done" | "active" | "locked"; position: number; large?: boolean }) {
+function StepBadge({ id, state, position, large, pop }: { id: string; state: "done" | "active" | "locked"; position: number; large?: boolean; pop?: boolean }) {
+  const popClass = pop ? "journey-pop" : "";
   if (state === "done") {
-    return <span className="relative z-[1] flex size-12 items-center justify-center rounded-full bg-[#306A51] text-white"><Check className="size-6" aria-hidden="true" /></span>;
+    return <span id={id} className={`relative z-[1] flex size-12 items-center justify-center rounded-full bg-[#306A51] text-white ${popClass}`}><Check className="size-6" aria-hidden="true" /></span>;
   }
   if (state === "locked") {
-    return <span className="relative z-[1] flex size-12 items-center justify-center rounded-full bg-[#F3E7CF] text-[#8d8982]"><Lock className="size-4" aria-hidden="true" /></span>;
+    return <span id={id} className="relative z-[1] flex size-12 items-center justify-center rounded-full bg-[#F3E7CF] text-[#8d8982] opacity-60"><Lock className="size-4" aria-hidden="true" /></span>;
   }
-  return <span className={`relative z-[1] flex items-center justify-center rounded-full bg-[#E8A428] font-display font-bold text-[#17352A] shadow-[0_5px_0_#C48614] ${large ? "size-16 text-2xl" : "size-12 text-lg"}`}>{position}</span>;
+  return <span id={id} className={`relative z-[1] flex items-center justify-center rounded-full bg-[#E8A428] font-display font-bold text-[#17352A] shadow-[0_5px_0_#C48614] ${popClass} ${large ? "size-16 text-2xl" : "size-12 text-lg"}`}>{position}</span>;
 }
 
 function VideoCard({ step, onPlay, className = "", pointer = false }: { step: Step; onPlay: () => void; className?: string; pointer?: boolean }) {
   return (
     <button type="button" onClick={onPlay} className={`rounded-2xl bg-white p-2 text-left shadow-[0_10px_24px_rgba(23,53,42,0.12)] ${className}`}>
       {pointer && <span className="absolute top-1/2 -right-2 size-4 -translate-y-1/2 rotate-45 bg-white" aria-hidden="true" />}
-      <span className="relative block aspect-video overflow-hidden rounded-xl bg-[#d7efe4]">
+      <span className="relative block aspect-video overflow-hidden rounded-xl bg-gradient-to-br from-[#d7efe4] to-[#9BD0A8]">
+        {step.video.provider === "youtube" && step.video.src && (
+          <img src={`https://i.ytimg.com/vi/${step.video.src}/hqdefault.jpg`} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        )}
         <span className="absolute inset-0 flex items-center justify-center">
-          <span className="flex size-10 items-center justify-center rounded-full bg-white text-[#17352A] shadow">▶</span>
+          <span className="flex size-12 items-center justify-center rounded-full bg-[#E8A428] text-[#17352A] shadow-[0_5px_0_#C48614]">▶</span>
         </span>
       </span>
       <span className="mt-2 block text-xs font-bold text-[#5e7266]">Video guide · {step.estimated_minutes} min</span>
@@ -393,13 +471,21 @@ function VideoCard({ step, onPlay, className = "", pointer = false }: { step: St
   );
 }
 
-function Tip({ step }: { step: Step }) {
+function Tip({ step, compact = false }: { step: Step; compact?: boolean }) {
   return (
     <div className="flex items-end gap-2">
-      <p className="min-w-60 max-w-xs rounded-2xl bg-[#fffaf2] px-4 py-3 text-sm font-bold text-[#17352A] shadow-[0_5px_0_#C48614,0_8px_16px_rgba(184,122,16,0.25)]">{step.description}</p>
-      <img src="/brand/mascot-spy.webp" alt="" width={120} height={168} className="h-28 w-auto shrink-0" />
+      <div className="relative min-w-60 max-w-80 rounded-2xl bg-white px-5 py-4 shadow-[0_5px_0_#C48614,0_8px_16px_rgba(184,122,16,0.25)]">
+        <p className="text-xs font-semibold tracking-wide text-[#306A51] uppercase">Chameleon&apos;s tip</p>
+        <p className="mt-1 text-[15px] font-semibold text-[#17352A]">{step.description}</p>
+        <span className="absolute top-1/2 -right-1.5 size-3 -translate-y-1/2 rotate-45 bg-white" aria-hidden="true" />
+      </div>
+      <img src="/brand/mascot-spy.webp" alt="" width={96} height={132} className={`journey-bob w-auto shrink-0 ${compact ? "h-[72px] md:h-24" : "h-24"}`} />
     </div>
   );
+}
+
+function completers(children: ChildView[], position: number) {
+  return children.filter((child) => child.finished || (child.nextPosition != null && child.nextPosition > position));
 }
 
 function WellDone({
