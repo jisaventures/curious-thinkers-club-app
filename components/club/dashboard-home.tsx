@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef, useState, type KeyboardEvent } from "react";
+import { useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
 import Link from "next/link";
 import {
   Bell,
   BookOpen,
   Cake,
   Camera,
+  ChevronRight,
   Coins,
   Flag,
   Flame,
@@ -28,6 +29,14 @@ import { remindPackLaunch } from "@/app/club/actions";
 import type { DashboardHome, HomePackCard, HomeRelease } from "@/lib/club/home";
 import { shopUrl } from "@/lib/env";
 import type { AvatarKey, CoverTone } from "@/lib/validators";
+
+type BoardPreview = {
+  nickname: string;
+  avatar_key: AvatarKey;
+  points: number;
+  rank: number;
+  is_mine: boolean;
+};
 
 type Member = {
   id: string;
@@ -59,16 +68,17 @@ export function DashboardHome({
   home,
   members,
   focusId,
+  leaderboard,
 }: {
   home: DashboardHome;
   members: Member[];
   focusId: string | null;
+  leaderboard: BoardPreview[];
 }) {
   const opensOnCompleted = home.inProgress.length === 0;
   const [tab, setTab] = useState<"progress" | "completed">(opensOnCompleted ? "completed" : "progress");
   const [reminded, setReminded] = useState(() => new Set(home.remindedIds));
   const [pendingId, setPendingId] = useState<string | null>(null);
-  const rightColumn = useRef<HTMLDivElement>(null);
 
   function onTabKey(event: KeyboardEvent<HTMLDivElement>) {
     if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
@@ -90,7 +100,7 @@ export function DashboardHome({
 
   return (
     <div className="grid min-w-0 items-start gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-stretch">
-      <div className="flex min-w-0 flex-col gap-4 lg:h-full">
+      <div className="flex min-w-0 flex-col gap-4 lg:h-0 lg:min-h-full">
       <section className="min-w-0 rounded-[28px] bg-white p-4 shadow-[0_18px_50px_rgba(23,53,42,0.06)] sm:p-5">
         <div role="tablist" aria-label="Your quests" className="inline-flex max-w-full rounded-full bg-[#F3E7CF] p-1 max-sm:flex max-sm:w-full" onKeyDown={onTabKey}>
           <TabButton id="pack-tab-progress" controls="pack-panel-progress" selected={tab === "progress"} onSelect={() => setTab("progress")}>
@@ -140,9 +150,10 @@ export function DashboardHome({
         </div>
       </section>
       {home.promo && <PromoBanner banner={home.promo} />}
-      <MyPacksStrip packs={home.ownedPacks} columnRef={rightColumn} />
+      <MyPacksStrip packs={home.ownedPacks} />
+      <LeaderboardPreview rows={leaderboard} />
       </div>
-      <div ref={rightColumn} className="min-w-0 space-y-4">
+      <div className="min-w-0 space-y-4">
         <Stats home={home} />
         <ReleaseCard title="Recent releases" packs={home.recent} mode="recent" />
         <ReleaseCard title="Upcoming releases" packs={home.upcoming} mode="upcoming" reminded={reminded} pendingId={pendingId} onRemind={remind} />
@@ -197,7 +208,14 @@ function PackRow({
   return (
     <article className="rounded-[22px] bg-[#f3faf4] p-3 sm:p-4">
       <div className="flex min-w-0 items-start gap-3">
-        <PackIcon title={pack.title} theme={pack.theme} tone={pack.coverTone} done={finished} />
+        <span className="relative shrink-0">
+          <PackThumb title={pack.title} theme={pack.theme} tone={pack.coverTone} />
+          {finished && (
+            <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-[#306A51] text-[10px] font-bold text-white" aria-hidden="true">
+              ✓
+            </span>
+          )}
+        </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="min-w-0 flex-1">
@@ -402,6 +420,65 @@ function StatIcon({ icon: Icon, className }: { icon: LucideIcon; className: stri
   );
 }
 
+function LeaderboardPreview({ rows }: { rows: BoardPreview[] }) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [count, setCount] = useState(() => Math.min(rows.length, 4));
+
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const apply = () => {
+      const wide = window.matchMedia("(min-width: 1024px)").matches;
+      if (!wide) {
+        setCount(Math.min(rows.length, 4));
+        return;
+      }
+      const style = getComputedStyle(section);
+      const limit = section.getBoundingClientRect().bottom - (parseFloat(style.paddingBottom) || 0);
+      const lis = [...section.querySelectorAll("li")];
+      let fit = lis.filter((li) => li.getBoundingClientRect().bottom <= limit + 1).length;
+      const last = lis[fit - 1];
+      if (last && fit < rows.length) {
+        const gap = 8;
+        if (limit - last.getBoundingClientRect().bottom >= last.getBoundingClientRect().height + gap) fit += 1;
+      }
+      const next = Math.min(rows.length, Math.max(fit, lis.length ? 1 : 0));
+      setCount((current) => (current === next ? current : next));
+    };
+    apply();
+    const observer = new ResizeObserver(apply);
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, [rows.length]);
+
+  const shown = rows.slice(0, count);
+  return (
+    <section ref={sectionRef} className="flex flex-col rounded-[28px] bg-white p-4 shadow-[0_18px_50px_rgba(23,53,42,0.06)] sm:p-5 lg:min-h-0 lg:flex-1 lg:overflow-hidden">
+      <div data-board-header className="mb-3 flex items-center justify-between gap-3">
+        <h2 className="font-display text-2xl text-[#17352A]">Leaderboard</h2>
+        <Link href="/club/leaderboard" className="inline-flex min-h-11 items-center gap-1 rounded-full border-2 border-[#306A51] px-3 text-sm font-bold text-[#306A51] no-underline">
+          View leaderboards
+          <ChevronRight className="size-4" aria-hidden="true" />
+        </Link>
+      </div>
+      {shown.length === 0 ? (
+        <p className="text-sm text-[#5e7266]">No scores yet.</p>
+      ) : (
+        <ol className="space-y-2">
+          {shown.map((row) => (
+            <li key={`${row.rank}-${row.nickname}`} className={`flex items-center gap-3 rounded-2xl px-2 py-1.5 ${row.is_mine ? "bg-[#E7F6EA]" : ""}`}>
+              <span className="w-6 text-center font-display text-lg text-[#306A51]">{row.rank}</span>
+              <Avatar avatar={row.avatar_key} title={row.nickname} className="size-9 rounded-full" />
+              <span className="min-w-0 flex-1 truncate font-display text-base text-[#17352A]">{row.nickname}</span>
+              <span className="font-display text-base text-[#17352A]">{row.points}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
+  );
+}
+
 function ReleaseCard({
   title,
   packs,
@@ -456,22 +533,6 @@ function ReleaseCard({
         {packs.length === 0 && <li className="py-4 text-sm text-[#5e7266]">Nothing here yet.</li>}
       </ul>
     </section>
-  );
-}
-
-function PackIcon({ title, theme, tone, done }: { title: string; theme: string; tone: CoverTone; done?: boolean }) {
-  const Icon = iconFor(title, theme);
-  return (
-    <span className={`relative flex size-14 shrink-0 items-center justify-center rounded-2xl border-2 border-[#17352A]/15 bg-white text-[#17352A] ${done ? "" : ""}`}>
-      <span className={`flex size-10 items-center justify-center rounded-xl ${tones[tone]} text-white`}>
-        <Icon className="size-5" aria-hidden="true" />
-      </span>
-      {done && (
-        <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-[#306A51] text-[10px] font-bold text-white" aria-hidden="true">
-          ✓
-        </span>
-      )}
-    </span>
   );
 }
 

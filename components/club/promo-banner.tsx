@@ -35,22 +35,18 @@ export function PromoBanner({ banner }: { banner: PromoBannerContent }) {
           <span key={`${spark.top}-${spark.left ?? spark.right}`} className="promo-banner__spark" style={spark} />
         ))}
       </div>
-      <div className="relative z-[1] grid items-center gap-4 p-4 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] sm:p-5">
+      <div className="relative z-[1] grid items-center gap-4 p-4 sm:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] sm:p-5">
         <img
           src={banner.imageUrl}
           alt="Official Club kit products"
-          className="h-40 w-full rounded-2xl bg-[#16382c] object-contain sm:h-52"
+          className="block h-auto w-full rounded-2xl"
         />
-        <div className="max-sm:pb-14 sm:pr-24">
+        <div className="min-w-0 max-sm:pb-14 sm:pr-16">
           <p className="inline-flex items-center gap-1.5 rounded-full bg-[#E8A428] px-3 py-1 font-display text-xs font-semibold tracking-wide text-[#17352A]">
             <Star className="size-3.5 fill-current" aria-hidden="true" />
             {banner.badgeText}
           </p>
-          <h2 className="mt-3 font-display text-[1.45rem] leading-[1.15] sm:text-[1.7rem]">
-            {banner.headline.split(/\n|<br\s*\/?>/i).map((line) => (
-              <span key={line} className="block whitespace-nowrap">{line}</span>
-            ))}
-          </h2>
+          <h2 className="mt-3 font-display text-[1.35rem] leading-tight whitespace-nowrap sm:text-[1.55rem]">{banner.headline.replace(/\n|<br\s*\/?>/gi, " ")}</h2>
           <p className="mt-2 max-w-md text-sm leading-snug sm:text-base" style={{ color: banner.textColour }}>
             {banner.subtext}
           </p>

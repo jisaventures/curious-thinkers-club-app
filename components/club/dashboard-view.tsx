@@ -160,7 +160,7 @@ export function DashboardView({ data, notice }: { data: DashboardData; notice?: 
             />
           </>
         )}
-        <DashboardHome home={data.home} members={data.children} focusId={focus?.id ?? null} />
+        <DashboardHome home={data.home} members={data.children} focusId={focus?.id ?? null} leaderboard={data.leaderboard} />
       </section>
       {bookId && (
         <Scrapbook

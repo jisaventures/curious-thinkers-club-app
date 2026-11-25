@@ -27,7 +27,7 @@ insert into public.dashboard_banners (
   'club-kit',
   '/brand/merch-banner-v2.png',
   'Club Merchandise',
-  E'Get the official\nclub kit!',
+  'Get the official club kit!',
   'Show you''re a Curious Thinker. Free drawstring bag with every bundle.',
   'Shop Now',
   'https://curiousthinkersclub.org',
