@@ -183,7 +183,6 @@ export function PackBanner({
 
 function NewPackBanner({
   title,
-  tone,
   blurb,
   durationLabel,
   ageMin,
@@ -205,8 +204,10 @@ function NewPackBanner({
     <article className="new-pack-banner">
       <span className="new-pack-banner__circle" aria-hidden="true" />
       <div className="new-pack-banner__cover">
-        <PromoBackdrop />
-        <PackArt tone={tone} title={title} className="relative z-[1] h-full w-full rounded-[20px] bg-transparent" />
+        <div className="new-pack-banner__stage">
+          <PromoBackdrop />
+        </div>
+        <div className="new-pack-banner__sheet" role="img" aria-label={title} />
       </div>
       <div className="new-pack-banner__copy">
         <p className="new-pack-banner__pill">

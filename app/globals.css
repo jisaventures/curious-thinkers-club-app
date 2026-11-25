@@ -909,12 +909,31 @@ select {
 }
 
 .new-pack-banner__cover {
+  position: static;
   width: 260px;
   height: 330px;
-  border-radius: 20px;
-  box-shadow: 0 8px 0 #17352a;
+}
+
+.new-pack-banner__stage {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(40px + 260px + 22px);
   overflow: hidden;
   background: linear-gradient(115deg, #12352a 0%, #1b4d3c 46%, #2a6a52 100%);
+  pointer-events: none;
+}
+
+.new-pack-banner__sheet {
+  position: relative;
+  z-index: 1;
+  width: 260px;
+  height: 330px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(23, 53, 42, 0.16);
 }
 
 .new-pack-banner__pill {
@@ -1083,9 +1102,24 @@ select {
   }
 
   .new-pack-banner__cover {
-    width: min(168px, 100%);
+    position: relative;
+    display: flex;
+    justify-content: center;
+    width: calc(100% + 80px);
     height: auto;
-    aspect-ratio: 260 / 330;
+    margin: -36px -40px 0;
+    padding: 28px 0;
+  }
+
+  .new-pack-banner__stage {
+    inset: 0;
+    width: auto;
+  }
+
+  .new-pack-banner__sheet {
+    width: min(168px, 70%);
+    height: auto;
+    aspect-ratio: 1 / 1.414;
   }
 
   .new-pack-banner__title {
