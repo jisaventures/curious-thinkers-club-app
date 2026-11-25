@@ -8,7 +8,7 @@ import { authCookieOptions } from "@/lib/env";
 import { startShopifyCustomerLogin } from "@/lib/auth/shopify";
 import { createClient } from "@/lib/supabase/server";
 import { emailSchema } from "@/lib/validators";
-import { siteUrl } from "@/lib/env";
+import { shopUrl, siteUrl } from "@/lib/env";
 
 const recentLinks = new Map<string, number>();
 
@@ -65,14 +65,23 @@ export async function requestShopLogin(
   return startShopifyCustomerLogin();
 }
 
-export async function signOut() {
+async function endSession() {
   if (isDemoMode()) {
     const jar = await cookies();
     jar.set("ctc_demo_signed_out", "1", { ...authCookieOptions, maxAge: 60 * 60 * 24 * 30 });
     jar.set("ctc_demo_persona", "", { ...authCookieOptions, maxAge: 0 });
-    redirect("/login");
+    return;
   }
   const supabase = await createClient();
   await supabase.auth.signOut();
+}
+
+export async function signOut() {
+  await endSession();
   redirect("/login");
+}
+
+export async function exitClubApp() {
+  await endSession();
+  redirect(shopUrl());
 }

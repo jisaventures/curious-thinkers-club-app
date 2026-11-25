@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { signOut } from "@/app/login/actions";
+import { exitClubApp } from "@/app/login/actions";
 import { GROUP_ICONS, GroupIcon, type GroupIconId } from "@/components/brand/group-icon";
 
 function isGroupIcon(value: string | null | undefined): value is GroupIconId {
@@ -21,11 +21,18 @@ export function AccountMenu({
   colour?: string | null;
 }) {
   const [open, setOpen] = useState(false);
+  const [confirmExit, setConfirmExit] = useState(false);
   const initial = name.slice(0, 1).toUpperCase();
   const groupIcon = isGroupIcon(icon) ? icon : null;
 
   return (
-    <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+    <div
+      className="relative"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => {
+        if (!confirmExit) setOpen(false);
+      }}
+    >
       <button
         type="button"
         className="flex h-9 cursor-pointer items-center gap-1 rounded-full bg-white pr-1.5 pl-0.5 shadow-[0_4px_0_#9a958c] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#306A51] md:h-[38px] md:gap-2 md:pr-2.5 md:pl-1"
@@ -48,14 +55,40 @@ export function AccountMenu({
       {open && (
         <div className="absolute right-0 top-full z-30 pt-2">
           <div className="w-48 rounded-2xl border border-[#eadfce] bg-white p-2 shadow-lg" role="menu">
-            <Link href="/club/group" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]" role="menuitem">
-              My Group
-            </Link>
-            <form action={signOut}>
-              <button type="submit" className="w-full rounded-xl px-3 py-2 text-left text-sm font-bold text-[#17352A] hover:bg-[#f6efe2]" role="menuitem">
-                Sign out
-              </button>
-            </form>
+            {confirmExit ? (
+              <div className="space-y-2 px-1 py-1">
+                <p className="px-2 text-sm font-bold text-[#17352A]">Are you sure?</p>
+                <button
+                  type="button"
+                  className="w-full rounded-xl bg-[#306A51] px-3 py-2 text-sm font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#17352A]"
+                  onClick={() => {
+                    setConfirmExit(false);
+                    setOpen(false);
+                  }}
+                >
+                  Stay Logged In
+                </button>
+                <form action={exitClubApp}>
+                  <button type="submit" className="w-full rounded-xl bg-[#c44536] px-3 py-2 text-sm font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#17352A]">
+                    Exit Club App
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <>
+                <Link href="/club/group" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]" role="menuitem">
+                  My Group
+                </Link>
+                <button
+                  type="button"
+                  className="w-full rounded-xl bg-[#c44536] px-3 py-2 text-left text-sm font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#17352A]"
+                  role="menuitem"
+                  onClick={() => setConfirmExit(true)}
+                >
+                  Sign out
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
