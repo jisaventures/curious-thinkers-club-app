@@ -885,21 +885,17 @@ select {
   gap: 44px;
   align-items: center;
   padding: 36px 40px;
-  background: #fffcf7;
-  border: 2px solid #efe3cb;
+  background: linear-gradient(115deg, #12352a 0%, #1b4d3c 46%, #2a6a52 100%);
+  color: #fffaf2;
   box-shadow: 0 10px 30px rgba(23, 53, 42, 0.1);
 }
 
-.new-pack-banner__circle {
+.new-pack-banner__sky {
   position: absolute;
-  right: -80px;
-  bottom: -110px;
-  width: 360px;
-  height: 360px;
-  overflow: hidden;
-  border-radius: 50%;
-  background: linear-gradient(115deg, #12352a 0%, #1b4d3c 46%, #2a6a52 100%);
+  inset: 0;
   z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .new-pack-banner__cover,
@@ -910,21 +906,8 @@ select {
 }
 
 .new-pack-banner__cover {
-  position: static;
   width: 260px;
   height: 330px;
-}
-
-.new-pack-banner__stage {
-  position: absolute;
-  z-index: 0;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: calc(40px + 260px + 22px);
-  overflow: hidden;
-  background: linear-gradient(115deg, #12352a 0%, #1b4d3c 46%, #2a6a52 100%);
-  pointer-events: none;
 }
 
 .new-pack-banner__sheet {
@@ -965,8 +948,8 @@ select {
   width: fit-content;
   padding: 6px 14px;
   border-radius: 999px;
-  background: #e4f1e8;
-  color: #306a51;
+  background: #e8a428;
+  color: #17352a;
   font-family: var(--font-fredoka), "Fredoka", sans-serif;
   font-weight: 600;
   font-size: 15px;
@@ -982,7 +965,7 @@ select {
 
 .new-pack-banner__title {
   margin: 14px 0 8px;
-  color: #17352a;
+  color: #fffaf2;
   font-family: var(--font-fredoka), "Fredoka", sans-serif;
   font-weight: 600;
   font-size: 44px;
@@ -991,7 +974,7 @@ select {
 
 .new-pack-banner__blurb {
   margin: 0 0 24px;
-  color: #3e5449;
+  color: #fffaf2;
   font-family: var(--font-nunito), "Nunito", sans-serif;
   font-weight: 400;
   font-size: 17px;
@@ -1006,7 +989,7 @@ select {
   margin: 0 0 26px;
   padding: 0;
   list-style: none;
-  color: #3e5449;
+  color: #fffaf2;
   font-family: var(--font-nunito), "Nunito", sans-serif;
   font-weight: 700;
   font-size: 14px;
@@ -1057,14 +1040,14 @@ select {
 
 .new-pack-banner__printed {
   margin: 22px 0 0;
-  color: #3e5449;
+  color: #fffaf2;
   font-family: var(--font-nunito), "Nunito", sans-serif;
   font-weight: 400;
   font-size: 15px;
 }
 
 .new-pack-banner__printed a {
-  color: #306a51;
+  color: #fffaf2;
   font-weight: 800;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -1124,18 +1107,8 @@ select {
   }
 
   .new-pack-banner__cover {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    width: calc(100% + 80px);
+    width: min(168px, 70%);
     height: auto;
-    margin: -36px -40px 0;
-    padding: 28px 0;
-  }
-
-  .new-pack-banner__stage {
-    inset: 0;
-    width: auto;
   }
 
   .new-pack-banner__sheet {
@@ -1157,14 +1130,6 @@ select {
 
   .new-pack-banner__meta {
     justify-content: center;
-  }
-
-  .new-pack-banner__circle {
-    top: -90px;
-    right: -90px;
-    bottom: auto;
-    width: 220px;
-    height: 220px;
   }
 
   .new-pack-banner__copy {

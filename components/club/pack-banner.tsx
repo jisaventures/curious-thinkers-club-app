@@ -202,13 +202,10 @@ function NewPackBanner({
   const icon = { size: 20, strokeWidth: 2.5, strokeLinecap: "round" as const, color: "currentColor", "aria-hidden": true };
   return (
     <article className="new-pack-banner">
-      <div className="new-pack-banner__circle" aria-hidden="true">
+      <div className="new-pack-banner__sky" aria-hidden="true">
         <PromoBackdrop />
       </div>
       <div className="new-pack-banner__cover">
-        <div className="new-pack-banner__stage">
-          <PromoBackdrop />
-        </div>
         <div className="new-pack-banner__sheet" role="img" aria-label={title}>
           <CoverSketch title={title} />
           <p>{title}</p>
