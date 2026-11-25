@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Check, Hand, Lock } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Lock } from "lucide-react";
 import { markStepForChildren } from "@/app/club/actions";
 import { Avatar } from "@/components/brand/avatar";
 import { BookCover } from "@/components/club/book-cover";
@@ -45,13 +45,62 @@ function LivePack({ data }: { data: OwnedPack }) {
   const activePosition = praise ? null : focus && !focus.finished ? (focus.nextPosition ?? data.steps[0]?.position ?? null) : null;
   const doneCount = focus?.finished ? data.steps.length : Math.max(0, (focus?.nextPosition ?? 1) - 1);
   const ratio = data.steps.length ? doneCount / data.steps.length : 0;
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const positions = data.steps.map((step) => step.position);
+
+  function scrollToPosition(position: number, smooth: boolean) {
+    const scroller = scrollerRef.current;
+    const el = document.getElementById(`journey-step-${position}`);
+    if (!scroller || !el) return;
+    const delta = el.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+    const dest = Math.max(0, scroller.scrollTop + delta - scroller.clientHeight * 0.62 + el.offsetHeight / 2);
+    if (!smooth) {
+      scroller.scrollTop = dest;
+      return;
+    }
+    const from = scroller.scrollTop;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / 600);
+      const eased = 1 - (1 - t) ** 3;
+      scroller.scrollTop = from + (dest - from) * eased;
+      if (t < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  function nearestPosition() {
+    const scroller = scrollerRef.current;
+    if (!scroller) return positions[0];
+    const mid = scroller.getBoundingClientRect().top + scroller.clientHeight * 0.62;
+    let best = positions[0];
+    let bestDist = Number.POSITIVE_INFINITY;
+    for (const position of positions) {
+      const el = document.getElementById(`journey-step-${position}`);
+      if (!el) continue;
+      const box = el.getBoundingClientRect();
+      const dist = Math.abs(box.top + box.height / 2 - mid);
+      if (dist < bestDist) {
+        best = position;
+        bestDist = dist;
+      }
+    }
+    return best;
+  }
+
+  useLayoutEffect(() => {
+    const position = focus?.finished ? data.steps.at(-1)?.position : focus?.nextPosition;
+    if (position) scrollToPosition(position, false);
+    // Centre the current step once the map has its height.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function selectMember(childId: string) {
     setFocusId(childId);
     setPraise(null);
     const child = childViews.find((item) => item.id === childId);
     const position = child?.finished ? data.steps.at(-1)?.position : child?.nextPosition;
-    if (position) document.getElementById(`journey-step-${position}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (position) scrollToPosition(position, true);
     window.history.replaceState(null, "", `/club/packs/${data.pack.slug}?mode=solo&child=${childId}`);
   }
 
@@ -104,113 +153,135 @@ function LivePack({ data }: { data: OwnedPack }) {
   function carryOn() {
     const next = praise ? data.steps.find((step) => step.position > praise.position) : null;
     setPraise(null);
-    if (next) document.getElementById(`journey-step-${next.position}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (next) requestAnimationFrame(() => scrollToPosition(next.position, true));
+  }
+
+  function stepBy(direction: 1 | -1) {
+    const current = nearestPosition();
+    const index = positions.indexOf(current);
+    const next = positions[index + direction];
+    if (next) scrollToPosition(next, true);
   }
 
   const ordered = [...data.steps].reverse();
+  const roadActive = activePosition ?? praise?.position ?? (focus?.finished ? data.steps.at(-1)?.position : null) ?? 1;
 
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[minmax(16rem,1fr)_minmax(0,3fr)]">
-      <aside className="min-w-0">
-        <Link href="/club" className="inline-flex text-sm font-extrabold text-[#306A51] no-underline">
-          ← My Quests
-        </Link>
-        <div className="mt-4 lg:block">
-          <div className="flex gap-4 lg:block">
-            <div className="aspect-[1/1.414] w-24 shrink-0 overflow-hidden rounded-[20px] shadow-[0_10px_24px_rgba(23,53,42,0.12)] lg:w-full">
-              <BookCover tone={data.pack.cover_tone} title={data.pack.title} className="h-full w-full rounded-[20px]" />
-            </div>
-            <div className="min-w-0 flex-1 lg:mt-4">
-              <p className="text-xs font-extrabold tracking-wide text-[#306A51] uppercase">Quest · {seriesLabel(data.pack.title, data.pack.theme)}</p>
-              <h1 className="mt-1 font-display text-3xl leading-tight font-bold text-[#17352A] lg:text-4xl">{data.pack.title}</h1>
-              <p className="mt-1 text-sm text-[#3d5348]">{data.pack.blurb}</p>
+    <div className="flex h-[calc(100dvh-8.5rem)] flex-col gap-3 lg:h-[calc(100dvh-11.25rem)]">
+      <div className="sticky top-[6.5rem] z-30 flex max-h-none shrink-0 flex-col gap-2 rounded-[28px] bg-white px-3 py-2 shadow-[0_18px_50px_rgba(23,53,42,0.06)] lg:top-[7.15rem] lg:h-[88px] lg:max-h-[88px] lg:flex-row lg:items-center lg:gap-4 lg:px-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <Link href="/club" className="shrink-0 text-xs font-extrabold text-[#306A51] no-underline">← My Quests</Link>
+          <div className="h-[68px] w-12 shrink-0 overflow-hidden rounded-lg">
+            <BookCover tone={data.pack.cover_tone} title={data.pack.title} className="h-full w-full rounded-lg" />
+          </div>
+            <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-extrabold tracking-wide text-[#306A51] uppercase">Quest · {seriesLabel(data.pack.title, data.pack.theme)}</p>
+            <h1 className="font-display text-lg leading-tight font-bold text-[#17352A] lg:text-[22px]">{data.pack.title}</h1>
+          </div>
+          <div className="w-24 shrink-0 lg:ml-2 lg:w-[140px]">
+            <p className="text-xs font-extrabold text-[#17352A]">{doneCount} of {data.steps.length}</p>
+            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#F3E7CF]" role="progressbar" aria-valuemin={0} aria-valuemax={data.steps.length} aria-valuenow={doneCount}>
+              <div className="h-full rounded-full bg-[#306A51]" style={{ width: `${Math.round(ratio * 100)}%` }} />
             </div>
           </div>
-          <p className="mt-4 text-sm font-extrabold text-[#17352A]">{doneCount} of {data.steps.length} tasks</p>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#F3E7CF]" role="progressbar" aria-valuemin={0} aria-valuemax={data.steps.length} aria-valuenow={doneCount}>
-            <div className="h-full rounded-full bg-[#306A51]" style={{ width: `${Math.round(ratio * 100)}%` }} />
+        </div>
+        <div className="flex items-center gap-2 lg:ml-auto">
+          <p className="sr-only">Tap a name to jump to their step</p>
+          <div className="flex gap-2 overflow-x-auto pb-1 lg:pb-0" title="Tap a name to jump to their step">
+            {childViews.map((child) => (
+              <button
+                key={child.id}
+                type="button"
+                onClick={() => selectMember(child.id)}
+                title={`${displayName(child)} @${child.nickname}. Tap a name to jump to their step`}
+                className="flex w-12 shrink-0 flex-col items-center gap-1"
+              >
+                <Avatar {...avatarProps(child)} title={displayName(child)} className={`size-8 rounded-full ring-2 ring-offset-2 ${child.id === focus?.id ? "ring-[#E8A428]" : "ring-transparent"}`} />
+                <StepPill child={child} current={child.id === focus?.id && !child.finished} compact />
+              </button>
+            ))}
           </div>
-          <h2 className="mt-6 font-display text-xl text-[#17352A]">Participating</h2>
-          <p className="mt-1 flex items-center gap-1.5 text-sm text-[#3d5348]">
-            <Hand className="size-4 text-[#306A51]" aria-hidden="true" />
-            Tap a name to jump to their step
-          </p>
-          <ul className="mt-3 space-y-2">
-            {childViews.map((child) => {
-              const selected = child.id === focus?.id;
+        </div>
+      </div>
+
+      <section className="relative min-h-0 flex-1 overflow-hidden rounded-[28px] bg-white shadow-[0_18px_50px_rgba(23,53,42,0.06)]">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[120px] bg-gradient-to-b from-white to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-16 bg-gradient-to-t from-white to-transparent" />
+        <div className="absolute top-4 right-3 z-30 flex flex-col gap-2">
+          <button type="button" aria-label="Next step" className="flex size-9 items-center justify-center rounded-full bg-white text-[#17352A] shadow-[0_8px_20px_rgba(23,53,42,0.12)]" onClick={() => stepBy(1)}>
+            <ChevronUp className="size-5" aria-hidden="true" />
+          </button>
+          <button type="button" aria-label="Previous step" className="flex size-9 items-center justify-center rounded-full bg-white text-[#17352A] shadow-[0_8px_20px_rgba(23,53,42,0.12)]" onClick={() => stepBy(-1)}>
+            <ChevronDown className="size-5" aria-hidden="true" />
+          </button>
+        </div>
+        <div ref={scrollerRef} className="journey-scroll h-full overflow-x-hidden overflow-y-auto px-3 py-8 sm:px-8">
+          <p className="text-center text-xs font-extrabold tracking-[0.16em] text-[#306A51] uppercase">Your journey</p>
+          <h2 className="mt-1 mb-6 text-center font-display text-3xl text-[#17352A] sm:text-4xl">{journeyTitle(data.pack.title)}</h2>
+          <ol className="mx-auto flex w-full max-w-5xl flex-col pb-[28vh]">
+            {ordered.map((step) => {
+              const here = onStep(childViews, step.position);
+              const passed = focus ? (focus.finished || (focus.nextPosition ?? 1) > step.position) : false;
+              const active = step.position === activePosition;
+              const praised = praise?.position === step.position;
+              const occupied = here.length > 0;
+              const locked = !passed && !active && !occupied;
+              const topGreen = step.position < roadActive;
+              const bottomGreen = step.position <= roadActive;
               return (
-                <li key={child.id}>
-                  <button
-                    type="button"
-                    onClick={() => selectMember(child.id)}
-                    className={`flex w-full items-center gap-3 rounded-2xl px-2 py-2 text-left ${selected ? "border-2 border-[#306A51] bg-[#E7F6EA]" : "border-2 border-transparent bg-white"}`}
-                  >
-                    <Avatar {...avatarProps(child)} title={displayName(child)} className="size-10 rounded-full" />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate font-display text-base font-bold text-[#17352A]">{displayName(child)}</span>
-                      <span className="block truncate text-xs font-bold text-[#5e7266]">@{child.nickname}</span>
-                    </span>
-                    <StepPill child={child} current={selected && !child.finished} />
-                  </button>
+                <li id={`journey-step-${step.position}`} key={step.id} className="relative grid min-h-[200px] grid-cols-1 items-center md:min-h-[210px] md:grid-cols-[1fr_5.5rem_1fr]">
+                  <div className="absolute top-0 bottom-0 left-8 w-0.5 -translate-x-1/2 md:left-1/2" aria-hidden="true">
+                    {step.position < data.steps.length && (
+                      <span className={`absolute top-0 h-1/2 w-full ${topGreen ? "bg-[#306A51]" : "bg-[#DCD6C8]"}`} />
+                    )}
+                    {step.position > 1 && (
+                      <span className={`absolute bottom-0 h-1/2 w-full ${bottomGreen ? "bg-[#306A51]" : "bg-[#DCD6C8]"}`} />
+                    )}
+                  </div>
+                  <div className="relative z-[1] hidden items-center justify-end gap-3 pr-6 md:flex">
+                    {active ? (
+                      <>
+                        <FacePile people={here} />
+                        <VideoCard step={step} className="relative w-64" pointer onPlay={() => setVideoStep(step.position)} />
+                      </>
+                    ) : (
+                      <FacePile people={here} />
+                    )}
+                  </div>
+                  <div className="absolute top-1/2 left-8 z-[1] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center md:static md:flex md:h-full md:translate-x-0 md:translate-y-0 md:justify-center">
+                    <StepBadge state={active || occupied ? "active" : passed ? "done" : "locked"} position={step.position} large={active} />
+                    {active && (
+                      <button
+                        type="button"
+                        className="relative z-[1] mt-3 rounded-full bg-[#E8A428] px-3 py-2 text-center text-xs font-extrabold whitespace-nowrap text-[#17352A] shadow-[0_5px_0_#C48614] disabled:opacity-60 max-md:absolute max-md:top-full max-md:left-1/2 max-md:mt-2"
+                        disabled={saving || here.length === 0}
+                        onClick={() => askToComplete(step.position)}
+                      >
+                        {saving ? "Saving…" : "Mark as complete"}
+                      </button>
+                    )}
+                  </div>
+                  <div className="relative z-[1] min-w-0 py-6 pl-16 md:py-0 md:pl-6">
+                    {here.length > 0 && !active && <div className="mb-2 md:hidden"><FacePile people={here} /></div>}
+                    {active ? (
+                      <div className="space-y-3">
+                        <VideoCard step={step} className="md:hidden" onPlay={() => setVideoStep(step.position)} />
+                        <Tip step={step} />
+                      </div>
+                    ) : praised ? (
+                      <WellDone praise={praise} people={childViews.filter((child) => praise.childIds.includes(child.id))} onContinue={carryOn} />
+                    ) : (
+                      <div>
+                        <p className={`font-display text-lg ${locked ? "text-[#8d8982]" : "text-[#17352A]"}`}>{step.title}</p>
+                        {passed && !occupied && <p className="text-sm font-bold text-[#306A51]">+{step.points} points</p>}
+                      </div>
+                    )}
+                  </div>
                 </li>
               );
             })}
-          </ul>
+          </ol>
         </div>
-      </aside>
-
-      <section className="min-w-0 rounded-[28px] bg-white p-4 shadow-[0_18px_50px_rgba(23,53,42,0.06)] sm:p-8">
-        <p className="text-center text-xs font-extrabold tracking-[0.16em] text-[#306A51] uppercase">Your journey</p>
-        <h2 className="mt-1 text-center font-display text-3xl text-[#17352A] sm:text-4xl">{journeyTitle(data.pack.title)}</h2>
-        <ol className="mx-auto mt-8 flex max-w-3xl flex-col gap-2">
-          {ordered.map((step) => {
-            const here = onStep(childViews, step.position);
-            const passed = focus ? (focus.finished || (focus.nextPosition ?? 1) > step.position) : false;
-            const active = step.position === activePosition;
-            const praised = praise?.position === step.position;
-            const state = here.length > 0 && !passed ? "current" : passed && here.length === 0 ? "done" : passed ? "current" : "locked";
-            const shown = active || (here.length > 0 && state !== "locked") ? "current" : state;
-            return (
-              <li id={`journey-step-${step.position}`} key={step.id} className="grid grid-cols-[4.25rem_4.5rem_minmax(0,1fr)] items-start gap-2 py-4 md:grid-cols-[13rem_10rem_minmax(0,1fr)] md:gap-4">
-                <div className="flex flex-col items-end gap-3 pt-1">
-                  <FacePile people={here} />
-                  {active && (
-                    <VideoCard step={step} className="hidden w-full md:mr-4 md:block" onPlay={() => setVideoStep(step.position)} />
-                  )}
-                </div>
-                <div className="relative flex flex-col items-center">
-                  <span className={`absolute top-0 bottom-0 left-1/2 w-0.5 -translate-x-1/2 ${shown === "done" || (shown === "current" && passed) ? "bg-[#306A51]" : "bg-[#E7E1D6]"}`} aria-hidden="true" />
-                  <StepBadge state={active ? "active" : shown === "done" ? "done" : shown === "current" ? "active" : "locked"} position={step.position} large={active} />
-                  {active && (
-                    <button
-                      type="button"
-                      className="relative z-[1] mt-3 max-w-full rounded-full bg-[#E8A428] px-3 py-2 text-center text-xs font-extrabold text-[#17352A] shadow-[0_5px_0_#C48614] disabled:opacity-60"
-                      disabled={saving || here.length === 0}
-                      onClick={() => askToComplete(step.position)}
-                    >
-                      {saving ? "Saving…" : "Mark as complete"}
-                    </button>
-                  )}
-                </div>
-                <div className="min-w-0 pt-1">
-                  {active ? (
-                    <div className="space-y-3">
-                      <VideoCard step={step} className="md:hidden" onPlay={() => setVideoStep(step.position)} />
-                      <Tip step={step} />
-                    </div>
-                  ) : praised ? (
-                    <WellDone praise={praise} people={childViews.filter((child) => praise.childIds.includes(child.id))} onContinue={carryOn} />
-                  ) : (
-                    <div>
-                      <p className={`font-display text-lg ${shown === "locked" ? "text-[#8d8982]" : "text-[#17352A]"}`}>{step.title}</p>
-                      {shown === "done" && <p className="text-sm font-bold text-[#306A51]">+{step.points} points</p>}
-                    </div>
-                  )}
-                </div>
-              </li>
-            );
-          })}
-        </ol>
       </section>
 
       {modalStep != null && (
@@ -274,12 +345,13 @@ function avatarProps(child: ChildView) {
   };
 }
 
-function StepPill({ child, current }: { child: ChildView; current: boolean }) {
+function StepPill({ child, current, compact = false }: { child: ChildView; current: boolean; compact?: boolean }) {
+  const size = compact ? "px-1.5 py-0.5 text-[10px]" : "px-2.5 py-1 text-xs";
   if (child.finished) {
-    return <span className="inline-flex items-center gap-1 rounded-full bg-[#306A51] px-2.5 py-1 text-xs font-extrabold text-white"><Check className="size-3" aria-hidden="true" /> Done</span>;
+    return <span className={`inline-flex items-center gap-0.5 rounded-full bg-[#306A51] font-extrabold text-white ${size}`}><Check className="size-3" aria-hidden="true" /></span>;
   }
   return (
-    <span className={`rounded-full px-2.5 py-1 text-xs font-extrabold ${current ? "bg-[#E8A428] text-[#17352A]" : "bg-[#9BD0A8] text-[#17352A]"}`}>
+    <span className={`rounded-full font-extrabold whitespace-nowrap ${size} ${current ? "bg-[#E8A428] text-[#17352A]" : "bg-[#9BD0A8] text-[#17352A]"}`}>
       Step {child.nextPosition ?? 1}
     </span>
   );
@@ -298,17 +370,18 @@ function FacePile({ people }: { people: ChildView[] }) {
 
 function StepBadge({ state, position, large }: { state: "done" | "active" | "locked"; position: number; large?: boolean }) {
   if (state === "done") {
-    return <span className="relative z-[1] flex size-10 items-center justify-center rounded-full bg-[#306A51] text-white"><Check className="size-5" aria-hidden="true" /></span>;
+    return <span className="relative z-[1] flex size-12 items-center justify-center rounded-full bg-[#306A51] text-white"><Check className="size-6" aria-hidden="true" /></span>;
   }
   if (state === "locked") {
-    return <span className="relative z-[1] flex size-10 items-center justify-center rounded-full bg-[#F3E7CF] text-[#8d8982]"><Lock className="size-4" aria-hidden="true" /></span>;
+    return <span className="relative z-[1] flex size-12 items-center justify-center rounded-full bg-[#F3E7CF] text-[#8d8982]"><Lock className="size-4" aria-hidden="true" /></span>;
   }
-  return <span className={`relative z-[1] flex items-center justify-center rounded-full bg-[#E8A428] font-display font-bold text-[#17352A] shadow-[0_5px_0_#C48614] ${large ? "size-14 text-2xl" : "size-10 text-lg"}`}>{position}</span>;
+  return <span className={`relative z-[1] flex items-center justify-center rounded-full bg-[#E8A428] font-display font-bold text-[#17352A] shadow-[0_5px_0_#C48614] ${large ? "size-16 text-2xl" : "size-12 text-lg"}`}>{position}</span>;
 }
 
-function VideoCard({ step, onPlay, className = "" }: { step: Step; onPlay: () => void; className?: string }) {
+function VideoCard({ step, onPlay, className = "", pointer = false }: { step: Step; onPlay: () => void; className?: string; pointer?: boolean }) {
   return (
     <button type="button" onClick={onPlay} className={`rounded-2xl bg-white p-2 text-left shadow-[0_10px_24px_rgba(23,53,42,0.12)] ${className}`}>
+      {pointer && <span className="absolute top-1/2 -right-2 size-4 -translate-y-1/2 rotate-45 bg-white" aria-hidden="true" />}
       <span className="relative block aspect-video overflow-hidden rounded-xl bg-[#d7efe4]">
         <span className="absolute inset-0 flex items-center justify-center">
           <span className="flex size-10 items-center justify-center rounded-full bg-white text-[#17352A] shadow">▶</span>
@@ -323,7 +396,7 @@ function VideoCard({ step, onPlay, className = "" }: { step: Step; onPlay: () =>
 function Tip({ step }: { step: Step }) {
   return (
     <div className="flex items-end gap-2">
-      <p className="max-w-xs rounded-2xl bg-[#fffaf2] px-4 py-3 text-sm font-bold text-[#17352A] shadow-[0_5px_0_#C48614,0_8px_16px_rgba(184,122,16,0.25)]">{step.description}</p>
+      <p className="min-w-60 max-w-xs rounded-2xl bg-[#fffaf2] px-4 py-3 text-sm font-bold text-[#17352A] shadow-[0_5px_0_#C48614,0_8px_16px_rgba(184,122,16,0.25)]">{step.description}</p>
       <img src="/brand/mascot-spy.webp" alt="" width={120} height={168} className="h-28 w-auto shrink-0" />
     </div>
   );

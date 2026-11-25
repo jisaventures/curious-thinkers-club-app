@@ -439,6 +439,14 @@ select {
   gap: 0.85rem;
 }
 
+.journey-scroll {
+  scrollbar-width: none;
+}
+
+.journey-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 .header-brand {
   display: inline-flex;
   align-items: center;
