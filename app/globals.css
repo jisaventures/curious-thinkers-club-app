@@ -476,7 +476,7 @@ select {
 
 @media (min-width: 768px) {
   html {
-    --site-header-h: calc(72px + 1px);
+    --site-header-h: calc(84px + 1px);
     --tabbar-h: 0px;
   }
 }
@@ -493,7 +493,7 @@ select {
 
 @media (min-width: 1024px) {
   .header-logo .wordmark {
-    font-size: 26px;
+    font-size: 32px;
   }
 }
 

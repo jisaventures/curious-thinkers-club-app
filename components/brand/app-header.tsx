@@ -78,7 +78,7 @@ export function AppHeader({ account }: { account: AccountRecord | null }) {
   return (
     <>
       <header className="sticky top-0 z-40 bg-[#f6f1e6]">
-        <div ref={rowRef} data-labels="hide" className="header-row mx-auto flex h-14 w-full max-w-6xl items-center gap-2 px-3 md:h-[72px] md:gap-3 md:px-6">
+        <div ref={rowRef} data-labels="hide" className="header-row mx-auto flex h-14 w-full max-w-6xl items-center gap-2 px-3 md:h-[84px] md:gap-3 md:px-6">
           <Link href="/club" prefetch className={`header-logo flex min-w-0 items-center gap-1.5 ${focus}`}>
             <img
               src="/brand/bulb.png"
@@ -88,13 +88,13 @@ export function AppHeader({ account }: { account: AccountRecord | null }) {
               loading="eager"
               fetchPriority="high"
               decoding="sync"
-              className="h-8 w-auto shrink-0 bg-transparent md:h-9 lg:h-10"
+              className="h-8 w-auto shrink-0 bg-transparent md:h-10 lg:h-14"
             />
             <span className="wordmark truncate text-[#306A51] md:hidden">Curious Thinkers</span>
             <span className="wordmark hidden truncate text-[#306A51] md:inline">Curious Thinkers Club</span>
           </Link>
 
-          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-2 md:flex" aria-label="Main">
+          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-2 md:flex lg:gap-3" aria-label="Main">
             {MENU.map((item) => {
               const active = selected(item.href, item.match);
               return (
@@ -109,8 +109,8 @@ export function AppHeader({ account }: { account: AccountRecord | null }) {
                   data-tip={item.label}
                   className={`menu-tip ${focus}`}
                 >
-                  <span data-current={active ? "true" : undefined} className={`nav-pill menu-pill inline-flex h-[38px] w-[38px] shrink-0 items-center justify-center gap-1.5 rounded-full px-0 font-display text-[14px] font-bold text-white ${active ? item.current : item.face}`}>
-                    <item.icon className="size-4 shrink-0" aria-hidden="true" />
+                  <span data-current={active ? "true" : undefined} className={`nav-pill menu-pill inline-flex h-11 w-11 shrink-0 items-center justify-center gap-1.5 rounded-full px-0 font-display text-[14px] font-bold text-white lg:h-[52px] lg:w-[52px] ${active ? item.current : item.face}`}>
+                    <item.icon className="size-6 shrink-0 lg:size-7" aria-hidden="true" />
                     <span className="menu-label">{item.label}</span>
                   </span>
                 </Link>

@@ -30,7 +30,7 @@ export function AccountMenu({
     <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       <button
         type="button"
-        className="flex h-8 cursor-default items-center gap-2 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#306A51] max-md:bg-transparent max-md:p-0 md:h-[38px] md:bg-white md:pr-2.5 md:pl-1 md:shadow-[0_4px_0_#17352A]"
+        className="flex h-8 cursor-default items-center gap-2 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#306A51] max-md:bg-transparent max-md:p-0 md:h-[38px] md:bg-white md:pr-2.5 md:pl-1 md:shadow-[0_4px_0_#9a958c]"
         aria-expanded={open}
         aria-haspopup="menu"
         onClick={() => {
