@@ -1,12 +1,10 @@
-import { Backpack, ShoppingCart, Star } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "@/app/login/actions";
 import { isDemoMode } from "@/lib/demo/mode";
 import { shopUrl } from "@/lib/env";
 import type { AccountRecord } from "@/lib/auth/session";
-import { AccountMenu } from "@/components/brand/account-menu";
+import { AppHeader } from "@/components/brand/app-header";
 import { LogoMark } from "@/components/brand/logo";
-import { Button } from "@/components/ui/button";
 
 export function AppShell({
   account,
@@ -28,7 +26,7 @@ export function AppShell({
   if (variant === "parent") {
     return (
       <div className="flex min-h-svh flex-col bg-[#f6f1e6]">
-        <ParentHeader account={account} />
+        <AppHeader account={account} />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
         {isDemoMode() && <DemoModeMenu corner="bottom" />}
       </div>
@@ -47,53 +45,6 @@ export function AppShell({
       </div>
       {isDemoMode() && <DemoModeMenu />}
     </div>
-  );
-}
-
-function ParentHeader({ account }: { account: AccountRecord | null }) {
-  const name = account?.display_name?.trim() || "Parent";
-  return (
-    <header className="sticky top-0 z-40 bg-[#f6f1e6]">
-      <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 sm:px-6">
-        <Link href="/club" className="flex shrink-0 items-center gap-2">
-          <img
-            src="/brand/bulb.png"
-            alt=""
-            width={103}
-            height={160}
-            loading="eager"
-            fetchPriority="high"
-            decoding="sync"
-            className="h-9 w-auto shrink-0 bg-transparent sm:h-10"
-          />
-          <span className="wordmark min-w-0 text-[#306A51] max-sm:hidden">Curious Thinkers Club</span>
-        </Link>
-        <div className="ml-auto flex items-center gap-2 sm:gap-3">
-          <Link href="/club" data-variant="green" data-size="sm" className="header-pill">
-            <Backpack className="size-4 shrink-0" aria-hidden="true" />
-            My Quests
-          </Link>
-          <Link href="/club/leaderboard" className="leaderboard-link">
-            <Star className="size-4 shrink-0" aria-hidden="true" />
-            Leaderboards
-          </Link>
-          <Button asChild variant="mustard" size="sm" className="header-shop gap-1.5 px-3 sm:px-4">
-            <Link href="/club/shop">
-              <ShoppingCart className="size-4 shrink-0" aria-hidden="true" />
-              Club shop
-            </Link>
-          </Button>
-          <AccountMenu
-            name={account?.group_name?.trim() || name}
-            icon={account?.group_icon}
-            background={account?.group_bg}
-            colour={account?.group_icon_colour}
-            isAdmin={account?.role === "admin"}
-          />
-        </div>
-      </div>
-      <div className="border-b border-dashed border-[#306A51]/25" />
-    </header>
   );
 }
 

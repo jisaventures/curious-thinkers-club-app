@@ -42,7 +42,7 @@ export function MyPacksStrip({ packs }: { packs: OwnedPack[] }) {
     <section className="rounded-[28px] bg-white p-4 shadow-[0_18px_50px_rgba(23,53,42,0.06)] sm:p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="font-display text-2xl text-[#17352A]">My quests</h2>
-        <Link href="/my-packs" className="inline-flex min-h-11 items-center gap-1 rounded-full border-2 border-[#306A51] px-3 text-sm font-bold text-[#306A51] no-underline">
+        <Link href="/my-quests" className="inline-flex min-h-11 items-center gap-1 rounded-full border-2 border-[#306A51] px-3 text-sm font-bold text-[#306A51] no-underline">
           See more
           <ChevronRight className="size-4" aria-hidden="true" />
         </Link>

@@ -7,6 +7,12 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "20mb",
     },
   },
+  async redirects() {
+    return [
+      { source: "/my-packs", destination: "/my-quests", permanent: false },
+      { source: "/club/uploads", destination: "/submit-work", permanent: false },
+    ];
+  },
   async headers() {
     return [
       {

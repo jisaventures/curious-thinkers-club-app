@@ -439,6 +439,24 @@ select {
   gap: 0.85rem;
 }
 
+.header-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 999px;
+  background: #17352a;
+  color: #e8a428;
+  padding: 0.45rem 0.95rem;
+  font-family: var(--font-fredoka), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
 .header-pill,
 .leaderboard-link {
   display: inline-flex;

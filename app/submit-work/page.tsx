@@ -12,7 +12,7 @@ export default async function UploadsPage() {
       <Link href="/club" className="text-sm font-extrabold text-[#306A51] no-underline hover:underline">
         Back to club
       </Link>
-      <h1 className="font-display text-3xl text-[#17352A]">Uploads</h1>
+      <h1 className="font-display text-3xl text-[#17352A]">Submit work</h1>
       <p className="text-[#3d5348]">Share a photo of finished work. It stays off the main club page.</p>
       {focus ? (
         <ShareWork
