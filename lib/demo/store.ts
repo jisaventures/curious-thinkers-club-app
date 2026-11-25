@@ -442,9 +442,11 @@ export function createSeed(): DemoDb {
   ] as const;
   const progress: DemoProgress[] = [];
   const certificates: Array<{ child_id: string; pack_id: string }> = [];
-  const finish = (childId: string, prefix: string, packId: string) => {
+  const finish = (childId: string, prefix: string, packId: string, when = "2026-08-01T12:00:00.000Z") => {
     for (let n = 1; n <= 8; n += 1) {
-      progress.push(complete(childId, `${prefix}${String(n).padStart(3, "0")}`));
+      const row = complete(childId, `${prefix}${String(n).padStart(3, "0")}`);
+      row.completed_at = when;
+      progress.push(row);
     }
     certificates.push({ child_id: childId, pack_id: packId });
   };
@@ -457,14 +459,16 @@ export function createSeed(): DemoDb {
       progress.push(row);
     });
   };
+  stamp(LOU_ID, "51100000-0000-4000-8000-000000000", [1, 2, 3], "2026-11-10T12:00:00.000Z");
+  finish(PIP_ID, "51100000-0000-4000-8000-000000000", pirate, "2026-11-05T12:00:00.000Z");
   stamp(LOU_ID, "51200000-0000-4000-8000-000000000", [1, 2, 3, 5], "2026-11-16T12:00:00.000Z");
   stamp(MO_ID, "51200000-0000-4000-8000-000000000", [1, 2, 4], "2026-11-14T12:00:00.000Z");
   stamp(NOAH_ID, "51200000-0000-4000-8000-000000000", [1, 2, 3], "2026-11-12T12:00:00.000Z");
-  finish(ARIA_ID, "51200000-0000-4000-8000-000000000", egypt);
-  finish(PIP_ID, "51200000-0000-4000-8000-000000000", egypt);
-  stamp(MO_ID, "51300000-0000-4000-8000-000000000", [1, 2, 3, 4, 5, 6], "2026-11-08T12:00:00.000Z");
-  finish(ARIA_ID, packPrefixes[3][0], knight);
-  finish(PIP_ID, packPrefixes[4][0], space);
+  finish(ARIA_ID, "51200000-0000-4000-8000-000000000", egypt, "2026-11-11T12:00:00.000Z");
+  finish(PIP_ID, "51200000-0000-4000-8000-000000000", egypt, "2026-11-09T12:00:00.000Z");
+  stamp(MO_ID, "51300000-0000-4000-8000-000000000", [1, 2, 3, 4, 5, 6], "2026-11-20T12:00:00.000Z");
+  finish(ARIA_ID, packPrefixes[3][0], knight, "2026-10-20T12:00:00.000Z");
+  finish(PIP_ID, packPrefixes[4][0], space, "2026-09-15T12:00:00.000Z");
   for (const row of progress) {
     if (!row.completed_at) row.completed_at = "2026-08-01T12:00:00.000Z";
   }
@@ -576,6 +580,8 @@ export function createSeed(): DemoDb {
       { account_id: SAM_ID, pack_id: pirate, source: "seed" as const, granted_at: "2026-11-18T09:00:00.000Z" },
       { account_id: SAM_ID, pack_id: egypt, source: "seed" as const, granted_at: "2026-10-02T09:00:00.000Z" },
       { account_id: SAM_ID, pack_id: spy, source: "seed" as const, granted_at: "2026-09-12T09:00:00.000Z" },
+      { account_id: SAM_ID, pack_id: knight, source: "seed" as const, granted_at: "2026-10-20T09:00:00.000Z" },
+      { account_id: SAM_ID, pack_id: space, source: "seed" as const, granted_at: "2026-09-15T09:00:00.000Z" },
     ],
     events: [],
     reminders: [],
@@ -628,7 +634,7 @@ export function createSeed(): DemoDb {
   };
 }
 
-const SEED_VERSION = 21;
+const SEED_VERSION = 22;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {

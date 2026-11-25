@@ -17,6 +17,7 @@ export type HomePack = {
   nextStep: string | null;
   pendingMemberIds: string[];
   completedMemberIds: string[];
+  activityAt: string;
 };
 
 export type HomePackCard = {
@@ -30,6 +31,7 @@ export type HomePackCard = {
   nextStep: string | null;
   pendingMemberIds: string[];
   completedMemberIds: string[];
+  activityAt: string;
 };
 
 export type HomeRelease = {
@@ -130,6 +132,7 @@ function card(pack: HomePack): HomePackCard {
     nextStep: pack.nextStep,
     pendingMemberIds: pack.pendingMemberIds,
     completedMemberIds: pack.completedMemberIds,
+    activityAt: pack.activityAt,
   };
 }
 
@@ -147,7 +150,7 @@ function release(pack: HomePack): HomeRelease {
 
 export function groupPackProgress(input: {
   steps: Array<{ id: string; pack_id: string; position: number; title: string }>;
-  progress: Array<{ child_id: string; step_id: string; status: string }>;
+  progress: Array<{ child_id: string; step_id: string; status: string; completed_at?: string | null }>;
   childIds: string[];
   packId: string;
   stepCount: number;
@@ -177,7 +180,11 @@ export function groupPackProgress(input: {
     if (finished) completedMemberIds.push(childId);
     else pendingMemberIds.push(childId);
   }
-  return { done, total, nextStep: next?.title ?? null, pendingMemberIds, completedMemberIds };
+  const activityAt = input.progress.reduce((latest, row) => {
+    if (row.status !== "complete" || !stepIds.has(row.step_id) || !row.completed_at) return latest;
+    return row.completed_at > latest ? row.completed_at : latest;
+  }, "");
+  return { done, total, nextStep: next?.title ?? null, pendingMemberIds, completedMemberIds, activityAt };
 }
 
 export function buildOwnedPacks(input: {
@@ -254,8 +261,9 @@ export function buildDashboardHome(input: {
 }): DashboardHome {
   const released = input.packs.filter((pack) => !pack.upcoming);
   const owned = released.filter((pack) => pack.owned);
-  const inProgress = owned.filter((pack) => pack.pendingMemberIds.length > 0 && (pack.done > 0 || pack.completedMemberIds.length > 0));
-  const completed = owned.filter((pack) => pack.completedMemberIds.length > 0);
+  const byRecent = (a: HomePack, b: HomePack) => (b.activityAt || "").localeCompare(a.activityAt || "") || a.title.localeCompare(b.title);
+  const inProgress = owned.filter((pack) => pack.pendingMemberIds.length > 0 && (pack.done > 0 || pack.completedMemberIds.length > 0)).sort(byRecent);
+  const completed = owned.filter((pack) => pack.completedMemberIds.length > 0).sort(byRecent);
   const recent = [...released]
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, 5)

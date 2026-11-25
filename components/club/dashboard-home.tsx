@@ -123,9 +123,7 @@ export function DashboardHome({
             </div>
           ) : (
             <>
-              {home.inProgress.map((pack) => (
-                <PackRow key={pack.id} pack={pack} members={members} focusId={focusId} mode="progress" />
-              ))}
+              <QuestList packs={home.inProgress} members={members} focusId={focusId} mode="progress" />
               <BuyMore />
             </>
           )}
@@ -141,7 +139,7 @@ export function DashboardHome({
           {home.completed.length === 0 ? (
             <p className="px-2 py-6 text-center text-sm text-[#3d5348]">No finished quests yet.</p>
           ) : (
-            home.completed.map((pack) => <PackRow key={pack.id} pack={pack} members={members} focusId={focusId} mode="completed" />)
+            <QuestList packs={home.completed} members={members} focusId={focusId} mode="completed" />
           )}
         </div>
       </section>
@@ -184,6 +182,33 @@ function TabButton({
     >
       {children}
     </button>
+  );
+}
+
+function QuestList({
+  packs,
+  members,
+  focusId,
+  mode,
+}: {
+  packs: HomePackCard[];
+  members: Member[];
+  focusId: string | null;
+  mode: "progress" | "completed";
+}) {
+  const [open, setOpen] = useState(false);
+  const shown = open ? packs : packs.slice(0, 3);
+  return (
+    <>
+      {shown.map((pack) => (
+        <PackRow key={pack.id} pack={pack} members={members} focusId={focusId} mode={mode} />
+      ))}
+      {packs.length > 3 && (
+        <button type="button" className="text-sm font-extrabold text-[#306A51] underline" onClick={() => setOpen((current) => !current)}>
+          {open ? "Show less" : "Show more"}
+        </button>
+      )}
+    </>
   );
 }
 
