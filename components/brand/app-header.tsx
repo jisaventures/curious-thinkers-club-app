@@ -7,12 +7,14 @@ import { Backpack, Gift, Home, ShoppingCart, Star, Upload, Users } from "lucide-
 import { AccountMenu } from "@/components/brand/account-menu";
 import type { AccountRecord } from "@/lib/auth/session";
 
+const ACTIVE = "bg-[#306A51] text-white shadow-[0_4px_0_#17352A]";
+
 const MENU = [
-  { href: "/club", label: "Dashboard", icon: Home, className: "bg-[#306A51] text-white shadow-[0_4px_0_#17352A]", match: (path: string) => path === "/club" },
-  { href: "/my-quests", label: "Quests", icon: Backpack, className: "bg-[#E8A428] text-white shadow-[0_4px_0_#C48614]", match: (path: string) => path.startsWith("/my-quests") },
+  { href: "/club", label: "Dashboard", icon: Home, className: "bg-[#E8A428] text-white shadow-[0_4px_0_#C48614]", match: (path: string) => path === "/club" },
+  { href: "/my-quests", label: "Quests", icon: Backpack, className: "bg-[#E07A3D] text-white shadow-[0_4px_0_#c4551a]", match: (path: string) => path.startsWith("/my-quests") },
   { href: "/club/leaderboard", label: "Leaderboards", icon: Star, className: "bg-[#F08AB0] text-white shadow-[0_4px_0_#d56b96]", match: (path: string) => path.startsWith("/club/leaderboard") },
   { href: "/rewards", label: "Rewards", icon: Gift, className: "bg-[#50B0DC] text-white shadow-[0_4px_0_#2f8fb8]", match: (path: string) => path.startsWith("/rewards") },
-  { href: "/submit-work", label: "Submit Work", icon: Upload, className: "bg-[#9BD0A8] text-white shadow-[0_4px_0_#6eae80]", match: (path: string) => path.startsWith("/submit-work") },
+  { href: "/submit-work", label: "Submit Work", icon: Upload, className: "bg-[#3F8A5C] text-white shadow-[0_4px_0_#2d6844]", match: (path: string) => path.startsWith("/submit-work") },
 ];
 
 const SOCIALS = [
@@ -31,7 +33,7 @@ export function AppHeader({ account }: { account: AccountRecord | null }) {
     <header className="sticky top-0 z-40 bg-[#f6f1e6]">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
         <div className="flex justify-center py-3">
-          <Link href="/club" className="flex items-center gap-2">
+          <Link href="/club" className="header-logo flex items-center gap-2.5">
             <img
               src="/brand/bulb.png"
               alt=""
@@ -40,33 +42,34 @@ export function AppHeader({ account }: { account: AccountRecord | null }) {
               loading="eager"
               fetchPriority="high"
               decoding="sync"
-              className="h-9 w-auto shrink-0 bg-transparent sm:h-10"
+              className="h-11 w-auto shrink-0 bg-transparent sm:h-12"
             />
             <span className="wordmark text-[#306A51]">Curious Thinkers Club</span>
           </Link>
         </div>
         <nav className="flex flex-wrap items-center gap-2 pb-3" aria-label="Main">
-          {MENU.map((item) => {
-            const active = item.match(path);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-display text-sm font-bold text-white no-underline ${item.className} ${active ? "outline outline-2 outline-offset-2 outline-white" : ""}`}
-              >
-                <item.icon className="size-4 shrink-0" aria-hidden="true" />
-                {item.label}
-              </Link>
-            );
-          })}
+          <div className="flex flex-wrap items-center gap-2">
+            {MENU.map((item) => {
+              const active = item.match(path);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={`menu-pop inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-display text-sm font-bold text-white no-underline ${active ? ACTIVE : item.className}`}
+                >
+                  <item.icon className="size-4 shrink-0" aria-hidden="true" />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
           <div className="ml-auto flex items-center gap-2">
-            <span className="mx-1 h-px w-8 bg-[#306A51]/40" aria-hidden="true" />
-            <button type="button" className="header-brand gap-1.5" onClick={() => setCommunity(true)}>
+            <button type="button" className="header-brand menu-pop gap-1.5" onClick={() => setCommunity(true)}>
               <Users className="size-4 shrink-0" aria-hidden="true" />
               Community
             </button>
-            <Link href="/club/shop" className="header-brand gap-1.5">
+            <Link href="/club/shop" className="header-brand menu-pop gap-1.5">
               <ShoppingCart className="size-4 shrink-0" aria-hidden="true" />
               Shop
             </Link>

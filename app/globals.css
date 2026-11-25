@@ -473,6 +473,28 @@ select {
   display: none;
 }
 
+.header-logo .wordmark {
+  font-size: clamp(22px, calc(22px + (100vw - 390px) * 0.02), 38px);
+}
+
+.menu-pop {
+  transition: transform 220ms ease;
+}
+
+.menu-pop:hover {
+  transform: translateY(-5px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-pop {
+    transition: none;
+  }
+
+  .menu-pop:hover {
+    transform: none;
+  }
+}
+
 .header-brand {
   display: inline-flex;
   align-items: center;
