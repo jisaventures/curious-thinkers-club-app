@@ -71,7 +71,7 @@ function ParentHeader({ account }: { account: AccountRecord | null }) {
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
           <Link href="/club" data-variant="green" data-size="sm" className="header-pill">
             <Backpack className="size-4 shrink-0" aria-hidden="true" />
-            My Packs
+            My Quests
           </Link>
           <Link href="/club/leaderboard" className="leaderboard-link">
             <Star className="size-4 shrink-0" aria-hidden="true" />
@@ -129,7 +129,7 @@ function SiteHeader({
         <div className="ml-auto flex items-center gap-3 sm:gap-5">
           <nav className="hidden items-center gap-5 md:flex" aria-label="Site">
             <a href={shop} className="font-sans text-base font-semibold text-club no-underline hover:underline">
-              Free pack
+              Free quest
             </a>
             <Link href={account ? "/club" : "/login"} className="font-sans text-base font-semibold text-club no-underline hover:underline">
               Club login
@@ -146,10 +146,10 @@ function SiteHeader({
             </summary>
             <div className="absolute right-0 z-30 mt-2 w-48 rounded-2xl border border-line bg-white p-2 shadow-lg">
               <a href={shop} className="block rounded-xl px-3 py-2 font-sans text-sm font-semibold text-club no-underline hover:underline">
-                Free pack
+                Free quest
               </a>
               <a href={shop} className="block rounded-xl px-3 py-2 font-sans text-sm font-semibold text-club no-underline hover:underline">
-                Shop the packs
+                Shop the quests
               </a>
               <Link href={account ? "/club" : "/login"} className="block rounded-xl px-3 py-2 font-sans text-sm font-semibold text-club no-underline hover:underline">
                 Club login
@@ -177,7 +177,7 @@ function SiteHeader({
             href={shop}
               className="hidden rounded-full bg-mustard px-4 py-2.5 font-sans text-sm font-bold text-white shadow-[0_6px_16px_rgba(232,164,40,0.35)] md:inline-flex"
           >
-            Shop the packs
+            Shop the quests
           </a>
           <a href={`${shop}/cart`} className="relative inline-flex text-club" aria-label="Cart, 0 items">
             <CartIcon />

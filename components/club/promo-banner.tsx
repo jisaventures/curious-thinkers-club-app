@@ -46,7 +46,11 @@ export function PromoBanner({ banner }: { banner: PromoBannerContent }) {
             <Star className="size-3.5 fill-current" aria-hidden="true" />
             {banner.badgeText}
           </p>
-          <h2 className="mt-3 font-display text-2xl leading-tight sm:text-3xl">{banner.headline}</h2>
+          <h2 className="mt-3 font-display text-2xl leading-tight sm:text-3xl">
+            {banner.headline.split(/\n|<br\s*\/?>/i).map((line) => (
+              <span key={line} className="block">{line}</span>
+            ))}
+          </h2>
           <p className="mt-2 max-w-md text-sm leading-snug sm:text-base" style={{ color: banner.textColour }}>
             {banner.subtext}
           </p>

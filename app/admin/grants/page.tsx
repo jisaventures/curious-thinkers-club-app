@@ -36,9 +36,9 @@ export default async function GrantsPage({
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="font-display text-3xl text-[#1e4d3a]">Grant a pack</h1>
+        <h1 className="font-display text-3xl text-[#1e4d3a]">Grant a quest</h1>
         <p className="text-sm text-[#5e7266]">
-          One grant unlocks the pack for every child on that account. Shopify order webhooks will do this later.
+          One grant unlocks the quest for every child on that account. Shopify order webhooks will do this later.
         </p>
         {query.error && <p className="mt-2 text-sm font-bold text-[#8a4b3a]">{query.error}</p>}
         {query.saved && <p className="mt-2 text-sm font-bold text-[#1e4d3a]">Saved.</p>}
@@ -52,7 +52,7 @@ export default async function GrantsPage({
         <form action={grantPack} className="space-y-3 rounded-[22px] bg-white p-4">
           <p className="font-extrabold">{account.display_name} · {account.email}</p>
           <input type="hidden" name="email" value={account.email} />
-          <Label htmlFor="packId">Pack</Label>
+          <Label htmlFor="packId">Quest</Label>
           <select id="packId" name="packId" className="h-12 w-full rounded-2xl border border-[#eadfce] bg-white px-3">
             {(packs ?? []).map((pack) => (
               <option key={pack.id} value={pack.id}>{pack.title}</option>
@@ -61,10 +61,10 @@ export default async function GrantsPage({
           <Button type="submit">Grant to this account</Button>
           <ul className="text-sm text-[#5e7266]">
             {(owned ?? []).map((row) => {
-              const title = packs?.find((pack) => pack.id === row.pack_id)?.title ?? "Pack";
+              const title = packs?.find((pack) => pack.id === row.pack_id)?.title ?? "Quest";
               return <li key={row.pack_id}>{title} · {row.source}</li>;
             })}
-            {(owned ?? []).length === 0 && <li>No packs yet.</li>}
+            {(owned ?? []).length === 0 && <li>No quests yet.</li>}
           </ul>
         </form>
       )}

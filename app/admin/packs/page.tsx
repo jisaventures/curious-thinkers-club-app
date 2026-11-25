@@ -20,9 +20,9 @@ export default async function PacksPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-display text-3xl text-[#1e4d3a]">Packs</h1>
+        <h1 className="font-display text-3xl text-[#1e4d3a]">Quests</h1>
         <Button asChild>
-          <Link href="/admin/packs/new">New pack</Link>
+          <Link href="/admin/packs/new">New quest</Link>
         </Button>
       </div>
       <div className="space-y-2">

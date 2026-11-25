@@ -35,7 +35,7 @@ export async function remindPackLaunch(packId: string) {
   const { account, supabase } = await requireAdult();
   if (isDemoMode()) return demoRemindPack(account.id, account.email, packId);
   const id = uuidSchema.safeParse(packId);
-  if (!id.success) return { error: "Choose a pack that has not launched yet." };
+  if (!id.success) return { error: "Choose a quest that has not launched yet." };
   const { error } = await supabase.from("pack_reminders").upsert(
     { account_id: account.id, pack_id: id.data, email: account.email },
     { onConflict: "account_id,pack_id" },
@@ -255,7 +255,7 @@ export async function markNextStepNow(packId: string, childId: string) {
   const parsedPack = uuidSchema.safeParse(packId);
   const parsedChild = uuidSchema.safeParse(childId);
   if (!parsedPack.success || !parsedChild.success) {
-    return { ok: false as const, message: "That pack could not be updated." };
+    return { ok: false as const, message: "That quest could not be updated." };
   }
   if (isDemoMode()) {
     const { account } = await requireAdult();
@@ -278,7 +278,7 @@ export async function markNextStepNow(packId: string, childId: string) {
     .filter((position): position is number => typeof position === "number");
   const next = nextStepPosition((steps ?? []).map((step) => step.position), complete);
   const step = (steps ?? []).find((item) => item.position === next);
-  if (!step) return { ok: false as const, message: "This pack is already finished." };
+  if (!step) return { ok: false as const, message: "This quest is already finished." };
   return markStepForChildren({ stepId: step.id, childIds: [parsedChild.data] });
 }
 
@@ -309,13 +309,13 @@ export async function markNextStep(formData: FormData) {
   const next = nextStepPosition((steps ?? []).map((step) => step.position), complete);
   const step = (steps ?? []).find((item) => item.position === next);
   if (!step) {
-    redirect("/club?notice=This+pack+is+already+finished");
+    redirect("/club?notice=This+quest+is+already+finished");
   }
 
   const result = await markStepForChildren({ stepId: step.id, childIds: [childId.data] });
   const notice = result.ok
     ? result.certificate
-      ? "Pack+finished.+Certificate+and+bonus+points+added."
+      ? "Quest+finished.+Certificate+and+bonus+points+added."
       : "Step+marked+complete"
     : encodeURIComponent(result.message ?? "Something went wrong");
   redirect(`/club?notice=${notice}`);

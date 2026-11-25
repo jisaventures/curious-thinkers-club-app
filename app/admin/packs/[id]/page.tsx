@@ -39,7 +39,7 @@ export default async function EditPackPage({
       <PackForm pack={{ ...fields, cover_tone: fields.cover_tone as CoverTone }} action={updatePack} />
       <form action={deletePack}>
         <input type="hidden" name="packId" value={id} />
-        <Button type="submit" variant="outline">Delete pack</Button>
+        <Button type="submit" variant="outline">Delete quest</Button>
       </form>
 
       <section className="space-y-3">

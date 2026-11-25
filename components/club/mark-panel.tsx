@@ -73,7 +73,7 @@ export function MarkPanel({
     const names = result.names.map(shortName).join(" and ");
     setMessage(
       result.certificate
-        ? `${names} finished the pack. Certificate and bonus points added.`
+        ? `${names} finished the quest. Certificate and bonus points added.`
         : `${names} earned ${result.points} points.`,
     );
   }

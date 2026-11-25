@@ -66,7 +66,7 @@ export function BannerEditor({
         {draft.visible ? (
           <PromoBanner banner={{ ...draft, imageUrl: previewImage }} />
         ) : (
-          <p className="rounded-[22px] bg-white p-4 text-sm text-[#3d5348]">Hidden. My packs will move up.</p>
+          <p className="rounded-[22px] bg-white p-4 text-sm text-[#3d5348]">Hidden. My quests will move up.</p>
         )}
       </div>
     </div>

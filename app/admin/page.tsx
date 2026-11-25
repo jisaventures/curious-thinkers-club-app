@@ -22,7 +22,7 @@ export default async function AdminHome() {
       })();
 
   const cards = [
-    ["Packs", counts.packs, "/admin/packs"],
+    ["Quests", counts.packs, "/admin/packs"],
     ["Waiting for approval", counts.pending, "/admin/submissions"],
     ["Accounts", counts.accounts, "/admin/grants"],
   ];
@@ -30,7 +30,7 @@ export default async function AdminHome() {
   return (
     <div>
       <h1 className="font-display text-3xl text-[#1e4d3a]">Club admin</h1>
-      <p className="mt-1 text-sm text-[#5e7266]">Packs, moderation, reward codes and manual grants.</p>
+      <p className="mt-1 text-sm text-[#5e7266]">Quests, moderation, reward codes and manual grants.</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         {cards.map(([label, count, href]) => (
           <Link key={String(href)} href={String(href)} className="rounded-[22px] bg-white p-4">

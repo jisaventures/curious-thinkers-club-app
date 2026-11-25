@@ -561,12 +561,12 @@ function recommendedGoal(child: DashboardData["children"][number], packs: Dashbo
     .sort((a, b) => b.done - a.done);
   const next = open[0];
   if (!next) {
-    return { text: "Every owned pack is finished. A new one from the shop would be a good next goal.", action: "Find a pack", href: "/club/shop" };
+    return { text: "Every owned quest is finished. A new one from the shop would be a good next goal.", action: "Find a quest", href: "/club/shop" };
   }
   const href = `/club/packs/${next.pack.slug}?mode=together&child=${child.id}`;
   if (next.done === 0) {
-    return { text: `Start ${next.pack.title}.`, action: "Start the pack", href };
+    return { text: `Start ${next.pack.title}.`, action: "Start the quest", href };
   }
-  return { text: `Finish ${next.pack.title}. ${next.done} of ${next.total} steps are done.`, action: "Continue the pack", href };
+  return { text: `Finish ${next.pack.title}. ${next.done} of ${next.total} steps are done.`, action: "Continue the quest", href };
 }
 

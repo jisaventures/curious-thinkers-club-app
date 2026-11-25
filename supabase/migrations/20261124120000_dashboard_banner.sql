@@ -26,10 +26,10 @@ insert into public.dashboard_banners (
 ) values (
   'club-kit',
   '/brand/merch-banner-v2.png',
-  'MEMBERS ONLY',
-  'Get the official Club kit!',
+  'Club Merch',
+  E'Get the official\nclub kit!',
   'Show you''re a Curious Thinker. Free drawstring bag with every bundle.',
-  'Shop the kit',
+  'Shop Now',
   'https://curiousthinkersclub.org',
   'linear-gradient(115deg, #12352a 0%, #1b4d3c 46%, #2a6a52 100%)',
   '#fffaf2',

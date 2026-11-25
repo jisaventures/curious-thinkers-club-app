@@ -558,12 +558,12 @@ export function createSeed(): DemoDb {
       },
     ],
     rewards: [
-      { id: "r1", code: "CURIOUS15", headline: "You've unlocked 15% off your next pack", description: "A little thank you for being a Curious Explorer this month.", min_points: 300, active: true },
-      { id: "r2", code: "EXPLORER10", headline: "You've unlocked 10% off your next pack", description: "A small thank you while you climb towards the next level.", min_points: 150, active: true },
+      { id: "r1", code: "CURIOUS15", headline: "You've unlocked 15% off your next quest", description: "A little thank you for being a Curious Explorer this month.", min_points: 300, active: true },
+      { id: "r2", code: "EXPLORER10", headline: "You've unlocked 10% off your next quest", description: "A small thank you while you climb towards the next level.", min_points: 150, active: true },
     ],
     prizes: [
-      { id: "z1", title: "Any pack of their choice", detail: "Printed and posted to you", sort_order: 1 },
-      { id: "z2", title: "50% off a pack", detail: "A code in the shop", sort_order: 2 },
+      { id: "z1", title: "Any quest of their choice", detail: "Printed and posted to you", sort_order: 1 },
+      { id: "z2", title: "50% off a quest", detail: "A code in the shop", sort_order: 2 },
       { id: "z3", title: "Certificate + stickers", detail: "Posted to your door", sort_order: 3 },
     ],
     ownership: [
@@ -622,7 +622,7 @@ export function createSeed(): DemoDb {
   };
 }
 
-const SEED_VERSION = 15;
+const SEED_VERSION = 16;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {

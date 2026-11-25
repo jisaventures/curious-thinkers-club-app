@@ -16,7 +16,7 @@ export default async function DashboardBannerPage({
     <div className="space-y-4">
       <div>
         <h1 className="font-display text-3xl text-[#17352A]">Dashboard banner</h1>
-        <p className="text-sm text-[#5e7266]">This promo sits under the pack tabs. Leave the dates empty to keep it up all the time.</p>
+        <p className="text-sm text-[#5e7266]">This promo sits under the quest tabs. Leave the dates empty to keep it up all the time.</p>
         {query.error && <p className="mt-2 text-sm font-bold text-[#8a4b3a]">{query.error}</p>}
         {query.saved && <p className="mt-2 text-sm font-bold text-[#306A51]">Saved.</p>}
       </div>

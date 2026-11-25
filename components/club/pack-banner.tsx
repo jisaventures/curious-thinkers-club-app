@@ -76,10 +76,10 @@ export function PackBanner({
           {featured && !continuing ? (
             <p className="inline-flex items-center gap-2 rounded-full bg-[#e7f5e1] px-3 py-1 text-sm font-bold text-[#306A51]">
               <span className="size-2 rounded-full bg-[#306A51]" aria-hidden="true" />
-              Your new pack is ready!
+              Your new quest is ready!
             </p>
           ) : (
-            <p className="text-xs font-extrabold tracking-[0.16em] text-[#306A51] uppercase">{continuing ? "Continue pack" : "Start pack"}</p>
+            <p className="text-xs font-extrabold tracking-[0.16em] text-[#306A51] uppercase">{continuing ? "Continue quest" : "Start quest"}</p>
           )}
           {!compact && continuing && (
             <p className="mt-2 text-sm font-bold text-[#3d5348] sm:text-base">{continueLead(clubName, done, total)}</p>
@@ -139,13 +139,13 @@ export function PackBanner({
                 ))}
               </div>
               <p className="text-sm font-bold text-[#3d5348]">
-                {continuing ? `${members.length} ${members.length === 1 ? "member" : "members"} on this pack` : "Ready for the whole club"}
+                {continuing ? `${members.length} ${members.length === 1 ? "member" : "members"} on this quest` : "Ready for the whole club"}
               </p>
             </div>
           )}
           <div className={`${compact ? "mt-2" : "mt-4"} flex flex-col gap-2 sm:flex-row`}>
             <Button asChild variant="mustard" size={compact ? "sm" : "md"} className="w-full sm:w-auto">
-              <Link href={href}>{continuing ? "Continue pack" : "Start pack"}</Link>
+              <Link href={href}>{continuing ? "Continue quest" : "Start quest"}</Link>
             </Button>
             {!continuing && (
               <Button asChild variant="white" size="md" className="w-full border-2 border-[#306A51] sm:w-auto">
@@ -209,7 +209,7 @@ function NewPackBanner({
       <div className="new-pack-banner__copy">
         <p className="new-pack-banner__pill">
           <span aria-hidden="true" />
-          Your new pack is ready!
+          Your new quest is ready!
         </p>
         <h2 className="new-pack-banner__title">{title}</h2>
         {blurb && <p className="new-pack-banner__blurb">{blurb}</p>}
@@ -235,7 +235,7 @@ function NewPackBanner({
         </ul>
         <div className="new-pack-banner__actions">
           <Link href={href} className="new-pack-banner__start">
-            Start pack
+            Start quest
             <Play {...icon} />
           </Link>
           <Link href={href} className="new-pack-banner__print">
@@ -261,9 +261,9 @@ function NewPackBanner({
 export function EmptyPackBanner() {
   return (
     <article className="rounded-[28px] bg-[#fff8ee] p-6 text-[#3d5348] shadow-[0_18px_50px_rgba(23,53,42,0.06)]">
-      <p className="text-xs font-extrabold tracking-[0.16em] text-[#306A51] uppercase">Start pack</p>
-      <h2 className="mt-2 font-display text-3xl text-[#17352A]">Your club is ready for a pack</h2>
-      <p className="mt-2">When you buy a pack, it will show up here for the whole club.</p>
+      <p className="text-xs font-extrabold tracking-[0.16em] text-[#306A51] uppercase">Start quest</p>
+      <h2 className="mt-2 font-display text-3xl text-[#17352A]">Your club is ready for a quest</h2>
+      <p className="mt-2">When you buy a quest, it will show up here for the whole club.</p>
       <Button asChild variant="mustard" size="md" className="mt-4 w-full sm:w-auto">
         <Link href="/club/shop">Visit the Club shop</Link>
       </Button>

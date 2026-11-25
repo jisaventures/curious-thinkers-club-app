@@ -17,10 +17,10 @@ export type PromoBannerRecord = PromoBannerContent & {
 
 export const defaultPromo: PromoBannerRecord = {
   imageUrl: "/brand/merch-banner-v2.png",
-  badgeText: "MEMBERS ONLY",
-  headline: "Get the official Club kit!",
+  badgeText: "Club Merch",
+  headline: "Get the official\nclub kit!",
   subtext: "Show you're a Curious Thinker. Free drawstring bag with every bundle.",
-  buttonLabel: "Shop the kit",
+  buttonLabel: "Shop Now",
   buttonLink: "https://curiousthinkersclub.org",
   background: "linear-gradient(115deg, #12352a 0%, #1b4d3c 46%, #2a6a52 100%)",
   textColour: "#fffaf2",
@@ -45,10 +45,10 @@ export function bannerFromRow(row: {
   if (!row?.headline || !row.image_url) return null;
   return {
     imageUrl: row.image_url,
-    badgeText: row.badge_text || "MEMBERS ONLY",
+    badgeText: row.badge_text || "Club Merch",
     headline: row.headline,
     subtext: row.subtext || "",
-    buttonLabel: row.button_label || "Shop the kit",
+    buttonLabel: row.button_label || "Shop Now",
     buttonLink: row.button_link || "/",
     background: row.background || defaultPromo.background,
     textColour: row.text_colour || defaultPromo.textColour,

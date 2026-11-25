@@ -24,10 +24,10 @@ export function MyPacksPage({ packs }: { packs: OwnedPack[] }) {
           <Link href="/club" className="text-sm font-extrabold text-[#306A51] no-underline hover:underline">
             Back to the club
           </Link>
-          <h1 className="mt-2 font-display text-3xl text-[#17352A]">My packs</h1>
+          <h1 className="mt-2 font-display text-3xl text-[#17352A]">My quests</h1>
         </div>
       </div>
-      <div role="tablist" aria-label="Filter packs" className="flex flex-wrap gap-2">
+      <div role="tablist" aria-label="Filter quests" className="flex flex-wrap gap-2">
         {filters.map((item) => {
           const selected = filter === item.id;
           return (
@@ -46,9 +46,9 @@ export function MyPacksPage({ packs }: { packs: OwnedPack[] }) {
       </div>
       {shown.length === 0 ? (
         <div className="rounded-[28px] bg-white p-6 text-center">
-          <p className="font-display text-2xl text-[#17352A]">No packs yet</p>
+          <p className="font-display text-2xl text-[#17352A]">No quests yet</p>
           <Button asChild variant="mustard" size="md" className="mt-4">
-            <Link href="/club/shop">Browse packs</Link>
+            <Link href="/club/shop">Browse quests</Link>
           </Button>
         </div>
       ) : (

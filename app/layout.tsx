@@ -18,7 +18,7 @@ const fredoka = Fredoka({
 
 export const metadata: Metadata = {
   title: "Curious Thinkers Club",
-  description: "The members' club for Curious Thinkers printable learning packs.",
+  description: "The members' club for Curious Thinkers printable learning quests.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

@@ -20,7 +20,7 @@ function fail(path: string, message: string): never {
 export async function demoRemindPack(accountId: string, email: string, packId: string) {
   const db = demoDb();
   const pack = db.packs.find((item) => item.id === packId && item.upcoming);
-  if (!pack) return { error: "That pack is not waiting to launch." };
+  if (!pack) return { error: "That quest is not waiting to launch." };
   if (!db.reminders.some((row) => row.account_id === accountId && row.pack_id === packId)) {
     db.reminders.push({ account_id: accountId, pack_id: packId, email, created_at: new Date().toISOString() });
   }
@@ -170,7 +170,7 @@ export async function demoMarkNextResult(accountId: string, packId: string, chil
   if (!result.ok) return result;
   return {
     ...result,
-    message: result.certificate ? "Pack finished. Certificate and bonus points added." : "Step marked complete",
+    message: result.certificate ? "Quest finished. Certificate and bonus points added." : "Step marked complete",
   };
 }
 

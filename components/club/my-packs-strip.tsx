@@ -44,14 +44,14 @@ export function MyPacksStrip({
       const card = cardRef.current;
       if (!right || !section || !card) return;
       const header = section.querySelector("[data-packs-header]");
-      const headerHeight = header?.getBoundingClientRect().height ?? 40;
-      const padding = 40;
+      const style = getComputedStyle(section);
+      const padBottom = parseFloat(style.paddingBottom) || 0;
       const gap = 12;
       const cardHeight = card.getBoundingClientRect().height;
-      const budget = right.getBoundingClientRect().bottom - section.getBoundingClientRect().top - headerHeight - padding;
+      const budget = right.getBoundingClientRect().bottom - (header?.getBoundingClientRect().bottom ?? section.getBoundingClientRect().top) - padBottom;
       const rows = Math.max(1, Math.floor((budget + gap) / (cardHeight + gap)));
-      const capacity = Math.max(Math.min(2, packs.length), rows * 2);
-      setVisible(Math.min(packs.length, capacity));
+      const next = Math.min(packs.length, rows * 2);
+      setVisible((current) => (current === next ? current : next));
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -66,10 +66,10 @@ export function MyPacksStrip({
   if (packs.length === 0) {
     return (
       <section className="rounded-[28px] bg-white p-5 shadow-[0_18px_50px_rgba(23,53,42,0.06)]">
-        <h2 className="font-display text-2xl text-[#17352A]">My packs</h2>
-        <p className="mt-3 text-sm text-[#3d5348]">No packs yet</p>
+        <h2 className="font-display text-2xl text-[#17352A]">My quests</h2>
+        <p className="mt-3 text-sm text-[#3d5348]">No quests yet</p>
         <Button asChild variant="mustard" size="md" className="mt-4">
-          <Link href="/club/shop">Browse packs</Link>
+          <Link href="/club/shop">Browse quests</Link>
         </Button>
       </section>
     );
@@ -78,9 +78,9 @@ export function MyPacksStrip({
   const shown = packs.slice(0, visible);
 
   return (
-    <section ref={sectionRef} className="rounded-[28px] bg-white p-4 shadow-[0_18px_50px_rgba(23,53,42,0.06)] sm:p-5">
+    <section ref={sectionRef} className="rounded-[28px] bg-white p-4 shadow-[0_18px_50px_rgba(23,53,42,0.06)] sm:p-5 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col">
       <div data-packs-header className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="font-display text-2xl text-[#17352A]">My packs</h2>
+        <h2 className="font-display text-2xl text-[#17352A]">My quests</h2>
         <Link href="/my-packs" className="inline-flex min-h-11 items-center gap-1 rounded-full border-2 border-[#306A51] px-3 text-sm font-bold text-[#306A51] no-underline">
           See all
           <ChevronRight className="size-4" aria-hidden="true" />

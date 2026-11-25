@@ -89,10 +89,10 @@ export function DashboardHome({
   }
 
   return (
-    <div className="grid min-w-0 items-start gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-      <div className="min-w-0 space-y-4">
+    <div className="grid min-w-0 items-start gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-stretch">
+      <div className="flex min-w-0 flex-col gap-4 lg:h-full">
       <section className="min-w-0 rounded-[28px] bg-white p-4 shadow-[0_18px_50px_rgba(23,53,42,0.06)] sm:p-5">
-        <div role="tablist" aria-label="Your packs" className="inline-flex max-w-full rounded-full bg-[#F3E7CF] p-1 max-sm:flex max-sm:w-full" onKeyDown={onTabKey}>
+        <div role="tablist" aria-label="Your quests" className="inline-flex max-w-full rounded-full bg-[#F3E7CF] p-1 max-sm:flex max-sm:w-full" onKeyDown={onTabKey}>
           <TabButton id="pack-tab-progress" controls="pack-panel-progress" selected={tab === "progress"} onSelect={() => setTab("progress")}>
             In progress
           </TabButton>
@@ -109,7 +109,7 @@ export function DashboardHome({
         >
           {home.inProgress.length === 0 ? (
             <div className="rounded-[22px] bg-[#E7F6EA] px-4 py-8 text-center">
-              <h2 className="font-display text-xl text-[#17352A]">No packs in progress</h2>
+              <h2 className="font-display text-xl text-[#17352A]">No quests in progress</h2>
               <p className="mt-1 text-sm text-[#3d5348]">Pick an adventure and get started.</p>
               <div className="mt-5 text-left">
                 <BuyMore />
@@ -133,7 +133,7 @@ export function DashboardHome({
         >
           <BuyMore />
           {home.completed.length === 0 ? (
-            <p className="px-2 py-6 text-center text-sm text-[#3d5348]">No finished packs yet.</p>
+            <p className="px-2 py-6 text-center text-sm text-[#3d5348]">No finished quests yet.</p>
           ) : (
             home.completed.map((pack) => <PackRow key={pack.id} pack={pack} members={members} focusId={focusId} mode="completed" />)
           )}
@@ -273,7 +273,7 @@ function PackProgress({
           ))}
         </div>
         <p className="min-w-0 text-sm font-bold text-[#3d5348]">
-          {members.length} {members.length === 1 ? "member" : "members"} {finished ? "finished this pack" : "on this pack"}
+          {members.length} {members.length === 1 ? "member" : "members"} {finished ? "finished this quest" : "on this quest"}
         </p>
       </div>
     </>
@@ -290,7 +290,7 @@ function PackAction({ href, finished }: { href: string; finished: boolean }) {
   }
   return (
     <Button asChild variant="mustard" size="md" className="w-full sm:w-auto">
-      <Link href={href}>Continue pack</Link>
+      <Link href={href}>Continue quest</Link>
     </Button>
   );
 }
@@ -302,7 +302,7 @@ function BuyMore() {
         <ShoppingCart className="size-5" aria-hidden="true" />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="font-display text-base text-[#17352A]">Buy more packs</p>
+        <p className="font-display text-base text-[#17352A]">Buy more quests</p>
         <p className="text-sm text-[#3d5348]">New adventures are in the shop</p>
       </div>
       <Button asChild variant="mustard" size="sm" className="max-sm:min-h-11 max-sm:w-full">
@@ -325,13 +325,13 @@ function Stats({ home }: { home: DashboardHome }) {
           <StatIcon icon={BookOpen} className="bg-[#E7F6EA] text-[#306A51]" />
           <div className="min-w-0 flex-1">
             {ownsAll ? (
-              <p className="font-display text-lg text-[#17352A]">You&apos;ve completed all packs!</p>
+              <p className="font-display text-lg text-[#17352A]">You&apos;ve completed all quests!</p>
             ) : (
               <>
                 <p className="font-display text-lg text-[#17352A]">
-                  {stats.owned} / {stats.shopTotal} packs
+                  {stats.owned} / {stats.shopTotal} quests
                 </p>
-                <p className="text-sm text-[#5e7266]">Packs owned</p>
+                <p className="text-sm text-[#5e7266]">Quests owned</p>
               </>
             )}
           </div>
@@ -341,7 +341,7 @@ function Stats({ home }: { home: DashboardHome }) {
             </a>
           ) : (
             <Button asChild variant="mustard" size="sm" className="max-sm:min-h-11 max-sm:w-full">
-              <Link href="/club/shop">Shop more packs</Link>
+              <Link href="/club/shop">Shop more quests</Link>
             </Button>
           )}
         </li>
@@ -376,7 +376,7 @@ function Stats({ home }: { home: DashboardHome }) {
                     <Link href="/club/rewards">Unlock reward</Link>
                   </Button>
                   <Button asChild variant="mustard" size="sm" className="max-sm:min-h-11">
-                    <Link href="/club/shop">Buy more packs</Link>
+                    <Link href="/club/shop">Buy more quests</Link>
                   </Button>
                 </div>
               )}
@@ -389,9 +389,9 @@ function Stats({ home }: { home: DashboardHome }) {
 }
 
 function pointsNudge(unfinished: number) {
-  if (unfinished <= 0) return "Get new packs to earn more points.";
-  const label = unfinished === 1 ? "1 unfinished pack" : `${unfinished} unfinished packs`;
-  return `Finish your ${label} or get new packs to earn more points.`;
+  if (unfinished <= 0) return "Get new quests to earn more points.";
+  const label = unfinished === 1 ? "1 unfinished quest" : `${unfinished} unfinished quests`;
+  return `Finish your ${label} or get new quests to earn more points.`;
 }
 
 function StatIcon({ icon: Icon, className }: { icon: LucideIcon; className: string }) {

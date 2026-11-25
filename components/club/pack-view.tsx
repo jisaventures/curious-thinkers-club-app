@@ -80,7 +80,7 @@ function LivePack({ data }: { data: Extract<PackData, { owned: true }> }) {
   return (
     <div className="space-y-4">
       <Link href="/club" className="inline-flex text-sm font-extrabold text-[#1e4d3a]">
-        ← My Packs
+        ← My Quests
       </Link>
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2">
         <section className="rounded-[22px] border border-[#f0e6d6] bg-white p-4">
@@ -105,7 +105,7 @@ function LivePack({ data }: { data: Extract<PackData, { owned: true }> }) {
 
         <section className="rounded-[22px] border border-[#f0e6d6] bg-white p-4">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="font-display text-xl text-[#1e4d3a]">Who&apos;s doing this pack?</h2>
+            <h2 className="font-display text-xl text-[#1e4d3a]">Who&apos;s doing this quest?</h2>
           </div>
           <div className="mt-3 grid grid-cols-2 rounded-full bg-[#f6efe2] p-1 text-center text-sm font-extrabold">
             <button
@@ -203,7 +203,7 @@ function StepPanel({
     const already =
       (child.nextPosition !== null && child.nextPosition > step.position) || child.finished;
     let detail = "On another step";
-    if (already && child.finished) detail = "Already finished this pack";
+    if (already && child.finished) detail = "Already finished this quest";
     else if (already) detail = "Already finished this step";
     else if (onStep && child.resumeSeconds > 3) detail = `On this step · resume at ${formatClock(child.resumeSeconds)}`;
     else if (onStep && child.started) detail = "On this step · watching now";
@@ -292,7 +292,7 @@ function CertificateNote({ data }: { data: PackData }) {
     <div>
       <p className="text-xs font-extrabold tracking-wide text-[#8a6a12] uppercase">Certificate</p>
       <h2 className="mt-1 font-display text-3xl text-[#1e4d3a]">
-        {focus ? `${focus.nickname} finished this pack` : "Pack complete"}
+        {focus ? `${focus.nickname} finished this quest` : "Quest complete"}
       </h2>
       <p className="mt-2 text-sm text-[#5e7266]">
         The certificate is saved on this account, with {data.pack.certificate_bonus_points} bonus points.
@@ -305,7 +305,7 @@ function LockedPack({ data }: { data: PackData }) {
   return (
     <div className="w-full rounded-[22px] bg-white p-6 text-center">
       <Link href="/club" className="text-sm font-extrabold text-[#1e4d3a]">
-        ← My Packs
+        ← My Quests
       </Link>
       <div className="mt-4 flex justify-center">
         <BookCover tone={data.pack.cover_tone} title={data.pack.title} locked />
@@ -313,7 +313,7 @@ function LockedPack({ data }: { data: PackData }) {
       <h1 className="mt-4 font-display text-3xl text-[#1e4d3a]">{data.pack.title}</h1>
       <p className="mt-2 text-sm text-[#5e7266]">{data.pack.blurb}</p>
       <p className="mt-2 text-sm text-[#5e7266]">
-        One purchase unlocks this pack for every child on the account. The videos stay hidden until then.
+        One purchase unlocks this quest for every child on the account. The videos stay hidden until then.
       </p>
       <Button asChild className="mt-4">
         <a href={shopUrl()} target="_blank" rel="noreferrer">
@@ -331,5 +331,5 @@ function pathTitle(title: string) {
   if (value.includes("spy")) return "The spy path";
   if (value.includes("knight")) return "The castle path";
   if (value.includes("space")) return "The space path";
-  return "The pack path";
+  return "The quest path";
 }
