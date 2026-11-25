@@ -896,8 +896,9 @@ select {
   bottom: -110px;
   width: 360px;
   height: 360px;
+  overflow: hidden;
   border-radius: 50%;
-  background: #e4f1e8;
+  background: linear-gradient(115deg, #12352a 0%, #1b4d3c 46%, #2a6a52 100%);
   z-index: 0;
 }
 
@@ -929,11 +930,32 @@ select {
 .new-pack-banner__sheet {
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   width: 260px;
   height: 330px;
+  padding: 28px 22px 22px;
   border-radius: 16px;
   background: #fff;
   box-shadow: 0 10px 24px rgba(23, 53, 42, 0.16);
+}
+
+.new-pack-banner__sheet svg {
+  width: 150px;
+  height: auto;
+}
+
+.new-pack-banner__sheet p {
+  margin: 0;
+  color: #17352a;
+  font-family: var(--font-fredoka), "Fredoka", sans-serif;
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 1.15;
+  text-align: center;
 }
 
 .new-pack-banner__pill {
