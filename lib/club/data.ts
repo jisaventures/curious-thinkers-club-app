@@ -326,6 +326,7 @@ export async function loadDashboard() {
 export type PackChildView = {
   id: string;
   nickname: string;
+  first_name?: string | null;
   avatar_key: AvatarKey;
   age_years: number;
   avatar_bg?: string | null;
