@@ -1,12 +1,5 @@
+import { PageLoading } from "@/components/brand/page-loading";
+
 export default function ParentLoading() {
-  return (
-    <div className="space-y-4" aria-busy="true" aria-live="polite">
-      <div className="h-36 animate-pulse rounded-[28px] bg-white/80" />
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="h-28 animate-pulse rounded-[28px] bg-white/70" />
-        <div className="h-28 animate-pulse rounded-[28px] bg-white/70" />
-      </div>
-      <div className="h-48 animate-pulse rounded-[28px] bg-white/70" />
-    </div>
-  );
+  return <PageLoading />;
 }

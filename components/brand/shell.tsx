@@ -4,6 +4,7 @@ import { isDemoMode } from "@/lib/demo/mode";
 import { shopUrl } from "@/lib/env";
 import type { AccountRecord } from "@/lib/auth/session";
 import { AppHeader } from "@/components/brand/app-header";
+import { PendingPage } from "@/components/brand/pending-page";
 import { LogoMark } from "@/components/brand/logo";
 
 export function AppShell({
@@ -27,7 +28,9 @@ export function AppShell({
     return (
       <div className="flex min-h-svh flex-col bg-[#f6f1e6]">
         <AppHeader account={account} />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-[calc(var(--tabbar-h)+1.5rem)] sm:px-6 md:py-8">{children}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-[calc(var(--tabbar-h)+1.5rem)] sm:px-6 md:py-8">
+          <PendingPage>{children}</PendingPage>
+        </main>
         {isDemoMode() && <DemoModeMenu corner="bottom" />}
       </div>
     );
