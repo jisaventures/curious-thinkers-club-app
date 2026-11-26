@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { markStepForChildren } from "@/app/club/actions";
+import { markStepForChildren } from "@/app/(parent)/club/actions";
 import { Avatar } from "@/components/brand/avatar";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -73,7 +73,7 @@ export function MarkPanel({
     const names = result.names.map(shortName).join(" and ");
     setMessage(
       result.certificate
-        ? `${names} finished the pack. Certificate and bonus points added.`
+        ? `${names} finished the quest. Certificate and bonus points added.`
         : `${names} earned ${result.points} points.`,
     );
   }

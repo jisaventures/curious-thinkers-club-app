@@ -5,6 +5,7 @@ import { z } from "zod";
 import { poundsToPence } from "@/lib/format";
 import { childInputSchema, detectVideoProvider, emailSchema, packSchema, rewardSchema, slugify, stepSchema, uuidSchema } from "@/lib/validators";
 import { nextStepPosition } from "@/lib/progress";
+import { safePromoBackground, safePromoLink } from "@/lib/club/promo";
 import { accountByEmail, demoDb, markDemoSteps, saveDemoVideo } from "@/lib/demo/store";
 
 function text(formData: FormData, key: string) {
@@ -14,6 +15,78 @@ function text(formData: FormData, key: string) {
 
 function fail(path: string, message: string): never {
   redirect(`${path}?error=${encodeURIComponent(message)}`);
+}
+
+export async function demoRemindPack(accountId: string, email: string, packId: string) {
+  const db = demoDb();
+  const pack = db.packs.find((item) => item.id === packId && item.upcoming);
+  if (!pack) return { error: "That quest is not waiting to launch." };
+  if (!db.reminders.some((row) => row.account_id === accountId && row.pack_id === packId)) {
+    db.reminders.push({ account_id: accountId, pack_id: packId, email, created_at: new Date().toISOString() });
+  }
+  return { ok: true as const };
+}
+
+export async function demoSaveDashboardBanner(formData: FormData) {
+  const db = demoDb();
+  const current = db.dashboardBanner;
+  const background = safePromoBackground(text(formData, "background"));
+  const textColour = text(formData, "textColour").trim();
+  const buttonLink = safePromoLink(text(formData, "buttonLink"));
+  const badgeText = text(formData, "badgeText").trim();
+  const headline = text(formData, "headline").trim();
+  const subtext = text(formData, "subtext").trim();
+  const buttonLabel = text(formData, "buttonLabel").trim();
+  if (!badgeText || badgeText.length > 40) return { error: "Add a short badge." };
+  if (headline.length < 2 || headline.length > 80) return { error: "Add a headline." };
+  if (subtext.length < 2 || subtext.length > 180) return { error: "Add the subtext." };
+  if (buttonLabel.length < 2 || buttonLabel.length > 40) return { error: "Add a button label." };
+  if (!background) return { error: "Use a hex colour or a linear-gradient for the background." };
+  if (!/^#[0-9a-fA-F]{3,8}$/.test(textColour)) return { error: "Use a hex text colour." };
+  if (!buttonLink) return { error: "Use a site path or a web link." };
+  let imageUrl = current.imageUrl;
+  const file = formData.get("image");
+  if (file instanceof File && file.size > 0) {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 1_500_000) {
+      return { error: "Use a JPG, PNG or WebP under 1.5 MB." };
+    }
+    const bytes = Buffer.from(await file.arrayBuffer());
+    imageUrl = `data:${file.type};base64,${bytes.toString("base64")}`;
+  }
+  const starts = text(formData, "startsAt");
+  const ends = text(formData, "endsAt");
+  db.dashboardBanner = {
+    imageUrl,
+    badgeText,
+    headline,
+    subtext,
+    buttonLabel,
+    buttonLink,
+    background,
+    textColour,
+    visible: formData.get("visible") === "on",
+    startsAt: starts ? new Date(starts).toISOString() : null,
+    endsAt: ends ? new Date(ends).toISOString() : null,
+  };
+  return { ok: true as const };
+}
+
+export async function demoUpdateGroupProfile(
+  accountId: string,
+  groupName: string,
+  leaderName: string,
+  icon: { icon: string; background: string; colour: string },
+) {
+  const account = demoDb().accounts.find((item) => item.id === accountId);
+  if (!account) return { error: "Unknown account." };
+  account.group_name = groupName;
+  account.display_name = leaderName;
+  account.group_icon = icon.icon;
+  account.group_bg = icon.background;
+  account.group_icon_colour = icon.colour;
+  revalidatePath("/club");
+  revalidatePath("/club/group");
+  return { ok: true as const, groupName, leaderName, icon };
 }
 
 export async function demoAddChild(accountId: string, formData: FormData) {
@@ -97,7 +170,7 @@ export async function demoMarkNextResult(accountId: string, packId: string, chil
   if (!result.ok) return result;
   return {
     ...result,
-    message: result.certificate ? "Pack finished. Certificate and bonus points added." : "Step marked complete",
+    message: result.certificate ? "Quest finished. Certificate and bonus points added." : "Step marked complete",
   };
 }
 
@@ -193,8 +266,12 @@ export async function demoCreatePack(formData: FormData) {
     price_pence: parsed.data.pricePence,
     certificate_bonus_points: parsed.data.certificateBonusPoints,
     step_count: 0,
+    page_count: 16,
     published: parsed.data.published,
     created_at: new Date().toISOString(),
+    free: false,
+    upcoming: false,
+    submission_slots: 3,
   });
   redirect(`/admin/packs/${id}?saved=1`);
 }

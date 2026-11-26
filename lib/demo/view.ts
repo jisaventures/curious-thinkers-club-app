@@ -2,6 +2,9 @@ import "server-only";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { levelProgress } from "@/lib/levels";
+import { clubPackBanners } from "@/lib/club/banners";
+import { buildDashboardHome, buildOwnedPacks, groupPackProgress, questsCompletedByGroup } from "@/lib/club/home";
+import { activePromo } from "@/lib/club/promo";
 import { catchUpNudge } from "@/lib/progress";
 import { detectVideoProvider, vimeoId, youtubeId, type AvatarKey } from "@/lib/validators";
 import type { AccountRecord } from "@/lib/auth/session";
@@ -74,9 +77,10 @@ export async function demoDashboard(account: AccountRecord) {
     .sort((a, b) => a.created_at.localeCompare(b.created_at));
   const jar = await cookies();
   const focus = children.find((child) => child.id === jar.get("ctc_focus_child")?.value) ?? children[0] ?? null;
-  const owned = new Set(db.ownership.filter((row) => row.account_id === account.id).map((row) => row.pack_id));
+  const ownership = db.ownership.filter((row) => row.account_id === account.id);
+  const owned = new Set(ownership.map((row) => row.pack_id));
   const packs = db.packs
-    .filter((pack) => pack.published || account.role === "admin")
+    .filter((pack) => !pack.upcoming && (pack.published || account.role === "admin"))
     .map((pack) => {
       const packSteps = db.steps.filter((step) => step.pack_id === pack.id).sort((a, b) => a.position - b.position);
       const done = focus
@@ -116,6 +120,7 @@ export async function demoDashboard(account: AccountRecord) {
     }
   }
   const focusPoints = focus ? (pointsByChild[focus.id] ?? 0) : 0;
+  const clubStanding = clubStandingFor(db, account.id);
   const totals = new Map<string, number>();
   for (const row of db.ledger) totals.set(row.child_id, (totals.get(row.child_id) ?? 0) + row.amount);
   const ranked = db.children
@@ -137,6 +142,15 @@ export async function demoDashboard(account: AccountRecord) {
     focus,
     packs,
     points: focusPoints,
+    clubPoints: clubStanding.points,
+    clubRank: clubStanding.rank,
+    joinedAt: account.created_at ?? null,
+    questsCompleted: questsCompletedByGroup({
+      packs: db.packs.filter((pack) => !pack.upcoming).map((pack) => ({ id: pack.id, stepCount: pack.step_count })),
+      steps: db.steps,
+      progress: db.progress,
+      childIds: children.map((child) => child.id),
+    }),
     level: levelProgress(focusPoints),
     leaderboard: ranked,
     prizes: [...db.prizes].sort((a, b) => a.sort_order - b.sort_order),
@@ -147,6 +161,63 @@ export async function demoDashboard(account: AccountRecord) {
     doneByChild,
     nextStepByChild: nextTitles(children, db),
     activities: activityFeed(children, db),
+    banners: clubPackBanners({
+      packs: db.packs,
+      steps: db.steps,
+      owned: ownership,
+      progress: db.progress,
+      childIds: children.map((child) => child.id),
+    }),
+    home: buildDashboardHome({
+      packs: db.packs.map((pack) => ({
+        id: pack.id,
+        slug: pack.slug,
+        title: pack.title,
+        theme: pack.theme,
+        coverTone: pack.cover_tone,
+        createdAt: pack.created_at,
+        owned: owned.has(pack.id),
+        upcoming: pack.upcoming,
+        free: pack.free,
+        submissionSlots: pack.submission_slots,
+        ...groupPackProgress({
+          steps: db.steps,
+          progress: db.progress,
+          childIds: children.map((child) => child.id),
+          packId: pack.id,
+          stepCount: pack.step_count,
+        }),
+      })),
+      points: Object.values(pointsByChild).reduce((sum, value) => sum + value, 0),
+      submissionsSent: db.submissions.filter((row) => row.account_id === account.id && row.status !== "rejected").length,
+      remindedPackIds: db.reminders.filter((row) => row.account_id === account.id).map((row) => row.pack_id),
+      promo: activePromo(db.dashboardBanner),
+      ownedPacks: buildOwnedPacks({
+        packs: db.packs.map((pack) => ({
+          id: pack.id,
+          slug: pack.slug,
+          title: pack.title,
+          theme: pack.theme,
+          coverTone: pack.cover_tone,
+          ageMin: pack.age_min,
+          ageMax: pack.age_max,
+          durationLabel: pack.duration_label,
+          pageCount: pack.page_count,
+          owned: owned.has(pack.id),
+          upcoming: pack.upcoming,
+          submissionSlots: pack.submission_slots,
+          stepCount: pack.step_count,
+        })),
+        steps: db.steps,
+        progress: db.progress,
+        childIds: children.map((child) => child.id),
+        purchases: ownership.map((row) => ({ packId: row.pack_id, grantedAt: row.granted_at })),
+        submissions: db.submissions
+          .filter((row) => row.account_id === account.id)
+          .map((row) => ({ packId: row.pack_id, status: row.status })),
+        ledger: db.ledger.map((row) => ({ childId: row.child_id, amount: row.amount, refId: row.ref_id, reason: row.reason })),
+      }),
+    }),
     pointsByChild,
     rewardLadder: rewards
       .filter((reward) => reward.active)
@@ -234,6 +305,26 @@ export function demoPackPage(account: AccountRecord, slug: string, modeRaw?: str
     certificates: db.certificates.filter((row) => row.pack_id === pack.id).map((row) => row.child_id),
     progress: db.progress,
   };
+}
+
+function clubStandingFor(db: ReturnType<typeof demoDb>, accountId: string) {
+  const totals = new Map<string, number>();
+  for (const child of db.children) {
+    const score = db.ledger.filter((row) => row.child_id === child.id).reduce((sum, row) => sum + row.amount, 0);
+    totals.set(child.account_id, (totals.get(child.account_id) ?? 0) + score);
+  }
+  const points = totals.get(accountId) ?? 0;
+  const board = [...totals.entries()].filter(([, score]) => score > 0).sort((a, b) => b[1] - a[1]);
+  let rank = 0;
+  let place = 0;
+  let previous = -1;
+  for (const [id, score] of board) {
+    place += 1;
+    if (score !== previous) rank = place;
+    previous = score;
+    if (id === accountId) return { points, rank };
+  }
+  return { points, rank: null as number | null };
 }
 
 function resolve(url: string | null) {

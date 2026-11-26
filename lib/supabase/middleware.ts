@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isDemoMode } from "@/lib/demo/mode";
+import { knownDemoPersona } from "@/lib/demo/store";
 import { authCookieOptions, supabaseAnonKey, supabaseUrl } from "@/lib/env";
 
 const demoCookie = {
@@ -13,7 +14,16 @@ function demoSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const persona = request.cookies.get("ctc_demo_persona")?.value;
   const signedOut = request.cookies.get("ctc_demo_signed_out")?.value === "1";
-  const needsAdult = path.startsWith("/club") || path.startsWith("/admin") || path.startsWith("/onboarding");
+  const needsAdult = path.startsWith("/club") || path.startsWith("/admin") || path.startsWith("/onboarding") || path.startsWith("/my-quests") || path.startsWith("/submit-work") || path.startsWith("/rewards");
+
+  if (persona && !knownDemoPersona(persona)) {
+    const response = needsAdult
+      ? NextResponse.redirect(new URL("/login", request.url))
+      : NextResponse.next({ request });
+    response.cookies.set("ctc_demo_persona", "", { ...authCookieOptions, maxAge: 0 });
+    response.cookies.set("ctc_demo_signed_out", "1", { ...demoCookie });
+    return response;
+  }
 
   const fresh = !persona && !signedOut;
   if (fresh && (path.startsWith("/onboarding") || path === "/terms" || path.startsWith("/api/"))) {
@@ -80,7 +90,7 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const needsAdult =
-    path.startsWith("/club") || path.startsWith("/admin") || path.startsWith("/onboarding");
+    path.startsWith("/club") || path.startsWith("/admin") || path.startsWith("/onboarding") || path.startsWith("/my-quests") || path.startsWith("/submit-work") || path.startsWith("/rewards");
 
   if (needsAdult && !user) {
     const redirectUrl = request.nextUrl.clone();
@@ -89,7 +99,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (user && (path.startsWith("/club") || path.startsWith("/admin"))) {
+  if (user && (path.startsWith("/club") || path.startsWith("/admin") || path.startsWith("/my-quests") || path.startsWith("/submit-work") || path.startsWith("/rewards"))) {
     const { data: account } = await supabase
       .from("accounts")
       .select("role, is_adult_confirmed")

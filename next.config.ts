@@ -6,6 +6,24 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "20mb",
     },
+    staleTimes: {
+      dynamic: 30,
+      static: 300,
+    },
+  },
+  async redirects() {
+    return [
+      { source: "/my-packs", destination: "/my-quests", permanent: false },
+      { source: "/club/uploads", destination: "/submit-work", permanent: false },
+    ];
+  },
+  async headers() {
+    return [
+      {
+        source: "/brand/:file*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+    ];
   },
 };
 

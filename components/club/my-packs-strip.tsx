@@ -1,0 +1,113 @@
+"use client";
+
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+import { PromoBackdrop } from "@/components/club/promo-banner";
+import { Button } from "@/components/ui/button";
+import { ownedPackStatus, type OwnedPack, type OwnedPackStatus } from "@/lib/club/home";
+import type { CoverTone } from "@/lib/validators";
+
+const tones: Record<CoverTone, string> = {
+  bottle: "bg-[#1e4d3a]",
+  palm: "bg-[#2f6b45]",
+  navy: "bg-[#1e3a5f]",
+  plum: "bg-[#5c3d6e]",
+  sea: "bg-[#245e78]",
+};
+
+const statusLabel: Record<OwnedPackStatus, string> = {
+  "in-progress": "In progress",
+  completed: "Completed",
+  "not-started": "Not started",
+};
+
+export function MyPacksStrip({ packs }: { packs: OwnedPack[] }) {
+
+  if (packs.length === 0) {
+    return (
+      <section className="rounded-[28px] bg-white p-5 shadow-[0_18px_50px_rgba(23,53,42,0.06)]">
+        <h2 className="font-display text-2xl text-[#17352A]">My quests</h2>
+        <p className="mt-3 text-sm text-[#3d5348]">No quests yet</p>
+        <Button asChild variant="mustard" size="md" className="mt-4">
+          <Link href="/club/shop">Browse quests</Link>
+        </Button>
+      </section>
+    );
+  }
+
+  const shown = packs.slice(0, 4);
+  const explore = shown.length % 2 === 1;
+
+  return (
+    <section className="rounded-[28px] bg-white p-4 shadow-[0_18px_50px_rgba(23,53,42,0.06)] sm:p-5">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="font-display text-2xl text-[#17352A]">My quests</h2>
+        <Link href="/my-quests" className="inline-flex min-h-11 items-center gap-1 rounded-full border-2 border-[#306A51] px-3 text-sm font-bold text-[#306A51] no-underline">
+          See more
+          <ChevronRight className="size-4" aria-hidden="true" />
+        </Link>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        {shown.map((pack) => (
+          <PackTile key={pack.id} pack={pack} />
+        ))}
+        {explore && <ExploreTile />}
+      </div>
+    </section>
+  );
+}
+
+function ExploreTile() {
+  return (
+    <Link
+      href="/club/shop"
+      className="relative flex h-full min-h-40 flex-col items-start justify-center overflow-hidden rounded-2xl p-4 no-underline"
+      style={{ background: "linear-gradient(115deg, #12352a 0%, #1b4d3c 46%, #2a6a52 100%)", color: "#fffaf2" }}
+    >
+      <PromoBackdrop />
+      <span className="relative z-[1]">
+        <p className="font-display text-xl leading-tight text-[#fffaf2]">Explore Quests</p>
+        <span className="mt-3 inline-flex rounded-full bg-[#E8A428] px-3 py-1.5 text-sm font-bold text-[#17352A]">Shop now</span>
+      </span>
+    </Link>
+  );
+}
+
+function PackTile({ pack }: { pack: OwnedPack }) {
+  const status = ownedPackStatus(pack);
+  const ratio = pack.total ? Math.min(1, pack.done / pack.total) : 0;
+  return (
+    <Link href={`/club/packs/${pack.slug}`} className="min-w-0 rounded-2xl bg-[#f7f3ea] p-3 no-underline">
+      <div className="flex min-w-0 gap-3">
+        <PackCover title={pack.title} tone={pack.coverTone} />
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-sm leading-tight text-[#17352A] sm:text-base">{pack.title}</p>
+          <StatusPill status={status} />
+        </div>
+      </div>
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#F3E7CF]" role="progressbar" aria-valuemin={0} aria-valuemax={pack.total} aria-valuenow={pack.done} aria-label={`${pack.done} of ${pack.total} steps`}>
+        <div className="h-full rounded-full bg-[#306A51]" style={{ width: `${Math.round(ratio * 100)}%` }} />
+      </div>
+      <p className="mt-1.5 text-xs font-bold text-[#3d5348]">{pack.done} of {pack.total} steps</p>
+    </Link>
+  );
+}
+
+export function PackCover({ title, tone }: { title: string; tone: CoverTone }) {
+  return (
+    <span className={`relative h-24 w-[4.5rem] shrink-0 overflow-hidden rounded-xl ${tones[tone]}`} role="img" aria-label={title}>
+      <span className="absolute inset-x-1.5 top-1.5 bottom-7 rounded-md bg-[#f7f1e6]" aria-hidden="true" />
+      <span className="absolute inset-x-1.5 bottom-1.5 text-center text-[9px] leading-tight font-bold text-white">{title}</span>
+    </span>
+  );
+}
+
+export function StatusPill({ status }: { status: OwnedPackStatus }) {
+  const className =
+    status === "completed"
+      ? "bg-[#306A51] text-white"
+      : status === "in-progress"
+        ? "bg-[#9BD0A8] text-[#17352A]"
+        : "bg-[#F3E7CF] text-[#17352A]";
+  return <span className={`mt-2 inline-flex rounded-full px-2 py-0.5 text-[11px] font-extrabold ${className}`}>{statusLabel[status]}</span>;
+}

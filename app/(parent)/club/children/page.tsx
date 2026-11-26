@@ -40,7 +40,7 @@ export default async function ChildrenPage() {
       <div>
         <h1 className="font-display text-3xl text-[#1e4d3a]">Children</h1>
         <p className="mt-1 max-w-xl text-sm text-[#5e7266]">
-          Up to five nicknames on this account. A pack you own unlocks for all of them. We never ask for a surname or a photo.
+          Up to five nicknames on this account. A quest you own unlocks for all of them. We never ask for a surname or a photo.
         </p>
       </div>
       <div className="grid gap-4 lg:grid-cols-2">

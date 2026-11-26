@@ -13,6 +13,7 @@ import {
   demoMoveStep,
   demoReplay,
   demoReview,
+  demoSaveDashboardBanner,
   demoSavePrize,
   demoSaveReward,
   demoUpdatePack,
@@ -20,6 +21,7 @@ import {
 } from "@/lib/demo/handlers";
 import { friendlyError, } from "@/lib/utils";
 import { poundsToPence } from "@/lib/format";
+import { safePromoBackground, safePromoLink } from "@/lib/club/promo";
 import {
   detectVideoProvider,
   emailSchema,
@@ -411,4 +413,64 @@ export async function replayUnmatched() {
     await supabase.from("shopify_events").update({ status: "granted", detail: "Matched on retry." }).eq("id", event.id);
   }
   redirect("/admin/grants?saved=1");
+}
+
+export async function saveDashboardBanner(formData: FormData) {
+  await requireAdmin();
+  if (isDemoMode()) {
+    const result = await demoSaveDashboardBanner(formData);
+    if ("error" in result && result.error) back("/admin/dashboard-banner", result.error);
+    revalidatePath("/club");
+    revalidatePath("/admin/dashboard-banner");
+    redirect("/admin/dashboard-banner?saved=1");
+  }
+  const { supabase } = await requireAdmin();
+  const background = safePromoBackground(text(formData, "background"));
+  const textColour = text(formData, "textColour").trim();
+  const buttonLink = safePromoLink(text(formData, "buttonLink"));
+  const badgeText = text(formData, "badgeText").trim();
+  const headline = text(formData, "headline").trim();
+  const subtext = text(formData, "subtext").trim();
+  const buttonLabel = text(formData, "buttonLabel").trim();
+  if (!badgeText || headline.length < 2 || subtext.length < 2 || buttonLabel.length < 2) back("/admin/dashboard-banner", "Fill in the banner text.");
+  if (!background) back("/admin/dashboard-banner", "Use a hex colour or a linear-gradient for the background.");
+  if (!/^#[0-9a-fA-F]{3,8}$/.test(textColour)) back("/admin/dashboard-banner", "Use a hex text colour.");
+  if (!buttonLink) back("/admin/dashboard-banner", "Use a site path or a web link.");
+  const existing = await supabase.from("dashboard_banners").select("image_url").eq("id", "club-kit").maybeSingle();
+  let imageUrl = existing.data?.image_url || "/brand/merch-banner.webp";
+  const file = formData.get("image");
+  if (file instanceof File && file.size > 0) {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 1_500_000) {
+      back("/admin/dashboard-banner", "Use a JPG, PNG or WebP under 1.5 MB.");
+    }
+    const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+    const path = `club-kit/${Date.now()}.${extension}`;
+    const uploaded = await supabase.storage.from("dashboard-banners").upload(path, new Uint8Array(await file.arrayBuffer()), {
+      contentType: file.type,
+      upsert: true,
+    });
+    if (uploaded.error) back("/admin/dashboard-banner", friendlyError(uploaded.error.message));
+    imageUrl = supabase.storage.from("dashboard-banners").getPublicUrl(path).data.publicUrl;
+  }
+  const starts = text(formData, "startsAt");
+  const ends = text(formData, "endsAt");
+  const { error } = await supabase.from("dashboard_banners").upsert({
+    id: "club-kit",
+    image_url: imageUrl,
+    badge_text: badgeText,
+    headline,
+    subtext,
+    button_label: buttonLabel,
+    button_link: buttonLink,
+    background,
+    text_colour: textColour,
+    visible: formData.get("visible") === "on",
+    starts_at: starts ? new Date(starts).toISOString() : null,
+    ends_at: ends ? new Date(ends).toISOString() : null,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) back("/admin/dashboard-banner", friendlyError(error.message));
+  revalidatePath("/club");
+  revalidatePath("/admin/dashboard-banner");
+  redirect("/admin/dashboard-banner?saved=1");
 }

@@ -12,6 +12,13 @@ export type AccountRecord = {
   is_adult_confirmed: boolean;
   role: "member" | "admin";
   shopify_customer_id: string | null;
+  group_name?: string | null;
+  group_type?: string | null;
+  group_location?: string | null;
+  group_icon?: string | null;
+  group_icon_colour?: string | null;
+  group_bg?: string | null;
+  created_at?: string | null;
 };
 
 export async function requireUser() {
@@ -50,7 +57,7 @@ export async function requireUser() {
 
   const { data, error } = await supabase
     .from("accounts")
-    .select("id, display_name, email, is_adult_confirmed, role, shopify_customer_id")
+    .select("id, display_name, email, is_adult_confirmed, role, shopify_customer_id, group_name, group_type, group_location, group_icon, group_icon_colour, group_bg, created_at")
     .eq("id", user.id)
     .maybeSingle();
 

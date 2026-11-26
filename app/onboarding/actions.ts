@@ -17,14 +17,23 @@ import { authCookieOptions } from "@/lib/env";
 import { isDemoMode } from "@/lib/demo/mode";
 import { createDemoFamily, demoDb, nicknameTaken } from "@/lib/demo/store";
 import { isRudeNickname, suggestNickname } from "@/lib/nicknames";
-import { firstNameFromShopAccount } from "@/lib/auth/shopify";
 import { requireUser } from "@/lib/auth/session";
-import { demoAccountFromCookie } from "@/lib/demo/view";
 import { friendlyError } from "@/lib/utils";
 import { ageSchema, childFirstNameSchema, nicknameSchema } from "@/lib/validators";
+import { groupNameProblem } from "@/lib/unsafe-language";
+import { GROUP_ICONS } from "@/components/brand/group-icon";
 
 const familySchema = z.object({
   adult: z.literal(true),
+  group: z.object({
+    name: z.string().trim().min(2).max(32),
+    type: z.enum(["Family", "School", "Team", "Club", "Homeschool", "Other"]),
+    location: z.string().trim().min(2).max(60),
+    leaderName: childFirstNameSchema,
+    icon: z.enum(GROUP_ICONS),
+    background: z.string().regex(/^[0-9a-fA-F]{6}$/),
+    colour: z.string().regex(/^[0-9a-fA-F]{6}$/),
+  }),
   children: z
     .array(
       z.object({
@@ -75,15 +84,6 @@ export async function checkNickname(nickname: string, firstName: string) {
   return { ok: true as const, suggestion, message: "" };
 }
 
-async function shopAccountFirstName() {
-  if (isDemoMode()) {
-    const jar = await cookies();
-    return firstNameFromShopAccount(demoAccountFromCookie(jar.get("ctc_demo_persona")?.value)?.display_name);
-  }
-  const { account } = await requireUser();
-  return firstNameFromShopAccount(account?.display_name);
-}
-
 async function isNicknameTaken(nickname: string) {
   if (isDemoMode()) return nicknameTaken(nickname);
   const { supabase, user } = await requireUser();
@@ -110,10 +110,13 @@ export async function completeOnboarding(input: z.infer<typeof familySchema>) {
     }
   }
 
-  const parentName = (await shopAccountFirstName()) ?? "Member";
+  if (groupNameProblem(parsed.data.group.name)) {
+    return { ok: false as const, message: "Choose a kinder group name." };
+  }
+  const parentName = parsed.data.group.leaderName;
 
   if (isDemoMode()) {
-    const created = createDemoFamily({ parentName, children: parsed.data.children });
+    const created = createDemoFamily({ parentName, group: parsed.data.group, children: parsed.data.children });
     const jar = await cookies();
     jar.set("ctc_demo_persona", created.accountId, { ...authCookieOptions, httpOnly: true, maxAge: 60 * 60 * 24 * 30 });
     jar.set("ctc_demo_signed_out", "", { ...authCookieOptions, maxAge: 0 });
@@ -129,18 +132,31 @@ export async function completeOnboarding(input: z.infer<typeof familySchema>) {
     const { error } = await supabase.from("accounts").insert({
       id: user.id,
       email: user.email ?? "",
-      display_name: parentName,
-      role: "member",
-      is_adult_confirmed: true,
-      adult_confirmed_at: new Date().toISOString(),
+        display_name: parentName,
+        role: "member",
+        is_adult_confirmed: true,
+        adult_confirmed_at: new Date().toISOString(),
+        group_name: parsed.data.group.name,
+        group_type: parsed.data.group.type,
+        group_location: parsed.data.group.location,
+        group_icon: parsed.data.group.icon,
+        group_icon_colour: parsed.data.group.colour,
+        group_bg: parsed.data.group.background,
     });
     if (error) return { ok: false as const, message: friendlyError(error.message) };
   } else {
     const { error } = await supabase
       .from("accounts")
       .update({
+        display_name: parentName,
         is_adult_confirmed: true,
         adult_confirmed_at: new Date().toISOString(),
+        group_name: parsed.data.group.name,
+        group_type: parsed.data.group.type,
+        group_location: parsed.data.group.location,
+        group_icon: parsed.data.group.icon,
+        group_icon_colour: parsed.data.group.colour,
+        group_bg: parsed.data.group.background,
       })
       .eq("id", user.id);
     if (error) return { ok: false as const, message: friendlyError(error.message) };

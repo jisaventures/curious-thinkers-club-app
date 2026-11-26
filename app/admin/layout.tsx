@@ -6,10 +6,11 @@ export const dynamic = "force-dynamic";
 
 const links = [
   ["Overview", "/admin"],
-  ["Packs", "/admin/packs"],
+  ["Quests", "/admin/packs"],
   ["Submissions", "/admin/submissions"],
   ["Rewards", "/admin/rewards"],
   ["Grants", "/admin/grants"],
+  ["Dashboard banner", "/admin/dashboard-banner"],
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

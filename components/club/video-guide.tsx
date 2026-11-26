@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { saveVideoPosition } from "@/app/club/actions";
+import { saveVideoPosition } from "@/app/(parent)/club/actions";
 import { formatClock } from "@/lib/format";
 
 export function VideoGuide({

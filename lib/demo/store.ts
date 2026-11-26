@@ -1,4 +1,5 @@
 import { boyAvatar, girlAvatar, type AvatarBuild } from "@/lib/avataaars-options";
+import { defaultPromo, type PromoBannerRecord } from "@/lib/club/promo";
 import { nextStepPosition } from "@/lib/progress";
 import type { AvatarKey, CoverTone } from "@/lib/validators";
 
@@ -18,6 +19,14 @@ export type DemoAccount = {
   is_adult_confirmed: boolean;
   role: "member" | "admin";
   shopify_customer_id: string | null;
+  region?: string;
+  group_name?: string;
+  group_type?: string;
+  group_location?: string;
+  group_icon?: string;
+  group_icon_colour?: string;
+  group_bg?: string;
+  created_at?: string;
 };
 
 export type DemoChild = {
@@ -27,6 +36,7 @@ export type DemoChild = {
   avatar_key: AvatarKey;
   age_years: number;
   created_at: string;
+  region?: string;
   first_name?: string;
   gender?: "boy" | "girl" | "unspecified";
   avatar_bg?: string;
@@ -56,8 +66,12 @@ export type DemoPack = {
   price_pence: number;
   certificate_bonus_points: number;
   step_count: number;
+  page_count: number;
   published: boolean;
   created_at: string;
+  free: boolean;
+  upcoming: boolean;
+  submission_slots: number;
 };
 
 export type DemoStep = {
@@ -88,6 +102,7 @@ export type DemoLedger = {
   amount: number;
   reason: "step_complete" | "pack_certificate" | "submission_featured" | "opening_balance";
   ref_id: string;
+  created_at?: string;
 };
 
 export type DemoSubmission = {
@@ -120,6 +135,33 @@ export type DemoOwnership = {
   granted_at: string;
 };
 
+export type DemoOrderItem = {
+  title: string;
+  quantity: number;
+  price: string;
+};
+
+export type DemoOrder = {
+  id: string;
+  account_id: string;
+  name: string;
+  created_at: string;
+  financial_status: "paid" | "refunded";
+  fulfillment_status: "fulfilled" | "unfulfilled" | "partial";
+  currency: "GBP";
+  total: string;
+  email: string;
+  shipping_country: string;
+  items: DemoOrderItem[];
+};
+
+export type DemoReminder = {
+  account_id: string;
+  pack_id: string;
+  email: string;
+  created_at: string;
+};
+
 export type DemoEvent = {
   id: string;
   email: string | null;
@@ -142,6 +184,9 @@ export type DemoDb = {
   prizes: DemoPrize[];
   ownership: DemoOwnership[];
   events: DemoEvent[];
+  orders: DemoOrder[];
+  reminders: DemoReminder[];
+  dashboardBanner: PromoBannerRecord;
   certificates: Array<{ child_id: string; pack_id: string }>;
 };
 
@@ -187,6 +232,8 @@ function pack(
   product: string,
   ageMin: number,
   ageMax: number,
+  createdAt = "2026-06-01T00:00:00.000Z",
+  pageCount = 16,
 ): DemoPack {
   return {
     id,
@@ -203,8 +250,110 @@ function pack(
     price_pence: 899,
     certificate_bonus_points: 50,
     step_count: 8,
+    page_count: pageCount,
     published: true,
-    created_at: new Date().toISOString(),
+    created_at: createdAt,
+    free: false,
+    upcoming: false,
+    submission_slots: 3,
+  };
+}
+
+function catalog(
+  id: string,
+  slug: string,
+  title: string,
+  theme: string,
+  blurb: string,
+  cover: CoverTone,
+  createdAt: string,
+  options: { free?: boolean; upcoming?: boolean } = {},
+): DemoPack {
+  const row = pack(id, slug, title, theme, blurb, cover, options.upcoming ? "900000000099" : `9${id.slice(-11)}`, 5, 10, createdAt);
+  row.free = options.free ?? false;
+  row.upcoming = options.upcoming ?? false;
+  row.published = !row.upcoming;
+  row.price_pence = row.free ? 0 : 899;
+  if (row.upcoming) row.shopify_product_id = null;
+  return row;
+}
+
+const CROWD_ID = "a1000000-0000-4000-8000-000000000099";
+
+function crowdClub(): { account: DemoAccount; children: DemoChild[]; ledger: DemoLedger[] } {
+  const names: Array<[string, string, "girl" | "boy"]> = [
+    ["Amira", "brightotter7", "girl"],
+    ["Jonah", "swiftfox19", "boy"],
+    ["Priya", "calmheron3", "girl"],
+    ["Mateo", "boldlynx12", "boy"],
+    ["Hana", "quietrobin8", "girl"],
+    ["Leo", "wildbadger4", "boy"],
+    ["Noor", "kindwhale21", "girl"],
+    ["Felix", "bravehawk6", "boy"],
+    ["Aya", "softpanda15", "girl"],
+    ["Omar", "quickseal9", "boy"],
+    ["Freya", "merryfinch2", "girl"],
+    ["Kai", "steadywolf18", "boy"],
+    ["Zuri", "goldfinch11", "girl"],
+    ["Hugo", "clevertren5", "boy"],
+    ["Lila", "warmkoala14", "girl"],
+    ["Nico", "trueotter16", "boy"],
+    ["Sana", "littlecrane1", "girl"],
+    ["Eli", "openbadger20", "boy"],
+    ["Maya", "fairrobin13", "girl"],
+    ["Theo", "gentlegull8", "boy"],
+    ["Ines", "brighthare17", "girl"],
+    ["Rafi", "calmlynx10", "boy"],
+    ["Esme", "kindheron22", "girl"],
+    ["Jonas", "boldseal23", "boy"],
+  ];
+  const hairBoy = ["shortRound", "theCaesar", "dreads", "fro", "shaggy", "curly", "shortFlat", "bun"] as const;
+  const hairGirl = ["bob", "curly", "longButNotTooLong", "straight01", "froBand", "bun", "frida", "curvy"] as const;
+  const skins = ["ffdbb4", "edb98a", "ae5d29", "614335", "f8d25c"];
+  const clothes = ["e8a428", "306a51", "65c9ff", "e36aa2", "1e4d3a", "c45b4a"];
+  const backgrounds = ["b5e8f0", "f6d6a8", "c7b6ea", "8fce78", "ffd5dc", "d4e7c5"];
+  const eyes = ["happy", "default", "wink", "side"] as const;
+  const hairColours = ["2c1b18", "4a312c", "e8c070", "6b4423", "b58143"];
+  const regions = ["Europe", "Asia", "Africa", "North America", "South America", "Oceania", "Middle East"];
+  const children: DemoChild[] = [];
+  const ledger: DemoLedger[] = [];
+  names.forEach(([first, nickname, gender], index) => {
+    const id = `c3000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`;
+    const girl = gender === "girl";
+    children.push({
+      id,
+      account_id: CROWD_ID,
+      first_name: first,
+      nickname,
+      avatar_key: "explorer",
+      gender,
+      age_years: 4 + (index % 8),
+      region: regions[index % regions.length],
+      created_at: "2026-03-01T00:00:00.000Z",
+      avatar_options: portrait({
+        ...boyAvatar(),
+        top: girl ? hairGirl[index % hairGirl.length] : hairBoy[index % hairBoy.length],
+        skin: skins[index % skins.length],
+        clothesColor: clothes[index % clothes.length],
+        background: backgrounds[index % backgrounds.length],
+        eyes: eyes[index % eyes.length],
+        hairColor: hairColours[index % hairColours.length],
+        clothing: girl ? "shirtVNeck" : "shirtCrewNeck",
+      }),
+    });
+    ledger.push({
+      child_id: id,
+      account_id: CROWD_ID,
+      amount: 740 - index * 22,
+      reason: "opening_balance",
+      ref_id: id,
+      created_at: index % 3 === 0 ? "2026-11-18T12:00:00.000Z" : "2026-08-01T12:00:00.000Z",
+    });
+  });
+  return {
+    account: { id: CROWD_ID, display_name: "World", email: "world@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "Europe" },
+    children,
+    ledger,
   };
 }
 
@@ -293,27 +442,38 @@ export function createSeed(): DemoDb {
   ] as const;
   const progress: DemoProgress[] = [];
   const certificates: Array<{ child_id: string; pack_id: string }> = [];
-  const finish = (childId: string, prefix: string, packId: string) => {
+  const finish = (childId: string, prefix: string, packId: string, when = "2026-08-01T12:00:00.000Z") => {
     for (let n = 1; n <= 8; n += 1) {
-      progress.push(complete(childId, `${prefix}${String(n).padStart(3, "0")}`));
+      const row = complete(childId, `${prefix}${String(n).padStart(3, "0")}`);
+      row.completed_at = when;
+      progress.push(row);
     }
     certificates.push({ child_id: childId, pack_id: packId });
   };
-  for (const [prefix, packId] of packPrefixes) finish(PIP_ID, prefix, packId);
-  finish(LOU_ID, packPrefixes[0][0], pirate);
-  for (let n = 1; n <= 3; n += 1) progress.push(complete(LOU_ID, `51200000-0000-4000-8000-000000000${String(n).padStart(3, "0")}`));
-  finish(MO_ID, packPrefixes[1][0], egypt);
-  finish(MO_ID, packPrefixes[2][0], spy);
-  finish(ARIA_ID, packPrefixes[0][0], pirate);
-  finish(ARIA_ID, packPrefixes[3][0], knight);
-  finish(ARIA_ID, packPrefixes[4][0], space);
-  for (let n = 1; n <= 2; n += 1) progress.push(complete(NOAH_ID, `51500000-0000-4000-8000-000000000${String(n).padStart(3, "0")}`));
-  progress.forEach((row, index) => {
-    const at = new Date("2026-11-20T12:00:00.000Z");
-    at.setDate(at.getDate() - (progress.length - index));
-    row.completed_at = at.toISOString();
-  });
+  const stamp = (childId: string, prefix: string, positions: number[], when: string) => {
+    positions.forEach((position, index) => {
+      const row = complete(childId, `${prefix}${String(position).padStart(3, "0")}`);
+      const at = new Date(when);
+      at.setDate(at.getDate() - (positions.length - index));
+      row.completed_at = at.toISOString();
+      progress.push(row);
+    });
+  };
+  stamp(LOU_ID, "51100000-0000-4000-8000-000000000", [1, 2, 3], "2026-11-10T12:00:00.000Z");
+  finish(PIP_ID, "51100000-0000-4000-8000-000000000", pirate, "2026-11-05T12:00:00.000Z");
+  stamp(LOU_ID, "51200000-0000-4000-8000-000000000", [1, 2, 3, 5], "2026-11-16T12:00:00.000Z");
+  stamp(MO_ID, "51200000-0000-4000-8000-000000000", [1, 2, 4], "2026-11-14T12:00:00.000Z");
+  stamp(NOAH_ID, "51200000-0000-4000-8000-000000000", [1, 2, 3], "2026-11-12T12:00:00.000Z");
+  finish(ARIA_ID, "51200000-0000-4000-8000-000000000", egypt, "2026-11-11T12:00:00.000Z");
+  finish(PIP_ID, "51200000-0000-4000-8000-000000000", egypt, "2026-11-09T12:00:00.000Z");
+  stamp(MO_ID, "51300000-0000-4000-8000-000000000", [1, 2, 3, 4, 5, 6], "2026-11-20T12:00:00.000Z");
+  finish(ARIA_ID, packPrefixes[3][0], knight, "2026-10-20T12:00:00.000Z");
+  finish(PIP_ID, packPrefixes[4][0], space, "2026-09-15T12:00:00.000Z");
+  for (const row of progress) {
+    if (!row.completed_at) row.completed_at = "2026-08-01T12:00:00.000Z";
+  }
 
+  const crowd = crowdClub();
   const ledger: DemoLedger[] = [
     ...progress
       .filter((row) => row.status === "complete")
@@ -323,6 +483,7 @@ export function createSeed(): DemoDb {
         amount: 10,
         reason: "step_complete" as const,
         ref_id: row.step_id,
+        created_at: row.completed_at,
       })),
     ...certificates.map((row) => ({
       child_id: row.child_id,
@@ -330,19 +491,37 @@ export function createSeed(): DemoDb {
       amount: 50,
       reason: "pack_certificate" as const,
       ref_id: row.pack_id,
+      created_at: progress.filter((item) => item.child_id === row.child_id && item.completed_at).map((item) => item.completed_at as string).sort().at(-1),
     })),
-    { child_id: "c1000000-0000-4000-8000-000000000004", account_id: "a1000000-0000-4000-8000-000000000003", amount: 512, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000004" },
-    { child_id: "c1000000-0000-4000-8000-000000000005", account_id: "a1000000-0000-4000-8000-000000000004", amount: 480, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000005" },
-    { child_id: "c1000000-0000-4000-8000-000000000006", account_id: "a1000000-0000-4000-8000-000000000005", amount: 175, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000006" },
+    { child_id: "c1000000-0000-4000-8000-000000000004", account_id: "a1000000-0000-4000-8000-000000000003", amount: 512, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000004", created_at: "2026-09-01T12:00:00.000Z" },
+    { child_id: "c1000000-0000-4000-8000-000000000005", account_id: "a1000000-0000-4000-8000-000000000004", amount: 480, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000005", created_at: "2026-09-01T12:00:00.000Z" },
+    { child_id: "c1000000-0000-4000-8000-000000000006", account_id: "a1000000-0000-4000-8000-000000000005", amount: 175, reason: "opening_balance", ref_id: "c1000000-0000-4000-8000-000000000006", created_at: "2026-09-01T12:00:00.000Z" },
+    ...crowd.ledger,
   ];
 
   return {
     accounts: [
-      { id: SAM_ID, display_name: "Sam", email: "sam@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null },
-      { id: ADMIN_ID, display_name: "Ada", email: "admin@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "admin", shopify_customer_id: null },
-      { id: "a1000000-0000-4000-8000-000000000003", display_name: "Star", email: "star@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null },
-      { id: "a1000000-0000-4000-8000-000000000004", display_name: "Dex", email: "dex@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null },
-      { id: "a1000000-0000-4000-8000-000000000005", display_name: "Bea", email: "bea@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null },
+      {
+        id: SAM_ID,
+        display_name: "Sam",
+        email: "sam@demo.curiousthinkersclub.test",
+        is_adult_confirmed: true,
+        role: "member",
+        shopify_customer_id: "1001",
+        region: "Europe",
+        group_name: "Sam's Club",
+        group_type: "Family",
+        group_location: "United Kingdom",
+        group_icon: "star",
+        group_icon_colour: "fff4dc",
+        group_bg: "2f9a4a",
+        created_at: "2026-01-10T00:00:00.000Z",
+      },
+      { id: ADMIN_ID, display_name: "Ada", email: "admin@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "admin", shopify_customer_id: null, region: "Europe" },
+      { id: "a1000000-0000-4000-8000-000000000003", display_name: "Star", email: "star@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "North America" },
+      { id: "a1000000-0000-4000-8000-000000000004", display_name: "Dex", email: "dex@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "Asia" },
+      { id: "a1000000-0000-4000-8000-000000000005", display_name: "Bea", email: "bea@demo.curiousthinkersclub.test", is_adult_confirmed: true, role: "member", shopify_customer_id: null, region: "Africa" },
+      crowd.account,
     ],
     children: [
       { id: LOU_ID, account_id: SAM_ID, first_name: "Lou", nickname: "wigglyfrog44", avatar_key: "explorer", gender: "boy", age_years: 4, created_at: "2026-01-15T00:00:00.000Z", avatar_options: portrait({ ...boyAvatar(), top: "theCaesar", hairColor: "2c1b18", eyes: "wink", clothesColor: "e8a428", background: "b5e8f0", skin: "edb98a" }) },
@@ -353,13 +532,24 @@ export function createSeed(): DemoDb {
       { id: "c1000000-0000-4000-8000-000000000004", account_id: "a1000000-0000-4000-8000-000000000003", nickname: "Star Scout", avatar_key: "star", age_years: 8, created_at: "2026-11-10T00:00:00.000Z" },
       { id: "c1000000-0000-4000-8000-000000000005", account_id: "a1000000-0000-4000-8000-000000000004", nickname: "Dino Dex", avatar_key: "dino", age_years: 6, created_at: "2026-11-11T00:00:00.000Z" },
       { id: "c1000000-0000-4000-8000-000000000006", account_id: "a1000000-0000-4000-8000-000000000005", nickname: "Cosmic Bea", avatar_key: "astronaut", age_years: 5, created_at: "2026-11-12T00:00:00.000Z" },
+      ...crowd.children,
     ],
     packs: [
-      pack(pirate, "be-a-pirate-for-the-day", "Be a pirate for the day", "history", "Learn about real pirates, maps and ships", "bottle", "900000000001", 4, 8),
-      pack(egypt, "be-an-egyptian-explorer", "Be an Egyptian explorer", "history", "Hieroglyphs, pyramids and real ancient Egypt", "palm", "900000000002", 6, 10),
-      pack(spy, "become-a-spy", "Become a spy", "codes", "Learn about real spies, codes and secret messages", "navy", "900000000003", 7, 10),
-      pack(knight, "be-a-knight-for-the-day", "Be a knight for the day", "castles", "Castles, armour and real medieval life", "plum", "900000000004", 5, 9),
-      pack(space, "be-a-space-explorer", "Be a space explorer", "space", "Planets, rockets and the real night sky", "sea", "900000000005", 6, 10),
+      pack(pirate, "be-a-pirate-for-the-day", "Be a pirate for the day", "history", "Learn about real pirates, maps and ships", "bottle", "900000000001", 4, 8, "2026-06-20T00:00:00.000Z", 22),
+      pack(egypt, "be-an-egyptian-explorer", "Be an Egyptian explorer", "history", "Hieroglyphs, pyramids and real ancient Egypt", "palm", "900000000002", 6, 10, "2026-11-15T00:00:00.000Z"),
+      pack(spy, "become-a-spy", "Become a spy", "codes", "Learn about real spies, codes and secret messages", "navy", "900000000003", 7, 10, "2026-11-08T00:00:00.000Z"),
+      pack(knight, "be-a-knight-for-the-day", "Be a knight for the day", "castles", "Castles, armour and real medieval life", "plum", "900000000004", 5, 9, "2026-11-20T00:00:00.000Z"),
+      pack(space, "be-a-space-explorer", "Be a space explorer", "space", "Planets, rockets and the real night sky", "sea", "900000000005", 6, 10, "2026-11-25T00:00:00.000Z"),
+      catalog("b1000000-0000-4000-8000-000000000006", "pocket-money-bosses", "Pocket Money Bosses", "money", "Count, save and spend pocket money", "bottle", "2026-11-12T00:00:00.000Z", { free: true }),
+      catalog("b1000000-0000-4000-8000-000000000007", "be-a-roman-builder", "Be a Roman builder", "history", "Roads, baths and real Roman towns", "plum", "2026-06-01T00:00:00.000Z"),
+      catalog("b1000000-0000-4000-8000-000000000008", "be-a-volcano-explorer", "Be a volcano explorer", "science", "Lava, rocks and how volcanoes work", "sea", "2026-05-01T00:00:00.000Z"),
+      catalog("b1000000-0000-4000-8000-000000000009", "be-a-baker-for-the-day", "Be a baker for the day", "food", "Bread, ovens and how bakers work", "palm", "2026-04-01T00:00:00.000Z"),
+      catalog("b1000000-0000-4000-8000-000000000010", "train-like-an-athlete", "Train like an athlete", "sport", "Warm-ups, practice and real sport science", "navy", "2026-03-01T00:00:00.000Z"),
+      catalog("b1000000-0000-4000-8000-000000000011", "map-your-town", "Map your town", "maps", "Streets, symbols and how maps are made", "bottle", "2026-02-01T00:00:00.000Z"),
+      catalog("b1000000-0000-4000-8000-000000000012", "design-a-garden", "Design a garden", "nature", "Soil, seeds and a garden of your own", "palm", "2026-01-01T00:00:00.000Z"),
+      catalog("b1000000-0000-4000-8000-000000000013", "dinosaur-detective", "Dinosaur detective", "dinosaurs", "Fossils, teeth and real dinosaur detectives", "plum", "2026-12-01T00:00:00.000Z", { upcoming: true }),
+      catalog("b1000000-0000-4000-8000-000000000014", "rainforest-explorer", "Rainforest explorer", "rainforest", "Canopies, creatures and real rainforests", "palm", "2026-12-08T00:00:00.000Z", { upcoming: true, free: true }),
+      catalog("b1000000-0000-4000-8000-000000000015", "ocean-scientist", "Ocean scientist", "ocean", "Tides, creatures and how the ocean works", "sea", "2026-12-15T00:00:00.000Z", { upcoming: true }),
     ],
     steps,
     progress,
@@ -378,26 +568,73 @@ export function createSeed(): DemoDb {
       },
     ],
     rewards: [
-      { id: "r1", code: "CURIOUS15", headline: "You've unlocked 15% off your next pack", description: "A little thank you for being a Curious Explorer this month.", min_points: 300, active: true },
-      { id: "r2", code: "EXPLORER10", headline: "You've unlocked 10% off your next pack", description: "A small thank you while you climb towards the next level.", min_points: 150, active: true },
+      { id: "r1", code: "CURIOUS15", headline: "You've unlocked 15% off your next quest", description: "A little thank you for being a Curious Explorer this month.", min_points: 300, active: true },
+      { id: "r2", code: "EXPLORER10", headline: "You've unlocked 10% off your next quest", description: "A small thank you while you climb towards the next level.", min_points: 150, active: true },
     ],
     prizes: [
-      { id: "z1", title: "Any pack of their choice", detail: "Printed and posted to you", sort_order: 1 },
-      { id: "z2", title: "50% off a pack", detail: "A code in the shop", sort_order: 2 },
+      { id: "z1", title: "Any quest of their choice", detail: "Printed and posted to you", sort_order: 1 },
+      { id: "z2", title: "50% off a quest", detail: "A code in the shop", sort_order: 2 },
       { id: "z3", title: "Certificate + stickers", detail: "Posted to your door", sort_order: 3 },
     ],
-    ownership: [pirate, egypt, spy, knight, space].map((packId) => ({
-      account_id: SAM_ID,
-      pack_id: packId,
-      source: "seed",
-      granted_at: new Date().toISOString(),
-    })),
+    ownership: [
+      { account_id: SAM_ID, pack_id: pirate, source: "seed" as const, granted_at: "2026-11-18T09:00:00.000Z" },
+      { account_id: SAM_ID, pack_id: egypt, source: "seed" as const, granted_at: "2026-10-02T09:00:00.000Z" },
+      { account_id: SAM_ID, pack_id: spy, source: "seed" as const, granted_at: "2026-09-12T09:00:00.000Z" },
+      { account_id: SAM_ID, pack_id: knight, source: "seed" as const, granted_at: "2026-10-20T09:00:00.000Z" },
+      { account_id: SAM_ID, pack_id: space, source: "seed" as const, granted_at: "2026-09-15T09:00:00.000Z" },
+    ],
     events: [],
+    reminders: [],
+    dashboardBanner: { ...defaultPromo },
+    orders: [
+      {
+        id: "1048",
+        account_id: SAM_ID,
+        name: "#1048",
+        created_at: "2026-10-12T11:20:00.000Z",
+        financial_status: "paid",
+        fulfillment_status: "fulfilled",
+        currency: "GBP",
+        total: "12.00",
+        email: "sam@demo.curiousthinkersclub.test",
+        shipping_country: "United Kingdom",
+        items: [{ title: "Be a pirate for the day", quantity: 1, price: "12.00" }],
+      },
+      {
+        id: "1062",
+        account_id: SAM_ID,
+        name: "#1062",
+        created_at: "2026-11-02T15:05:00.000Z",
+        financial_status: "paid",
+        fulfillment_status: "fulfilled",
+        currency: "GBP",
+        total: "12.00",
+        email: "sam@demo.curiousthinkersclub.test",
+        shipping_country: "United Kingdom",
+        items: [{ title: "Be an Egyptian explorer", quantity: 1, price: "12.00" }],
+      },
+      {
+        id: "1081",
+        account_id: SAM_ID,
+        name: "#1081",
+        created_at: "2026-11-18T09:40:00.000Z",
+        financial_status: "paid",
+        fulfillment_status: "unfulfilled",
+        currency: "GBP",
+        total: "24.00",
+        email: "sam@demo.curiousthinkersclub.test",
+        shipping_country: "United Kingdom",
+        items: [
+          { title: "Be a space explorer", quantity: 1, price: "12.00" },
+          { title: "Become a spy", quantity: 1, price: "12.00" },
+        ],
+      },
+    ],
     certificates,
   };
 }
 
-const SEED_VERSION = 4;
+const SEED_VERSION = 22;
 type GlobalDemo = typeof globalThis & { __ctcDemo?: DemoDb; __ctcDemoVersion?: number };
 
 export function demoDb() {
@@ -409,8 +646,38 @@ export function demoDb() {
   return g.__ctcDemo;
 }
 
+const SAM_CHILD_IDS = new Set([PIP_ID, LOU_ID, MO_ID, ARIA_ID, NOAH_ID]);
+
 export function resetDemoDb() {
   (globalThis as GlobalDemo).__ctcDemo = createSeed();
+}
+
+/** Put the sample Sam family back without removing groups created afterwards. */
+export function restoreSamDemo() {
+  const fresh = createSeed();
+  const db = demoDb();
+  const sam = fresh.accounts.find((account) => account.id === SAM_ID);
+  if (!sam) return;
+  const index = db.accounts.findIndex((account) => account.id === SAM_ID);
+  if (index >= 0) db.accounts[index] = structuredClone(sam);
+  else db.accounts.unshift(structuredClone(sam));
+  const replace = <T extends { account_id?: string; child_id?: string }>(rows: T[], next: T[], owns: (row: T) => boolean) => [
+    ...next.filter(owns).map((row) => structuredClone(row)),
+    ...rows.filter((row) => !owns(row)),
+  ];
+  db.children = replace(db.children, fresh.children, (row) => row.account_id === SAM_ID);
+  db.orders = replace(db.orders, fresh.orders, (row) => row.account_id === SAM_ID);
+  db.ownership = replace(db.ownership, fresh.ownership, (row) => row.account_id === SAM_ID);
+  db.submissions = replace(db.submissions, fresh.submissions, (row) => row.account_id === SAM_ID);
+  db.progress = replace(db.progress, fresh.progress, (row) => SAM_CHILD_IDS.has(row.child_id ?? ""));
+  db.ledger = replace(db.ledger, fresh.ledger, (row) => row.account_id === SAM_ID || SAM_CHILD_IDS.has(row.child_id ?? ""));
+  db.certificates = replace(db.certificates, fresh.certificates, (row) => SAM_CHILD_IDS.has(row.child_id ?? ""));
+}
+
+export function knownDemoPersona(persona: string | undefined) {
+  if (!persona) return false;
+  if (persona === "sam" || persona === "admin") return true;
+  return demoDb().accounts.some((account) => account.id === persona);
 }
 
 export function accountById(id: string) {
@@ -513,6 +780,14 @@ export function nicknameTaken(nickname: string) {
 
 export function createDemoFamily(input: {
   parentName: string;
+  group?: {
+    name: string;
+    type: string;
+    location: string;
+    icon: string;
+    background: string;
+    colour: string;
+  };
   children: Array<{
     firstName: string;
     nickname: string;
@@ -547,6 +822,13 @@ export function createDemoFamily(input: {
     is_adult_confirmed: true,
     role: "member",
     shopify_customer_id: null,
+    group_name: input.group?.name,
+    group_type: input.group?.type,
+    group_location: input.group?.location,
+    group_icon: input.group?.icon,
+    group_icon_colour: input.group?.colour,
+    group_bg: input.group?.background,
+    created_at: new Date().toISOString(),
   });
   const childIds = input.children.map((child) => {
     const id = crypto.randomUUID();

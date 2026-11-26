@@ -3,8 +3,9 @@ import { signOut } from "@/app/login/actions";
 import { isDemoMode } from "@/lib/demo/mode";
 import { shopUrl } from "@/lib/env";
 import type { AccountRecord } from "@/lib/auth/session";
+import { AppHeader } from "@/components/brand/app-header";
+import { PendingPage } from "@/components/brand/pending-page";
 import { LogoMark } from "@/components/brand/logo";
-import { Button } from "@/components/ui/button";
 
 export function AppShell({
   account,
@@ -26,86 +27,27 @@ export function AppShell({
   if (variant === "parent") {
     return (
       <div className="flex min-h-svh flex-col bg-[#f6f1e6]">
-        <ParentHeader account={account} />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+        <AppHeader account={account} />
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-[calc(var(--tabbar-h)+1.5rem)] sm:px-6 md:py-8">
+          <PendingPage>{children}</PendingPage>
+        </main>
         {isDemoMode() && <DemoModeMenu corner="bottom" />}
       </div>
     );
   }
   const frame = centered
-    ? `mx-auto flex w-full max-w-6xl flex-1 flex-col px-3 [justify-content:safe_center] sm:px-4 ${onboarding ? "pt-4 pb-28 sm:pt-6" : "py-4 sm:py-6"}`
+    ? `onboarding-frame mx-auto flex w-full max-w-6xl flex-1 flex-col px-3 [justify-content:safe_center] sm:px-4 ${onboarding ? "pt-4 pb-28 sm:pt-6" : "py-4 sm:py-6"}`
     : "mx-auto w-full max-w-none px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-5";
   return (
     <div className={`flex min-h-svh flex-col ${onboarding ? "onboarding-zoom" : ""}`}>
       <SiteHeader account={account} shop={shop} centered={centered} onboarding={onboarding} />
       <div className={frame}>
-        <div className="min-w-0 rounded-[28px] border border-white/80 bg-[#fffdf8] shadow-[0_24px_70px_rgba(30,77,58,0.08)]">
-          <div className={centered ? "px-3 pt-9 pb-8 sm:px-5 md:px-7" : "px-3 pb-6 sm:px-5 md:px-7 md:pb-8"}>{children}</div>
+        <div className="onboarding-card min-w-0 rounded-[28px] border border-white/80 bg-[#fffdf8] shadow-[0_24px_70px_rgba(30,77,58,0.08)]">
+          <div className={centered ? "onboarding-card-body px-3 pt-9 pb-8 sm:px-5 md:px-7" : "px-3 pb-6 sm:px-5 md:px-7 md:pb-8"}>{children}</div>
         </div>
       </div>
       {isDemoMode() && <DemoModeMenu />}
     </div>
-  );
-}
-
-function ParentHeader({ account }: { account: AccountRecord | null }) {
-  const name = account?.display_name?.trim() || "Parent";
-  const initial = name.slice(0, 1).toUpperCase();
-  return (
-    <header className="sticky top-0 z-40 bg-[#f6f1e6]">
-      <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 sm:px-6">
-        <Link href="/club" className="flex min-w-0 items-center gap-2">
-          <img
-            src="/brand/bulb.png"
-            alt=""
-            width={103}
-            height={160}
-            loading="eager"
-            fetchPriority="high"
-            decoding="sync"
-            className="h-9 w-auto shrink-0 bg-transparent sm:h-10"
-          />
-          <span className="wordmark min-w-0 text-[#306A51] max-sm:!text-[13px]">Curious Thinkers Club</span>
-        </Link>
-        <div className="ml-auto flex items-center gap-2 sm:gap-3">
-          <Button asChild variant="mustard" size="sm" className="px-3 sm:px-4">
-            <Link href="/club/shop">Shop packs</Link>
-          </Button>
-          <details className="relative">
-            <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-[#eadfce] bg-white py-1 pr-2 pl-1 shadow-sm sm:pr-3 [&::-webkit-details-marker]:hidden">
-              <span className="flex size-8 items-center justify-center rounded-full bg-[#306A51] font-display text-sm font-bold text-white">{initial}</span>
-              <span className="hidden font-display text-base text-[#17352A] sm:inline">{name}</span>
-              <svg viewBox="0 0 20 20" className="size-4 text-[#306A51]" aria-hidden="true">
-                <path d="M5 7.5 10 12.5 15 7.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </summary>
-            <div className="absolute right-0 z-30 mt-2 w-48 rounded-2xl border border-[#eadfce] bg-white p-2 shadow-lg">
-              <Link href="/club/group" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
-                My Group
-              </Link>
-              <Link href="/club/rewards" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
-                Rewards
-              </Link>
-              <Link href="/club/uploads" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
-                Uploads
-              </Link>
-              <Link href="/club/children" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
-                Children
-              </Link>
-              {account?.role === "admin" && (
-                <Link href="/admin" className="block rounded-xl px-3 py-2 text-sm font-bold text-[#17352A] no-underline hover:bg-[#f6efe2]">
-                  Admin
-                </Link>
-              )}
-              <form action={signOut}>
-                <button className="w-full rounded-xl px-3 py-2 text-left text-sm font-bold text-[#17352A] hover:bg-[#f6efe2]">Sign out</button>
-              </form>
-            </div>
-          </details>
-        </div>
-      </div>
-      <div className="border-b border-dashed border-[#306A51]/25" />
-    </header>
   );
 }
 
@@ -141,7 +83,7 @@ function SiteHeader({
         <div className="ml-auto flex items-center gap-3 sm:gap-5">
           <nav className="hidden items-center gap-5 md:flex" aria-label="Site">
             <a href={shop} className="font-sans text-base font-semibold text-club no-underline hover:underline">
-              Free pack
+              Free quest
             </a>
             <Link href={account ? "/club" : "/login"} className="font-sans text-base font-semibold text-club no-underline hover:underline">
               Club login
@@ -158,10 +100,10 @@ function SiteHeader({
             </summary>
             <div className="absolute right-0 z-30 mt-2 w-48 rounded-2xl border border-line bg-white p-2 shadow-lg">
               <a href={shop} className="block rounded-xl px-3 py-2 font-sans text-sm font-semibold text-club no-underline hover:underline">
-                Free pack
+                Free quest
               </a>
               <a href={shop} className="block rounded-xl px-3 py-2 font-sans text-sm font-semibold text-club no-underline hover:underline">
-                Shop the packs
+                Shop the quests
               </a>
               <Link href={account ? "/club" : "/login"} className="block rounded-xl px-3 py-2 font-sans text-sm font-semibold text-club no-underline hover:underline">
                 Club login
@@ -189,7 +131,7 @@ function SiteHeader({
             href={shop}
               className="hidden rounded-full bg-mustard px-4 py-2.5 font-sans text-sm font-bold text-white shadow-[0_6px_16px_rgba(232,164,40,0.35)] md:inline-flex"
           >
-            Shop the packs
+            Shop the quests
           </a>
           <a href={`${shop}/cart`} className="relative inline-flex text-club" aria-label="Cart, 0 items">
             <CartIcon />
@@ -206,7 +148,7 @@ function SiteHeader({
 
 function DemoModeMenu({ corner = "top" }: { corner?: "top" | "bottom" }) {
   return (
-    <details className={`fixed z-50 ${corner === "bottom" ? "bottom-3 left-3" : "top-3 right-3"}`}>
+    <details className={`fixed z-50 ${corner === "bottom" ? "bottom-[calc(var(--tabbar-h)+0.75rem)] left-3 md:bottom-3" : "top-3 right-3"}`}>
       <summary
         className="flex cursor-pointer list-none flex-col items-center [&::-webkit-details-marker]:hidden"
         aria-label="Demo mode"

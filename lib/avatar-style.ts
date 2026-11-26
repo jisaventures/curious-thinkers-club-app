@@ -57,6 +57,30 @@ export const ACCESSORY_COLOURS = [
   { id: "gold", label: "Gold", hex: "#f0b429" },
 ] as const;
 
+export const GROUP_BACKGROUND_COLOURS = [
+  { id: "green", label: "Green", hex: "#2f9a4a" },
+  { id: "blue", label: "Blue", hex: "#3a6fe0" },
+  { id: "violet", label: "Violet", hex: "#8a45d4" },
+  { id: "rose", label: "Rose", hex: "#d45384" },
+  { id: "teal", label: "Teal", hex: "#1aa39a" },
+  { id: "orange", label: "Orange", hex: "#e07a22" },
+  { id: "red", label: "Red", hex: "#d6453d" },
+  { id: "brown", label: "Brown", hex: "#a56b32" },
+  { id: "black", label: "Black", hex: "#1c1c1c" },
+] as const;
+
+export const GROUP_ICON_COLOURS = [
+  { id: "cream", label: "Cream", hex: "#fff4dc" },
+  { id: "white", label: "White", hex: "#ffffff" },
+  { id: "gold", label: "Gold", hex: "#f0b429" },
+  { id: "lemon", label: "Lemon", hex: "#ffe27a" },
+  { id: "mint", label: "Mint", hex: "#c8f0b4" },
+  { id: "sky", label: "Sky", hex: "#9ad7f0" },
+  { id: "pink", label: "Pink", hex: "#ffc4e0" },
+  { id: "peach", label: "Peach", hex: "#ffc9a8" },
+  { id: "lilac", label: "Lilac", hex: "#d4c2ff" },
+] as const;
+
 export const CLOTHES_COLOURS = [
   { id: "white", label: "White", hex: "#ffffff" },
   { id: "black", label: "Black", hex: "#1c1c1c" },

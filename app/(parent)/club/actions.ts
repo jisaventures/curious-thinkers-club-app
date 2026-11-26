@@ -9,6 +9,8 @@ import { isDemoMode } from "@/lib/demo/mode";
 import {
   demoAddChild,
   demoDeleteChild,
+  demoUpdateGroupProfile,
+  demoRemindPack,
   demoMark,
   demoMarkNext,
   demoMarkNextResult,
@@ -20,11 +22,62 @@ import {
 import { authCookieOptions } from "@/lib/env";
 import { nextStepPosition } from "@/lib/progress";
 import { friendlyError } from "@/lib/utils";
+import { GROUP_ICONS } from "@/components/brand/group-icon";
+import { groupNameProblem, childFirstNameProblem } from "@/lib/unsafe-language";
 import { childInputSchema, uuidSchema } from "@/lib/validators";
 
 function text(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value : "";
+}
+
+export async function remindPackLaunch(packId: string) {
+  const { account, supabase } = await requireAdult();
+  if (isDemoMode()) return demoRemindPack(account.id, account.email, packId);
+  const id = uuidSchema.safeParse(packId);
+  if (!id.success) return { error: "Choose a quest that has not launched yet." };
+  const { error } = await supabase.from("pack_reminders").upsert(
+    { account_id: account.id, pack_id: id.data, email: account.email },
+    { onConflict: "account_id,pack_id" },
+  );
+  if (error) return { error: "We could not save that reminder." };
+  revalidatePath("/club");
+  return { ok: true as const };
+}
+
+export async function updateGroupProfile(formData: FormData) {
+  const { account } = await requireAdult();
+  const groupName = text(formData, "groupName").replace(/\s+/g, " ").trim().slice(0, 32);
+  const leaderName = text(formData, "leaderName").replace(/\s+/g, "").trim().slice(0, 15);
+  if (!groupName || groupNameProblem(groupName)) {
+    return { error: groupNameProblem(groupName) || "Add a group name." };
+  }
+  if (!leaderName || childFirstNameProblem(leaderName)) {
+    return { error: childFirstNameProblem(leaderName) || "Add the group leader's first name." };
+  }
+  const icon = text(formData, "icon");
+  const background = text(formData, "background").replace("#", "");
+  const colour = text(formData, "colour").replace("#", "");
+  if (!(GROUP_ICONS as readonly string[]).includes(icon) || !/^[0-9a-fA-F]{6}$/.test(background) || !/^[0-9a-fA-F]{6}$/.test(colour)) {
+    return { error: "Choose a group icon." };
+  }
+  const groupIcon = { icon, background, colour };
+  if (isDemoMode()) return demoUpdateGroupProfile(account.id, groupName, leaderName, groupIcon);
+  const { supabase } = await requireAdult();
+  const { error } = await supabase
+    .from("accounts")
+    .update({
+      group_name: groupName,
+      display_name: leaderName,
+      group_icon: icon,
+      group_bg: background,
+      group_icon_colour: colour,
+    })
+    .eq("id", account.id);
+  if (error) return { error: friendlyError(error.message) };
+  revalidatePath("/club");
+  revalidatePath("/club/group");
+  return { ok: true as const, groupName, leaderName, icon: groupIcon };
 }
 
 export async function addChild(formData: FormData) {
@@ -202,7 +255,7 @@ export async function markNextStepNow(packId: string, childId: string) {
   const parsedPack = uuidSchema.safeParse(packId);
   const parsedChild = uuidSchema.safeParse(childId);
   if (!parsedPack.success || !parsedChild.success) {
-    return { ok: false as const, message: "That pack could not be updated." };
+    return { ok: false as const, message: "That quest could not be updated." };
   }
   if (isDemoMode()) {
     const { account } = await requireAdult();
@@ -225,7 +278,7 @@ export async function markNextStepNow(packId: string, childId: string) {
     .filter((position): position is number => typeof position === "number");
   const next = nextStepPosition((steps ?? []).map((step) => step.position), complete);
   const step = (steps ?? []).find((item) => item.position === next);
-  if (!step) return { ok: false as const, message: "This pack is already finished." };
+  if (!step) return { ok: false as const, message: "This quest is already finished." };
   return markStepForChildren({ stepId: step.id, childIds: [parsedChild.data] });
 }
 
@@ -256,13 +309,13 @@ export async function markNextStep(formData: FormData) {
   const next = nextStepPosition((steps ?? []).map((step) => step.position), complete);
   const step = (steps ?? []).find((item) => item.position === next);
   if (!step) {
-    redirect("/club?notice=This+pack+is+already+finished");
+    redirect("/club?notice=This+quest+is+already+finished");
   }
 
   const result = await markStepForChildren({ stepId: step.id, childIds: [childId.data] });
   const notice = result.ok
     ? result.certificate
-      ? "Pack+finished.+Certificate+and+bonus+points+added."
+      ? "Quest+finished.+Certificate+and+bonus+points+added."
       : "Step+marked+complete"
     : encodeURIComponent(result.message ?? "Something went wrong");
   redirect(`/club?notice=${notice}`);

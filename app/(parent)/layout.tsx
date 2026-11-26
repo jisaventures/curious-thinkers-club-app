@@ -3,7 +3,7 @@ import { requireAdult } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
-export default async function ClubLayout({ children }: { children: React.ReactNode }) {
+export default async function ParentLayout({ children }: { children: React.ReactNode }) {
   const { account } = await requireAdult();
   return (
     <AppShell account={account} variant="parent">
